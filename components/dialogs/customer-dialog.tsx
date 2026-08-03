@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
 interface CustomerDialogProps {
@@ -28,6 +27,7 @@ export function CustomerDialog({
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (customer) {

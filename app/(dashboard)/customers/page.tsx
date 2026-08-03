@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
-import { Button } from '@/components/ui/button'
 import { useCustomers } from '@/lib/hooks/use-crud'
 import { CustomerDialog } from '@/components/dialogs/customer-dialog'
 import { DeleteConfirmDialog } from '@/components/dialogs/delete-confirm'
@@ -74,13 +73,13 @@ export default function CustomersPage() {
                   Manage your customer information and contact details
                 </p>
               </div>
-              <Button
+              <button
                 onClick={handleAddClick}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 font-medium"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4" />
                 Add Customer
-              </Button>
+              </button>
             </div>
 
             {/* Search */}
