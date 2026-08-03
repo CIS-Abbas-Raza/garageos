@@ -4,16 +4,14 @@ import { useState } from 'react'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { Button } from '@/components/ui/button'
-import { useGarageStore } from '@/lib/store/garage-store'
-import { useCRUD } from '@/lib/hooks/use-crud'
+import { useCustomers } from '@/lib/hooks/use-crud'
 import { CustomerDialog } from '@/components/dialogs/customer-dialog'
 import { DeleteConfirmDialog } from '@/components/dialogs/delete-confirm'
 import { EmptyState } from '@/components/empty-state'
 import { Search, Plus, Edit, Trash2 } from 'lucide-react'
 
 export default function CustomersPage() {
-  const { customers } = useGarageStore()
-  const { addCustomer, updateCustomer, deleteCustomer } = useCRUD()
+  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)

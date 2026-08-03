@@ -4,16 +4,14 @@ import { useState } from 'react'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { Button } from '@/components/ui/button'
-import { useGarageStore } from '@/lib/store/garage-store'
-import { useCRUD } from '@/lib/hooks/use-crud'
+import { useVehicles } from '@/lib/hooks/use-crud'
 import { VehicleDialog } from '@/components/dialogs/vehicle-dialog'
 import { DeleteConfirmDialog } from '@/components/dialogs/delete-confirm'
 import { EmptyState } from '@/components/empty-state'
 import { Search, Plus, Edit, Trash2, Car } from 'lucide-react'
 
 export default function VehiclesPage() {
-  const { vehicles } = useGarageStore()
-  const { addVehicle, updateVehicle, deleteVehicle } = useCRUD()
+  const { vehicles, addVehicle, updateVehicle, deleteVehicle } = useVehicles()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)

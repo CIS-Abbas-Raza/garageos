@@ -4,16 +4,14 @@ import { useState } from 'react'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { Button } from '@/components/ui/button'
-import { useGarageStore } from '@/lib/store/garage-store'
-import { useCRUD } from '@/lib/hooks/use-crud'
+import { useJobCards } from '@/lib/hooks/use-crud'
 import { JobCardDialog } from '@/components/dialogs/job-card-dialog'
 import { DeleteConfirmDialog } from '@/components/dialogs/delete-confirm'
 import { EmptyState } from '@/components/empty-state'
 import { Search, Plus, Edit, Trash2, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 
 export default function JobCardsPage() {
-  const { jobCards } = useGarageStore()
-  const { addJobCard, updateJobCard, deleteJobCard } = useCRUD()
+  const { jobCards, addJobCard, updateJobCard, deleteJobCard } = useJobCards()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
