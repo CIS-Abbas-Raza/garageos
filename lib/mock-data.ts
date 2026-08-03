@@ -1,0 +1,221 @@
+import { DashboardStats, Job, Customer, Mechanic, Invoice, Notification } from "./types";
+
+export const dashboardStats: DashboardStats = {
+  revenueMTD: 68400,
+  revenueVsLastMonth: 11.7,
+  activeJobs: 12,
+  activeJobsVsLastMonth: 3,
+  pendingJobs: 7,
+  pendingJobsVsLastMonth: -2,
+  completedToday: 9,
+  completedTodayVsLastMonth: 4,
+  vehiclesToday: 24,
+  vehiclesTodayVsLastMonth: 8,
+  totalCustomers: 1284,
+  totalCustomersVsLastMonth: 62,
+  mechanicsOnDuty: 8,
+  lowStockItems: 2,
+};
+
+export const jobs: Job[] = [
+  {
+    id: "JOB-001",
+    customerId: "CUST-001",
+    vehicleId: "VEH-001",
+    title: "Oil Change & Filter Replacement",
+    description: "Scheduled maintenance",
+    status: "completed",
+    createdAt: new Date("2026-08-01"),
+    dueAt: new Date("2026-08-03"),
+    completedAt: new Date("2026-08-02"),
+    mechanic: "John Smith",
+    estimatedCost: 450,
+    actualCost: 450,
+  },
+  {
+    id: "JOB-002",
+    customerId: "CUST-002",
+    vehicleId: "VEH-002",
+    title: "Brake Pad Replacement",
+    description: "Front and rear brake pads",
+    status: "in-progress",
+    createdAt: new Date("2026-08-02"),
+    dueAt: new Date("2026-08-04"),
+    mechanic: "Sarah Johnson",
+    estimatedCost: 680,
+  },
+  {
+    id: "JOB-003",
+    customerId: "CUST-003",
+    vehicleId: "VEH-003",
+    title: "Engine Diagnostic",
+    description: "Check engine light diagnosis",
+    status: "pending",
+    createdAt: new Date("2026-08-03"),
+    dueAt: new Date("2026-08-05"),
+    estimatedCost: 350,
+  },
+  {
+    id: "JOB-004",
+    customerId: "CUST-001",
+    vehicleId: "VEH-004",
+    title: "Transmission Service",
+    status: "on-hold",
+    createdAt: new Date("2026-08-01"),
+    dueAt: new Date("2026-08-08"),
+    mechanic: "Mike Davis",
+    estimatedCost: 1200,
+  },
+];
+
+export const customers: Customer[] = [
+  {
+    id: "CUST-001",
+    name: "John Michael",
+    email: "john@example.com",
+    phone: "(555) 123-4567",
+    address: "123 Main St, Springfield",
+    createdAt: new Date("2025-01-15"),
+    vehicles: [],
+    totalJobs: 8,
+    totalSpent: 3200,
+  },
+  {
+    id: "CUST-002",
+    name: "Sarah Anderson",
+    email: "sarah@example.com",
+    phone: "(555) 234-5678",
+    address: "456 Oak Ave, Springfield",
+    createdAt: new Date("2025-02-20"),
+    vehicles: [],
+    totalJobs: 12,
+    totalSpent: 5600,
+  },
+  {
+    id: "CUST-003",
+    name: "Robert Martinez",
+    email: "robert@example.com",
+    phone: "(555) 345-6789",
+    address: "789 Pine Rd, Springfield",
+    createdAt: new Date("2025-03-10"),
+    vehicles: [],
+    totalJobs: 5,
+    totalSpent: 1800,
+  },
+];
+
+export const mechanics: Mechanic[] = [
+  {
+    id: "MECH-001",
+    name: "John Smith",
+    email: "john.smith@garageos.com",
+    specialization: "Engine Work",
+    availability: "available",
+    activeJobs: 2,
+    rating: 4.8,
+  },
+  {
+    id: "MECH-002",
+    name: "Sarah Johnson",
+    email: "sarah.j@garageos.com",
+    specialization: "Brakes & Suspension",
+    availability: "busy",
+    activeJobs: 3,
+    rating: 4.9,
+  },
+  {
+    id: "MECH-003",
+    name: "Mike Davis",
+    email: "mike.davis@garageos.com",
+    specialization: "Transmission",
+    availability: "available",
+    activeJobs: 1,
+    rating: 4.7,
+  },
+  {
+    id: "MECH-004",
+    name: "Lisa Rodriguez",
+    email: "lisa.r@garageos.com",
+    specialization: "Electrical",
+    availability: "available",
+    activeJobs: 2,
+    rating: 4.9,
+  },
+];
+
+export const invoices: Invoice[] = [
+  {
+    id: "INV-001",
+    jobId: "JOB-001",
+    customerId: "CUST-001",
+    amount: 450,
+    status: "paid",
+    issuedAt: new Date("2026-08-02"),
+    dueAt: new Date("2026-08-09"),
+    paidAt: new Date("2026-08-05"),
+    items: [
+      {
+        id: "ITEM-001",
+        description: "Oil Change Service",
+        quantity: 1,
+        unitPrice: 300,
+        total: 300,
+      },
+      {
+        id: "ITEM-002",
+        description: "Oil Filter",
+        quantity: 1,
+        unitPrice: 150,
+        total: 150,
+      },
+    ],
+  },
+];
+
+export const notifications: Notification[] = [
+  {
+    id: "NOTIF-001",
+    type: "job",
+    title: "Job Completed",
+    message: "Oil Change & Filter Replacement completed for John Michael",
+    read: true,
+    createdAt: new Date("2026-08-02T14:30:00"),
+    actionUrl: "/jobs/JOB-001",
+  },
+  {
+    id: "NOTIF-002",
+    type: "alert",
+    title: "Low Stock Alert",
+    message: "Brake pads inventory is running low",
+    read: false,
+    createdAt: new Date("2026-08-03T10:15:00"),
+    actionUrl: "/inventory",
+  },
+  {
+    id: "NOTIF-003",
+    type: "payment",
+    title: "Payment Received",
+    message: "Invoice INV-001 has been paid by John Michael",
+    read: false,
+    createdAt: new Date("2026-08-03T16:45:00"),
+    actionUrl: "/invoices/INV-001",
+  },
+];
+
+export const monthlyRevenueData = [
+  { month: "Jan", revenue: 32000, expenses: 18000 },
+  { month: "Feb", revenue: 48500, expenses: 30000 },
+  { month: "Mar", revenue: 42000, expenses: 25000 },
+  { month: "Apr", revenue: 55000, expenses: 32000 },
+  { month: "May", revenue: 61200, expenses: 35500 },
+  { month: "Jun", revenue: 58900, expenses: 33000 },
+  { month: "Jul", revenue: 67500, expenses: 38000 },
+  { month: "Aug", revenue: 68400, expenses: 39500 },
+];
+
+export const jobStatusData = [
+  { name: "Completed", value: 245, fill: "#10b981" },
+  { name: "In Progress", value: 67, fill: "#3b82f6" },
+  { name: "Pending", value: 45, fill: "#f59e0b" },
+  { name: "On Hold", value: 23, fill: "#ef4444" },
+];
