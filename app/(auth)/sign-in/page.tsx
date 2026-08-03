@@ -1,17 +1,20 @@
 'use client'
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Wrench } from "lucide-react";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock sign-in
+  const handleClick = () => {
+    // Mock sign-in - navigate to dashboard
+    if (email && password) {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -24,7 +27,7 @@ export default function SignInPage() {
             <p className="text-muted-foreground">Welcome back — let&apos;s get you into the shop.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Work email</label>
               <input
@@ -57,10 +60,14 @@ export default function SignInPage() {
               </Link>
             </div>
 
-            <Button className="w-full" size="lg">
+            <button
+              type="button"
+              onClick={handleClick}
+              className="w-full py-3 px-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+            >
               Sign in
-            </Button>
-          </form>
+            </button>
+          </div>
 
           <div className="text-center text-sm">
             New to GarageOS?{" "}
