@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { RootLayoutClient } from '@/components/root-layout-client'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'GarageOS - Auto Repair Management',
@@ -45,6 +46,7 @@ export default function RootLayout({
         <RootLayoutClient>
           {children}
         </RootLayoutClient>
+        <Toaster position="top-right" theme="system" />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
