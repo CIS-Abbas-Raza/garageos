@@ -64,7 +64,7 @@ export default function SettingsPage() {
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader title="Settings" />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
             {/* Header */}

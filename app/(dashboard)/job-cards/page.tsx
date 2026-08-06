@@ -91,7 +91,7 @@ export default function JobCardsPage() {
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader title="Job Cards" />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
             {/* Header */}
@@ -159,11 +159,9 @@ export default function JobCardsPage() {
                             {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                           </div>
                         </div>
-                        {job.assignedMechanic && (
-                          <p className="text-sm text-muted-foreground">
-                            Assigned to: {job.assignedMechanic}
-                          </p>
-                        )}
+                        <p className="text-sm text-muted-foreground">
+                          Priority: {job.priority}
+                        </p>
                       </div>
                       <div className="flex gap-1">
                         <button
@@ -187,23 +185,19 @@ export default function JobCardsPage() {
                       <div>
                         <p className="text-muted-foreground">Est. Hours</p>
                         <p className="font-medium text-foreground">
-                          {job.estimatedHours}h
+                          {job.total.toFixed(2)}
                         </p>
                       </div>
-                      {job.actualHours && (
-                        <div>
-                          <p className="text-muted-foreground">Actual Hours</p>
-                          <p className="font-medium text-foreground">{job.actualHours}h</p>
-                        </div>
-                      )}
-                      {job.notes && (
-                        <div className="sm:col-span-2">
-                          <p className="text-muted-foreground">Notes</p>
-                          <p className="font-medium text-foreground truncate">
-                            {job.notes}
-                          </p>
-                        </div>
-                      )}
+                      <div>
+                        <p className="text-muted-foreground">Priority</p>
+                        <p className="font-medium text-foreground">{job.priority}</p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-muted-foreground">Due date</p>
+                        <p className="font-medium text-foreground truncate">
+                          {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : 'Not scheduled'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -231,8 +225,8 @@ export default function JobCardsPage() {
       />
 
       <DeleteConfirmDialog
-        open={deleteConfirm.open}
-        onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
+        isOpen={deleteConfirm.open}
+        onCancel={() => setDeleteConfirm({ open: false, id: null })}
         onConfirm={handleConfirmDelete}
         title="Delete Job Card"
         description="Are you sure you want to delete this job card? This action cannot be undone."

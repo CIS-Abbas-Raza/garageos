@@ -22,7 +22,7 @@ export default function CustomersPage() {
 
   const filteredCustomers = customers.filter(
     (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${customer.firstName} ${customer.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.phone.includes(searchTerm)
   )
@@ -62,7 +62,7 @@ export default function CustomersPage() {
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader title="Customers" />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
             {/* Header */}
@@ -123,7 +123,7 @@ export default function CustomersPage() {
                         className="border-b border-border hover:bg-muted/10 transition-colors"
                       >
                         <td className="px-6 py-4 text-sm text-foreground font-medium">
-                          {customer.name}
+                          {customer.firstName} {customer.lastName}
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                           {customer.email}
@@ -180,8 +180,8 @@ export default function CustomersPage() {
       />
 
       <DeleteConfirmDialog
-        open={deleteConfirm.open}
-        onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
+        isOpen={deleteConfirm.open}
+        onCancel={() => setDeleteConfirm({ open: false, id: null })}
         onConfirm={handleConfirmDelete}
         title="Delete Customer"
         description="Are you sure you want to delete this customer? This action cannot be undone."
