@@ -1,38 +1,127 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { AlertCircle, CalendarDays, CheckCircle2, Clock3, DollarSign, Truck, Users, Wrench } from 'lucide-react'
+import { useState } from 'react'
+import { AlertCircle, CheckCircle2, Clock3, DollarSign, Truck, Users, Wrench, ToggleLeft, ToggleRight } from 'lucide-react'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { StatCard } from '@/components/dashboard/stat-card'
+import { DateTimeCard } from '@/components/dashboard/date-time-card'
+import { RevenueChart } from '@/components/dashboard/revenue-chart'
+import { ActivityList } from '@/components/dashboard/activity-list'
 import { Button } from '@/components/ui/button'
 import { useGarageStore } from '@/lib/store/garage-store'
 
-const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
-
 export default function DashboardPage() {
-  const { invoices, payments, jobCards, customers, vehicles, mechanics, parts, appointments, expenses } = useGarageStore()
-  const [range, setRange] = useState<'30d' | '6m' | '1y'>('30d')
+  const { invoices, payments, jobCards, customers, vehicles, mechanics, parts, appointments } = useGarageStore()
+  const [viewType, setViewType] = useState<'overview' | 'detailed'>('overview')
+
   const revenue = payments.reduce((sum, payment) => sum + payment.amount, 0)
   const activeJobs = jobCards.filter((job) => job.status !== 'completed').length
-  const pendingJobs = jobCards.filter((job) => job.status === 'pending').length
+  const inProgressJobs = jobCards.filter((job) => job.status === 'in-progress').length
   const completedToday = jobCards.filter((job) => job.status === 'completed' && new Date(job.createdAt).toDateString() === new Date().toDateString()).length
   const lowStock = parts.filter((part) => part.quantity <= part.minStock).length
   const onDuty = mechanics.filter((mechanic) => mechanic.available).length
-  const todayAppointments = appointments.filter((appointment) => new Date(appointment.startTime).toDateString() === new Date().toDateString())
-  const statuses = useMemo(() => ['pending', 'in-progress', 'completed', 'on-hold'].map((name) => ({ name: name.replace('-', ' '), value: jobCards.filter((job) => job.status === name).length })), [jobCards])
-  const revenueData = useMemo(() => {
-    const buckets = range === '30d' ? 6 : range === '6m' ? 6 : 12
-    return Array.from({ length: buckets }, (_, index) => {
-      const date = new Date()
-      date.setMonth(date.getMonth() - (buckets - index - 1))
-      const month = date.toLocaleString('en-US', { month: 'short' })
-      const revenueValue = invoices.filter((invoice) => new Date(invoice.createdAt).getMonth() === date.getMonth()).reduce((sum, invoice) => sum + invoice.amountPaid, 0)
-      const expenseValue = expenses.filter((expense) => new Date(expense.date).getMonth() === date.getMonth()).reduce((sum, expense) => sum + expense.amount, 0)
-      return { month, revenue: revenueValue, expenses: expenseValue }
-    })
-  }, [expenses, invoices, range])
 
-  return <div className="flex min-h-screen bg-background"><DashboardSidebar /><div className="flex min-w-0 flex-1 flex-col"><DashboardHeader title="Dashboard" /><main className="flex-1 overflow-y-auto"><div className="mx-auto flex max-w-7xl flex-col gap-8 p-6 lg:p-8"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-medium text-primary">Garage operations</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">Good morning, operator.</h1><p className="mt-2 text-muted-foreground">Here is what is happening across your garage today.</p></div><div className="flex gap-1">{(['30d', '6m', '1y'] as const).map((item) => <Button key={item} variant={range === item ? 'default' : 'outline'} size="sm" onClick={() => setRange(item)}>{item}</Button>)}</div></div><div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"><StatCard title="REVENUE COLLECTED" value={`$${revenue.toLocaleString()}`} change={0} icon={<DollarSign className="size-5 text-primary" />} /><StatCard title="ACTIVE JOBS" value={activeJobs} change={0} icon={<Wrench className="size-5 text-primary" />} /><StatCard title="PENDING JOBS" value={pendingJobs} change={0} icon={<Clock3 className="size-5 text-primary" />} trend="down" /><StatCard title="COMPLETED TODAY" value={completedToday} change={0} icon={<CheckCircle2 className="size-5 text-primary" />} /></div><div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"><StatCard title="CUSTOMERS" value={customers.length} change={0} icon={<Users className="size-5 text-primary" />} /><StatCard title="VEHICLES" value={vehicles.length} change={0} icon={<Truck className="size-5 text-primary" />} /><StatCard title="MECHANICS ON DUTY" value={onDuty} change={0} icon={<Wrench className="size-5 text-primary" />} /><StatCard title="LOW STOCK ITEMS" value={lowStock} change={0} icon={<AlertCircle className="size-5 text-destructive" />} trend="down" /></div><div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]"><section className="rounded-2xl border border-border bg-card p-6"><div className="mb-6"><h2 className="text-lg font-semibold">Revenue and expenses</h2><p className="text-sm text-muted-foreground">Derived from invoices, payments, and daily expenses.</p></div><ResponsiveContainer width="100%" height={300}><BarChart data={revenueData}><CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /><XAxis dataKey="month" stroke="var(--muted-foreground)" /><YAxis stroke="var(--muted-foreground)" /><Tooltip /><Bar dataKey="revenue" fill="var(--chart-1)" radius={[6, 6, 0, 0]} /><Bar dataKey="expenses" fill="var(--chart-4)" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></section><section className="rounded-2xl border border-border bg-card p-6"><h2 className="text-lg font-semibold">Job status</h2><p className="mt-1 text-sm text-muted-foreground">Current work across all job cards.</p><ResponsiveContainer width="100%" height={240}><PieChart><Pie data={statuses} dataKey="value" nameKey="name" innerRadius={58} outerRadius={88} paddingAngle={3}>{statuses.map((entry, index) => <Cell key={entry.name} fill={chartColors[index % chartColors.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className="flex flex-col gap-2 text-sm">{statuses.map((status, index) => <div key={status.name} className="flex items-center justify-between"><span className="flex items-center gap-2 capitalize"><span className="size-2 rounded-full" style={{ backgroundColor: chartColors[index % chartColors.length] }} />{status.name}</span><strong>{status.value}</strong></div>)}</div></section></div><div className="grid gap-6 lg:grid-cols-2"><section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">Today&apos;s appointments</h2><p className="text-sm text-muted-foreground">{todayAppointments.length} scheduled visits</p></div><CalendarDays className="size-5 text-primary" /></div><div className="mt-5 flex flex-col gap-3">{todayAppointments.slice(0, 4).map((appointment) => <div key={appointment.id} className="flex items-center justify-between rounded-lg border border-border p-3"><div><p className="font-medium">{appointment.title}</p><p className="text-xs text-muted-foreground">{appointment.status}</p></div><span className="text-sm text-muted-foreground">{new Date(appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span></div>)}{todayAppointments.length === 0 && <p className="py-6 text-sm text-muted-foreground">No appointments scheduled for today.</p>}</div></section><section className="rounded-2xl border border-border bg-card p-6"><h2 className="text-lg font-semibold">Payment snapshot</h2><p className="mt-1 text-sm text-muted-foreground">{invoices.length} invoices and {payments.length} recorded payments.</p><div className="mt-5 flex flex-col gap-3">{['paid', 'partially-paid', 'sent', 'overdue'].map((status) => <div key={status} className="flex items-center justify-between rounded-lg bg-muted/40 px-4 py-3 text-sm"><span className="capitalize">{status.replace('-', ' ')}</span><strong>{invoices.filter((invoice) => invoice.status === status).length}</strong></div>)}</div></section></div></div></main></div></div>
+  return (
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <DashboardHeader title="Dashboard" />
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto flex max-w-7xl flex-col gap-8 p-6 lg:p-8">
+            {/* Page Header */}
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-sm font-medium text-primary">Garage Operations</p>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight">Dashboard</h1>
+                <p className="mt-1 text-muted-foreground">Overview of your garage operations and key metrics</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewType(viewType === 'overview' ? 'detailed' : 'overview')}
+                className="gap-2 w-fit"
+              >
+                {viewType === 'overview' ? (
+                  <>
+                    <ToggleLeft className="h-4 w-4" />
+                    Overview
+                  </>
+                ) : (
+                  <>
+                    <ToggleRight className="h-4 w-4" />
+                    Detailed
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Date/Time Card */}
+            <div className="grid gap-4 lg:grid-cols-2">
+              <DateTimeCard />
+            </div>
+
+            {/* Primary Statistics - 8 Cards in 4 columns */}
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                title="Total Revenue"
+                value={`$${revenue.toLocaleString()}`}
+                change={0}
+                icon={<DollarSign className="size-5 text-primary" />}
+              />
+              <StatCard
+                title="Active Jobs"
+                value={activeJobs}
+                change={0}
+                icon={<Wrench className="size-5 text-primary" />}
+              />
+              <StatCard
+                title="In Progress"
+                value={inProgressJobs}
+                change={0}
+                icon={<Clock3 className="size-5 text-blue-500" />}
+              />
+              <StatCard
+                title="Completed Today"
+                value={completedToday}
+                change={0}
+                icon={<CheckCircle2 className="size-5 text-green-500" />}
+              />
+              <StatCard
+                title="Total Customers"
+                value={customers.length}
+                change={0}
+                icon={<Users className="size-5 text-primary" />}
+              />
+              <StatCard
+                title="Total Vehicles"
+                value={vehicles.length}
+                change={0}
+                icon={<Truck className="size-5 text-primary" />}
+              />
+              <StatCard
+                title="Mechanics Available"
+                value={onDuty}
+                change={0}
+                icon={<Wrench className="size-5 text-green-500" />}
+              />
+              <StatCard
+                title="Low Stock Items"
+                value={lowStock}
+                change={0}
+                icon={<AlertCircle className="size-5 text-destructive" />}
+                trend="down"
+              />
+            </div>
+
+            {/* Bottom Section: Activity and Revenue Chart */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <ActivityList />
+              <RevenueChart />
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  )
 }
