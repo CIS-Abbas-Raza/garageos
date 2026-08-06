@@ -1,0 +1,2 @@
+import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
+export default function CompaniesPage() { return <EntityCrudPage config={{ resource: 'companies', title: 'Companies', description: 'Manage branches and garage company records.', fields: [{ key: 'name', label: 'Company name', required: true }, { key: 'email', label: 'Email', type: 'email', required: true }, { key: 'phone', label: 'Phone' }, { key: 'city', label: 'City' }, { key: 'state', label: 'State' }], columns: ['name', 'email', 'phone', 'active'], empty: 'No companies yet.' }} /> }

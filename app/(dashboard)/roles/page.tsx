@@ -1,0 +1,2 @@
+import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
+export default function RolesPage() { return <EntityCrudPage config={{ resource: 'roles', title: 'Roles', description: 'Define permission sets for advisors, mechanics, and administrators.', fields: [{ key: 'name', label: 'Role name', required: true }, { key: 'permissions', label: 'Permissions (comma separated)', required: true }], columns: ['name', 'permissions'], empty: 'No roles configured.' }} /> }

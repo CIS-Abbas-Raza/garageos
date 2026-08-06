@@ -1,224 +1,38 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { StatCard } from "@/components/dashboard/stat-card";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import {
-  DollarSign,
-  Wrench,
-  AlertCircle,
-  Users,
-  Truck,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
-import { dashboardStats, monthlyRevenueData, jobStatusData } from "@/lib/mock-data";
+import { useMemo, useState } from 'react'
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { AlertCircle, CalendarDays, CheckCircle2, Clock3, DollarSign, Truck, Users, Wrench } from 'lucide-react'
+import { DashboardHeader } from '@/components/dashboard/header'
+import { DashboardSidebar } from '@/components/dashboard/sidebar'
+import { StatCard } from '@/components/dashboard/stat-card'
+import { Button } from '@/components/ui/button'
+import { useGarageStore } from '@/lib/store/garage-store'
+
+const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
 
 export default function DashboardPage() {
-  return (
-    <div className="flex h-screen bg-background">
-      <DashboardSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader title="Dashboard" />
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto max-w-7xl px-6 py-8 space-y-8">
-            {/* Top Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                title="REVENUE (MTD)"
-                value={`$${(dashboardStats.revenueMTD / 1000).toFixed(1)}k`}
-                change={dashboardStats.revenueVsLastMonth}
-                icon={<DollarSign className="h-5 w-5 text-primary" />}
-              />
-              <StatCard
-                title="ACTIVE JOBS"
-                value={dashboardStats.activeJobs}
-                change={dashboardStats.activeJobsVsLastMonth}
-                icon={<Wrench className="h-5 w-5 text-blue-500" />}
-              />
-              <StatCard
-                title="PENDING JOBS"
-                value={dashboardStats.pendingJobs}
-                change={dashboardStats.pendingJobsVsLastMonth}
-                icon={<Clock className="h-5 w-5 text-amber-500" />}
-                trend={dashboardStats.pendingJobsVsLastMonth > 0 ? "down" : "up"}
-              />
-              <StatCard
-                title="COMPLETED TODAY"
-                value={dashboardStats.completedToday}
-                change={dashboardStats.completedTodayVsLastMonth}
-                icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-              />
-            </div>
+  const { invoices, payments, jobCards, customers, vehicles, mechanics, parts, appointments, expenses } = useGarageStore()
+  const [range, setRange] = useState<'30d' | '6m' | '1y'>('30d')
+  const revenue = payments.reduce((sum, payment) => sum + payment.amount, 0)
+  const activeJobs = jobCards.filter((job) => job.status !== 'completed').length
+  const pendingJobs = jobCards.filter((job) => job.status === 'pending').length
+  const completedToday = jobCards.filter((job) => job.status === 'completed' && new Date(job.createdAt).toDateString() === new Date().toDateString()).length
+  const lowStock = parts.filter((part) => part.quantity <= part.minStock).length
+  const onDuty = mechanics.filter((mechanic) => mechanic.available).length
+  const todayAppointments = appointments.filter((appointment) => new Date(appointment.startTime).toDateString() === new Date().toDateString())
+  const statuses = useMemo(() => ['pending', 'in-progress', 'completed', 'on-hold'].map((name) => ({ name: name.replace('-', ' '), value: jobCards.filter((job) => job.status === name).length })), [jobCards])
+  const revenueData = useMemo(() => {
+    const buckets = range === '30d' ? 6 : range === '6m' ? 6 : 12
+    return Array.from({ length: buckets }, (_, index) => {
+      const date = new Date()
+      date.setMonth(date.getMonth() - (buckets - index - 1))
+      const month = date.toLocaleString('en-US', { month: 'short' })
+      const revenueValue = invoices.filter((invoice) => new Date(invoice.createdAt).getMonth() === date.getMonth()).reduce((sum, invoice) => sum + invoice.amountPaid, 0)
+      const expenseValue = expenses.filter((expense) => new Date(expense.date).getMonth() === date.getMonth()).reduce((sum, expense) => sum + expense.amount, 0)
+      return { month, revenue: revenueValue, expenses: expenseValue }
+    })
+  }, [expenses, invoices, range])
 
-            {/* Secondary Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                title="VEHICLES TODAY"
-                value={dashboardStats.vehiclesToday}
-                change={dashboardStats.vehiclesTodayVsLastMonth}
-                icon={<Truck className="h-5 w-5 text-purple-500" />}
-              />
-              <StatCard
-                title="CUSTOMERS"
-                value={dashboardStats.totalCustomers}
-                change={dashboardStats.totalCustomersVsLastMonth}
-                icon={<Users className="h-5 w-5 text-cyan-500" />}
-              />
-              <StatCard
-                title="MECHANICS ON DUTY"
-                value={dashboardStats.mechanicsOnDuty}
-                change={0}
-                icon={<Wrench className="h-5 w-5 text-indigo-500" />}
-              />
-              <StatCard
-                title="LOW STOCK ITEMS"
-                value={dashboardStats.lowStockItems}
-                change={0}
-                icon={<AlertCircle className="h-5 w-5 text-red-500" />}
-                trend="down"
-              />
-            </div>
-
-            {/* Charts */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              {/* Monthly Revenue Chart */}
-              <div className="lg:col-span-2 p-6 space-y-6 rounded-lg border border-border bg-card">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold">Monthly Revenue</h2>
-                    <p className="text-sm text-muted-foreground">Revenue vs. operating expenses (YTD)</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button variant="outline" size="sm">30d</Button>
-                    <Button variant="outline" size="sm">6m</Button>
-                    <Button variant="outline" size="sm">1y</Button>
-                  </div>
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyRevenueData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-                    <YAxis stroke="var(--muted-foreground)" />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'var(--card)',
-                        border: '1px solid var(--border)',
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="revenue" fill="var(--chart-1)" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="expenses" fill="var(--chart-4)" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Job Status Pie Chart */}
-              <div className="p-6 space-y-6 rounded-lg border border-border bg-card">
-                <div>
-                  <h2 className="text-lg font-semibold">Job Status</h2>
-                  <p className="text-sm text-muted-foreground">Distribution across current cards</p>
-                </div>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={jobStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {jobStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="space-y-2 text-sm">
-                  {jobStatusData.map((status) => (
-                    <div key={status.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: status.fill }}
-                        />
-                        <span>{status.name}</span>
-                      </div>
-                      <span className="font-semibold">{status.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Activity and Appointments */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Upcoming Appointments */}
-              <div className="p-6 space-y-4 rounded-lg border border-border bg-card">
-                <h2 className="text-lg font-semibold">Today&apos;s Appointments</h2>
-                <div className="space-y-3">
-                  {[
-                    { time: "09:00 AM", customer: "John Michael", service: "Oil Change", vehicle: "2022 Honda Civic" },
-                    { time: "10:30 AM", customer: "Sarah Anderson", service: "Brake Inspection", vehicle: "2021 Toyota Camry" },
-                    { time: "01:00 PM", customer: "Robert Martinez", service: "Engine Diagnostic", vehicle: "2019 Ford F-150" },
-                  ].map((appt, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                      <div>
-                        <div className="font-medium text-sm">{appt.customer}</div>
-                        <div className="text-xs text-muted-foreground">{appt.vehicle}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold">{appt.time}</div>
-                        <div className="text-xs text-muted-foreground">{appt.service}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Team Activity */}
-              <div className="p-6 space-y-4 rounded-lg border border-border bg-card">
-                <h2 className="text-lg font-semibold">Team Activity</h2>
-                <div className="space-y-3">
-                  {[
-                    { mechanic: "John Smith", action: "Completed Oil Change", time: "2 hours ago" },
-                    { mechanic: "Sarah Johnson", action: "Started Brake Pads Replacement", time: "1 hour ago" },
-                    { mechanic: "Mike Davis", action: "Flagged for Review", time: "30 minutes ago" },
-                    { mechanic: "Lisa Rodriguez", action: "Completed Electrical Repair", time: "15 minutes ago" },
-                  ].map((activity, idx) => (
-                    <div key={idx} className="flex items-start justify-between p-3 rounded-lg border border-border">
-                      <div>
-                        <div className="font-medium text-sm">{activity.mechanic}</div>
-                        <div className="text-xs text-muted-foreground">{activity.action}</div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">{activity.time}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+  return <div className="flex min-h-screen bg-background"><DashboardSidebar /><div className="flex min-w-0 flex-1 flex-col"><DashboardHeader title="Dashboard" /><main className="flex-1 overflow-y-auto"><div className="mx-auto flex max-w-7xl flex-col gap-8 p-6 lg:p-8"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-medium text-primary">Garage operations</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">Good morning, operator.</h1><p className="mt-2 text-muted-foreground">Here is what is happening across your garage today.</p></div><div className="flex gap-1">{(['30d', '6m', '1y'] as const).map((item) => <Button key={item} variant={range === item ? 'default' : 'outline'} size="sm" onClick={() => setRange(item)}>{item}</Button>)}</div></div><div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"><StatCard title="REVENUE COLLECTED" value={`$${revenue.toLocaleString()}`} change={0} icon={<DollarSign className="size-5 text-primary" />} /><StatCard title="ACTIVE JOBS" value={activeJobs} change={0} icon={<Wrench className="size-5 text-primary" />} /><StatCard title="PENDING JOBS" value={pendingJobs} change={0} icon={<Clock3 className="size-5 text-primary" />} trend="down" /><StatCard title="COMPLETED TODAY" value={completedToday} change={0} icon={<CheckCircle2 className="size-5 text-primary" />} /></div><div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"><StatCard title="CUSTOMERS" value={customers.length} change={0} icon={<Users className="size-5 text-primary" />} /><StatCard title="VEHICLES" value={vehicles.length} change={0} icon={<Truck className="size-5 text-primary" />} /><StatCard title="MECHANICS ON DUTY" value={onDuty} change={0} icon={<Wrench className="size-5 text-primary" />} /><StatCard title="LOW STOCK ITEMS" value={lowStock} change={0} icon={<AlertCircle className="size-5 text-destructive" />} trend="down" /></div><div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]"><section className="rounded-2xl border border-border bg-card p-6"><div className="mb-6"><h2 className="text-lg font-semibold">Revenue and expenses</h2><p className="text-sm text-muted-foreground">Derived from invoices, payments, and daily expenses.</p></div><ResponsiveContainer width="100%" height={300}><BarChart data={revenueData}><CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /><XAxis dataKey="month" stroke="var(--muted-foreground)" /><YAxis stroke="var(--muted-foreground)" /><Tooltip /><Bar dataKey="revenue" fill="var(--chart-1)" radius={[6, 6, 0, 0]} /><Bar dataKey="expenses" fill="var(--chart-4)" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></section><section className="rounded-2xl border border-border bg-card p-6"><h2 className="text-lg font-semibold">Job status</h2><p className="mt-1 text-sm text-muted-foreground">Current work across all job cards.</p><ResponsiveContainer width="100%" height={240}><PieChart><Pie data={statuses} dataKey="value" nameKey="name" innerRadius={58} outerRadius={88} paddingAngle={3}>{statuses.map((entry, index) => <Cell key={entry.name} fill={chartColors[index % chartColors.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className="flex flex-col gap-2 text-sm">{statuses.map((status, index) => <div key={status.name} className="flex items-center justify-between"><span className="flex items-center gap-2 capitalize"><span className="size-2 rounded-full" style={{ backgroundColor: chartColors[index % chartColors.length] }} />{status.name}</span><strong>{status.value}</strong></div>)}</div></section></div><div className="grid gap-6 lg:grid-cols-2"><section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">Today&apos;s appointments</h2><p className="text-sm text-muted-foreground">{todayAppointments.length} scheduled visits</p></div><CalendarDays className="size-5 text-primary" /></div><div className="mt-5 flex flex-col gap-3">{todayAppointments.slice(0, 4).map((appointment) => <div key={appointment.id} className="flex items-center justify-between rounded-lg border border-border p-3"><div><p className="font-medium">{appointment.title}</p><p className="text-xs text-muted-foreground">{appointment.status}</p></div><span className="text-sm text-muted-foreground">{new Date(appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span></div>)}{todayAppointments.length === 0 && <p className="py-6 text-sm text-muted-foreground">No appointments scheduled for today.</p>}</div></section><section className="rounded-2xl border border-border bg-card p-6"><h2 className="text-lg font-semibold">Payment snapshot</h2><p className="mt-1 text-sm text-muted-foreground">{invoices.length} invoices and {payments.length} recorded payments.</p><div className="mt-5 flex flex-col gap-3">{['paid', 'partially-paid', 'sent', 'overdue'].map((status) => <div key={status} className="flex items-center justify-between rounded-lg bg-muted/40 px-4 py-3 text-sm"><span className="capitalize">{status.replace('-', ' ')}</span><strong>{invoices.filter((invoice) => invoice.status === status).length}</strong></div>)}</div></section></div></div></main></div></div>
 }

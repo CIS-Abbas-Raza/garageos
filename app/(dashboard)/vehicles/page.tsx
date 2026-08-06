@@ -63,7 +63,7 @@ export default function VehiclesPage() {
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader title="Vehicles" />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
             {/* Header */}
@@ -180,8 +180,8 @@ export default function VehiclesPage() {
       />
 
       <DeleteConfirmDialog
-        open={deleteConfirm.open}
-        onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
+        isOpen={deleteConfirm.open}
+        onCancel={() => setDeleteConfirm({ open: false, id: null })}
         onConfirm={handleConfirmDelete}
         title="Delete Vehicle"
         description="Are you sure you want to delete this vehicle? This action cannot be undone."

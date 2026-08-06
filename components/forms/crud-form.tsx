@@ -1,14 +1,14 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodSchema } from 'zod'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
-interface CrudFormProps<T> {
-  schema: ZodSchema
+interface CrudFormProps<T extends FieldValues> {
+  schema: ZodSchema<T>
   onSubmit: (data: T) => void
   onClose: () => void
   defaultValues?: T
@@ -17,7 +17,7 @@ interface CrudFormProps<T> {
   children: React.ReactNode
 }
 
-export function CrudForm<T>({
+export function CrudForm<T extends FieldValues>({
   schema,
   onSubmit,
   onClose,
@@ -32,7 +32,7 @@ export function CrudForm<T>({
     formState: { errors, isSubmitting },
     control,
   } = useForm<T>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema as any) as any,
     defaultValues: defaultValues as any,
   })
 

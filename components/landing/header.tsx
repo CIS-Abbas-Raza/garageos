@@ -29,7 +29,7 @@ export function LandingHeader() {
         </nav>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Link href="/sign-in">
+          <Link href="/login">
             <Button variant="ghost" size="sm">
               Sign in
             </Button>

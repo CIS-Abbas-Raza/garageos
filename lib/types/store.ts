@@ -251,6 +251,27 @@ export interface TaxRate {
   isDefault: boolean;
 }
 
+export interface Review {
+  id: string;
+  companyId: string;
+  customerId: string;
+  jobCardId?: string;
+  rating: number;
+  comment: string;
+  status: 'pending' | 'approved' | 'hidden';
+  createdAt: Date;
+}
+
+export interface Expense {
+  id: string;
+  companyId: string;
+  date: Date;
+  category: string;
+  description: string;
+  amount: number;
+  createdAt: Date;
+}
+
 export interface GarageSettings {
   companyId: string;
   logoUrl?: string;

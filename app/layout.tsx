@@ -5,7 +5,7 @@ import { RootLayoutClient } from '@/components/root-layout-client'
 import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
-  title: 'GarageOS - Auto Repair Management',
+  title: 'GarageOS — Auto Repair Management',
   description: 'The operating system for modern auto garages',
   generator: 'v0.app',
   icons: {
@@ -41,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground">
         <RootLayoutClient>
           {children}

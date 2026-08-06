@@ -124,6 +124,18 @@ interface GarageStore {
   clearAllNotifications: () => void
   getUnreadNotifications: () => Types.Notification[]
 
+  // Reviews
+  reviews: Types.Review[]
+  addReview: (review: Omit<Types.Review, 'id' | 'createdAt'>) => string
+  updateReview: (id: string, data: Partial<Types.Review>) => void
+  deleteReview: (id: string) => void
+
+  // Expenses
+  expenses: Types.Expense[]
+  addExpense: (expense: Omit<Types.Expense, 'id' | 'createdAt'>) => string
+  updateExpense: (id: string, data: Partial<Types.Expense>) => void
+  deleteExpense: (id: string) => void
+
   // Settings
   settings: Record<string, Types.GarageSettings>
   updateSettings: (companyId: string, settings: Partial<Types.GarageSettings>) => void
@@ -468,6 +480,26 @@ export const useGarageStore = create<GarageStore>()(
           notifications: state.notifications.filter((n) => !n.read),
         })),
       getUnreadNotifications: () => get().notifications.filter((n) => !n.read),
+
+      // Reviews
+      reviews: [],
+      addReview: (review) => {
+        const id = generateId()
+        set((state) => ({ reviews: [...state.reviews, { ...review, id, createdAt: new Date() } as Types.Review] }))
+        return id
+      },
+      updateReview: (id, data) => set((state) => ({ reviews: state.reviews.map((review) => review.id === id ? { ...review, ...data } : review) })),
+      deleteReview: (id) => set((state) => ({ reviews: state.reviews.filter((review) => review.id !== id) })),
+
+      // Expenses
+      expenses: [],
+      addExpense: (expense) => {
+        const id = generateId()
+        set((state) => ({ expenses: [...state.expenses, { ...expense, id, createdAt: new Date() } as Types.Expense] }))
+        return id
+      },
+      updateExpense: (id, data) => set((state) => ({ expenses: state.expenses.map((expense) => expense.id === id ? { ...expense, ...data } : expense) })),
+      deleteExpense: (id) => set((state) => ({ expenses: state.expenses.filter((expense) => expense.id !== id) })),
 
       // Settings
       settings: {},
