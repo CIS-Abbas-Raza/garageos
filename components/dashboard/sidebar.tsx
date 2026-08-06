@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/lib/store/auth-store";
+import { toast } from "sonner";
 import {
   BarChart3,
   Calendar,
@@ -54,7 +57,15 @@ const menuItems = [
 ];
 
 export function DashboardSidebar() {
+  const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleSignOut = () => {
+    logout();
+    toast.success("You have been signed out.");
+    router.push("/login");
+  };
 
   return (
     <aside
@@ -107,6 +118,7 @@ export function DashboardSidebar() {
           variant="ghost"
           className={`w-full justify-start gap-3 ${collapsed ? "px-2" : ""}`}
           title={collapsed ? "Sign out" : ""}
+          onClick={handleSignOut}
         >
           <LogOut className="h-4 w-4 flex-shrink-0" />
           {!collapsed && <span className="text-sm">Sign out</span>}
