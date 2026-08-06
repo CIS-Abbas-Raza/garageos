@@ -2,16 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Bell, Plus, Search, ChevronDown, Building2, MapPin } from "lucide-react";
-import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Bell, Plus, Search, Building2, MapPin } from "lucide-react";
 import { useGarageStore } from "@/lib/store/garage-store";
 
 interface DashboardHeaderProps {
@@ -21,7 +12,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ title, onNewClick }: DashboardHeaderProps) {
   const { companies } = useGarageStore();
-  const [selectedCompany, setSelectedCompany] = useState(companies[0]?.name || "Select Company");
+  const selectedCompany = companies[0]?.name || "Select Company";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,44 +20,15 @@ export function DashboardHeader({ title, onNewClick }: DashboardHeaderProps) {
         <div className="flex items-center gap-4 flex-1">
           <h1 className="text-xl font-semibold">{title}</h1>
           <div className="hidden lg:flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                <Building2 className="h-4 w-4" />
-                <span className="max-w-xs truncate">{selectedCompany}</span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Select Company</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {companies.length > 0 ? (
-                  companies.map((company) => (
-                    <DropdownMenuItem
-                      key={company.id}
-                      onClick={() => setSelectedCompany(company.name)}
-                      className="cursor-pointer"
-                    >
-                      {company.name}
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem disabled>No companies</DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="max-w-xs truncate">{selectedCompany}</span>
+            </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                <MapPin className="h-4 w-4" />
-                <span>Branch</span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuLabel>Select Branch</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Main Branch</DropdownMenuItem>
-                <DropdownMenuItem>Downtown Branch</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="outline" size="sm" className="gap-2">
+              <MapPin className="h-4 w-4" />
+              <span>Main Branch</span>
+            </Button>
           </div>
           <div className="hidden md:block flex-1 max-w-xs">
             <div className="relative">
