@@ -77,14 +77,14 @@ export function MarketingHeader() {
           {links.map(([label, href]) => <a key={href} href={href} className="text-sm font-medium text-landing-muted transition hover:text-landing-blue">{label}</a>)}
         </nav>
         <div className="hidden items-center gap-5 md:flex">
-          <Link href="/sign-in" className="text-sm font-semibold text-landing-foreground hover:text-landing-blue">Sign in</Link>
+          <Link href="/login" className="text-sm font-semibold text-landing-foreground hover:text-landing-blue">Sign in</Link>
           <Link href="/register" className="rounded-full bg-landing-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90">Start free trial</Link>
         </div>
         <button type="button" onClick={() => setOpen(!open)} className="rounded-lg p-2 text-landing-foreground md:hidden" aria-label="Toggle navigation">
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
-      {open && <nav className="border-t border-landing-line px-5 py-4 md:hidden">{links.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="block py-3 text-sm font-semibold text-landing-foreground">{label}</a>)}<Link href="/sign-in" className="block py-3 text-sm font-semibold text-landing-foreground">Sign in</Link><Link href="/register" className="mt-2 block rounded-full bg-landing-blue px-5 py-3 text-center text-sm font-semibold text-white">Start free trial</Link></nav>}
+      {open && <nav className="border-t border-landing-line px-5 py-4 md:hidden">{links.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="block py-3 text-sm font-semibold text-landing-foreground">{label}</a>)}<Link href="/login" className="block py-3 text-sm font-semibold text-landing-foreground">Sign in</Link><Link href="/register" className="mt-2 block rounded-full bg-landing-blue px-5 py-3 text-center text-sm font-semibold text-white">Start free trial</Link></nav>}
     </header>
   )
 }

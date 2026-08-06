@@ -26,7 +26,7 @@ export default function SettingsPage() {
   })
 
   const [userPreferences, setUserPreferences] = useState({
-    theme: 'dark',
+    theme: 'light',
     language: 'en',
     timeFormat: '24h',
     currency: 'USD',
