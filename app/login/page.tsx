@@ -1,7 +1,10 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, BarChart3, Eye, EyeOff, Gauge, LockKeyhole, ShieldCheck, Wrench } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -9,6 +12,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { loginSchema, type LoginFormData } from '@/lib/schemas'
+import { useAuthStore } from '@/lib/store/auth-store'
 
 const benefits = [
   { icon: Gauge, value: '2.4x', label: 'faster job intake' },
@@ -17,23 +22,37 @@ const benefits = [
 ]
 
 export default function LoginPage() {
+  const router = useRouter()
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
+  const login = useAuthStore((state) => state.login)
   const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!email || !password) {
-      toast.error('Enter your email and password to continue.')
-      return
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/dashboard')
     }
+  }, [isLoggedIn, router])
 
-    setIsSubmitting(true)
-    window.setTimeout(() => {
-      setIsSubmitting(false)
-      toast.success('Demo sign-in complete. Welcome back to GarageOS.')
-    }, 700)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  async function onSubmit(data: LoginFormData) {
+    // Simulate a brief delay for better UX
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    
+    // Mock login - store the session
+    login(data.email)
+    
+    toast.success('Sign in successful! Welcome back to GarageOS.')
+    
+    // Redirect to dashboard
+    router.push('/dashboard')
   }
 
   return (
@@ -59,7 +78,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Work email</Label>
                 <Input
@@ -67,10 +86,13 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@garage.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  required
+                  {...register('email')}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  className={errors.email ? 'border-destructive' : ''}
                 />
+                {errors.email && (
+                  <span className="text-xs font-medium text-destructive">{errors.email.message}</span>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -86,10 +108,9 @@ export default function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="pr-11"
-                    required
+                    {...register('password')}
+                    aria-invalid={errors.password ? 'true' : 'false'}
+                    className={`pr-11 ${errors.password ? 'border-destructive' : ''}`}
                   />
                   <button
                     type="button"
@@ -100,10 +121,13 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <span className="text-xs font-medium text-destructive">{errors.password.message}</span>
+                )}
               </div>
 
               <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1 h-11 w-full">
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                {isSubmitting ? 'Signing in...' : 'Sign in to your account'}
                 {!isSubmitting && <ArrowRight data-icon="inline-end" />}
               </Button>
             </form>

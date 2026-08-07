@@ -1,5 +1,10 @@
 import { z } from 'zod'
 
+export const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+})
+
 export const customerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
@@ -96,6 +101,7 @@ export const purchaseOrderSchema = z.object({
   notes: z.string().optional(),
 })
 
+export type LoginFormData = z.infer<typeof loginSchema>
 export type CustomerFormData = z.infer<typeof customerSchema>
 export type VehicleFormData = z.infer<typeof vehicleSchema>
 export type MechanicFormData = z.infer<typeof mechanicSchema>
