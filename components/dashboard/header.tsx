@@ -1,60 +1,56 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Bell, Plus, Search, Building2, MapPin } from "lucide-react";
-import { useGarageStore } from "@/lib/store/garage-store";
+import { useState } from 'react'
+import { Bell, Building2, ChevronDown, MapPin, Menu, Plus, Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { useGarageStore } from '@/lib/store/garage-store'
 
 interface DashboardHeaderProps {
-  title: string;
-  onNewClick?: () => void;
+  title: string
+  onNewClick?: () => void
 }
 
 export function DashboardHeader({ title, onNewClick }: DashboardHeaderProps) {
-  const { companies } = useGarageStore();
-  const selectedCompany = companies[0]?.name || "Select Company";
+  const { companies } = useGarageStore()
+  const selectedCompany = companies[0]?.name || 'Select Company'
+  const [query, setQuery] = useState('')
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center justify-between px-6 gap-4">
-        <div className="flex items-center gap-4 flex-1">
-          <h1 className="text-xl font-semibold">{title}</h1>
-          <div className="hidden lg:flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Building2 className="h-4 w-4" />
-              <span className="max-w-xs truncate">{selectedCompany}</span>
-            </Button>
-
-            <Button variant="outline" size="sm" className="gap-2">
-              <MapPin className="h-4 w-4" />
-              <span>Main Branch</span>
-            </Button>
-          </div>
-          <div className="hidden md:block flex-1 max-w-xs">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                placeholder="Search customers, vehicles, jobs..."
-                className="pl-9 bg-card w-full px-3 py-2 border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="flex min-h-16 items-center gap-3 px-4 py-3 lg:gap-5 lg:px-6">
+        <Button variant="ghost" size="icon" className="size-9 shrink-0" aria-label="Toggle navigation" onClick={() => window.dispatchEvent(new Event('garageos:toggle-sidebar'))}>
+          <Menu className="size-5" />
+        </Button>
+        <div className="hidden items-center gap-2 border-l border-border pl-4 md:flex">
+          <Button variant="outline" size="sm" className="h-10 gap-2 rounded-full px-4 font-medium">
+            <Building2 className="size-4 text-muted-foreground" />
+            <span className="max-w-40 truncate">{selectedCompany}</span>
+            <ChevronDown className="size-3.5 text-muted-foreground" />
+          </Button>
+          <Button variant="outline" size="sm" className="h-10 gap-2 rounded-full px-4 font-medium">
+            <MapPin className="size-4 text-muted-foreground" />
+            <span>Main Branch</span>
+            <ChevronDown className="size-3.5 text-muted-foreground" />
+          </Button>
         </div>
-
-        <div className="flex items-center gap-2">
-          {onNewClick && (
-            <Button size="sm" onClick={onNewClick} className="gap-1">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Job</span>
-            </Button>
-          )}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
+        <div className="relative min-w-0 flex-1 md:mx-auto md:max-w-2xl">
+          <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input aria-label="Global search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search customers, vehicles, jobs..." className="h-10 w-full rounded-full border border-border bg-muted/30 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20" />
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {onNewClick && <Button size="sm" onClick={onNewClick} className="hidden gap-2 rounded-full sm:flex"><Plus className="size-4" />New Job</Button>}
+          <Button variant="ghost" size="icon" className="relative size-10" aria-label="Notifications">
+            <Bell className="size-[18px]" />
+            <span className="absolute right-2 top-2 size-2 rounded-full bg-destructive ring-2 ring-background" />
           </Button>
           <ThemeToggle />
         </div>
       </div>
+      <div className="flex gap-2 px-4 pb-3 md:hidden">
+        <Button variant="outline" size="sm" className="h-9 flex-1 gap-2 rounded-full"><Building2 className="size-4" /><span className="truncate">{selectedCompany}</span><ChevronDown className="size-3" /></Button>
+        <Button variant="outline" size="sm" className="h-9 flex-1 gap-2 rounded-full"><MapPin className="size-4" /><span>Main Branch</span><ChevronDown className="size-3" /></Button>
+      </div>
     </header>
-  );
+  )
 }
