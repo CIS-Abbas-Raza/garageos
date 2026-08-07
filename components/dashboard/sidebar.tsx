@@ -32,9 +32,10 @@ import {
 } from 'lucide-react'
 
 const menuSections = [
-  { label: 'Main', items: [{ href: '/dashboard', label: 'Dashboard', icon: Home }] },
+  { label: 'Main', icon: Home, items: [{ href: '/dashboard', label: 'Dashboard', icon: Home }] },
   {
     label: 'Administration',
+    icon: ShieldCheck,
     items: [
       { href: '/admin', label: 'Admin', icon: ShieldCheck },
       { href: '/companies', label: 'Companies', icon: Building2 },
@@ -46,6 +47,7 @@ const menuSections = [
   },
   {
     label: 'Company Management',
+    icon: Building2,
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
       { href: '/mechanics', label: 'Mechanics', icon: UserRoundCog },
@@ -55,6 +57,7 @@ const menuSections = [
   },
   {
     label: 'Operations',
+    icon: Wrench,
     items: [
       { href: '/vehicles', label: 'Vehicles', icon: Truck },
       { href: '/job-cards', label: 'Job Cards', icon: FileText },
@@ -64,6 +67,7 @@ const menuSections = [
   },
   {
     label: 'Finance & Billing',
+    icon: CreditCard,
     items: [
       { href: '/invoices', label: 'Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
@@ -73,6 +77,7 @@ const menuSections = [
   },
   {
     label: 'Supply Chain',
+    icon: Truck,
     items: [
       { href: '/parts', label: 'Parts', icon: Boxes },
       { href: '/suppliers', label: 'Suppliers', icon: Truck },
@@ -80,6 +85,7 @@ const menuSections = [
   },
   {
     label: 'Other',
+    icon: Boxes,
     items: [
       { href: '/reports', label: 'Reports', icon: BarChart3 },
       { href: '/reviews', label: 'Reviews', icon: FileText },
@@ -138,7 +144,10 @@ export function DashboardSidebar() {
             return (
               <div key={section.label}>
                 <button type="button" onClick={() => setExpandedSections((current) => ({ ...current, [section.label]: !isExpanded }))} className={`${collapsed ? 'justify-center' : 'justify-between'} flex w-full items-center rounded-md px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground`} aria-expanded={isExpanded}>
-                  <span className={collapsed ? 'sr-only' : 'max-md:hidden'}>{section.label}</span>
+                  <span className="flex items-center gap-2">
+                    <section.icon className="size-4 shrink-0" />
+                    <span className={collapsed ? 'sr-only' : 'max-md:hidden'}>{section.label}</span>
+                  </span>
                   {!collapsed && <ChevronDown className={`size-3 transition-transform max-md:hidden ${isExpanded ? '' : '-rotate-90'}`} />}
                 </button>
                 {isExpanded && (
