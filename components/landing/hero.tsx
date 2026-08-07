@@ -1,190 +1,230 @@
-'use client';
+'use client'
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { ArrowRight, BarChart3, ClipboardList, FileText, Sparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-const dashboardViews = [
+type DashboardView = {
+  id: string
+  name: string
+  path: string
+  icon: typeof BarChart3
+  stats: { value: string; label: string }[]
+  detail: string
+}
+
+const dashboardViews: DashboardView[] = [
   {
-    id: 1,
-    name: "Dashboard Overview",
+    id: 'overview',
+    name: 'Dashboard overview',
+    path: 'dashboard',
+    icon: BarChart3,
     stats: [
-      { value: "$68,400", label: "REVENUE MTD" },
-      { value: "12", label: "ACTIVE JOBS" },
-      { value: "24", label: "VEHICLES TODAY" },
-      { value: "82%", label: "UTILIZATION" },
+      { value: '$68,400', label: 'Revenue MTD' },
+      { value: '12', label: 'Active jobs' },
+      { value: '24', label: 'Vehicles today' },
+      { value: '82%', label: 'Utilization' },
     ],
+    detail: 'Revenue is up 18.4% compared with last month.',
   },
   {
-    id: 2,
-    name: "Job Cards Kanban",
+    id: 'jobs',
+    name: 'Job card kanban',
+    path: 'job-cards',
+    icon: ClipboardList,
     stats: [
-      { value: "8", label: "PENDING" },
-      { value: "14", label: "IN PROGRESS" },
-      { value: "6", label: "READY FOR PICKUP" },
-      { value: "32", label: "COMPLETED THIS MONTH" },
+      { value: '8', label: 'Pending' },
+      { value: '14', label: 'In progress' },
+      { value: '6', label: 'Ready for pickup' },
+      { value: '32', label: 'Completed this month' },
     ],
+    detail: 'Two vehicles are ready for customer pickup today.',
   },
   {
-    id: 3,
-    name: "Invoice Management",
+    id: 'invoices',
+    name: 'Invoice management',
+    path: 'invoices',
+    icon: FileText,
     stats: [
-      { value: "$45,200", label: "OUTSTANDING" },
-      { value: "$68,400", label: "PAID THIS MONTH" },
-      { value: "28", label: "PENDING INVOICES" },
-      { value: "3.2 days", label: "AVG PAYMENT TIME" },
+      { value: '$45,200', label: 'Outstanding' },
+      { value: '$68,400', label: 'Paid this month' },
+      { value: '28', label: 'Pending invoices' },
+      { value: '3.2d', label: 'Avg payment time' },
     ],
+    detail: 'Your average payment time is down 1.1 days this month.',
   },
-];
+]
 
 export function LandingHero() {
-  const [currentView, setCurrentView] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-  const [fadeIn, setFadeIn] = useState(false);
+  const [currentView, setCurrentView] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
-    setFadeIn(true);
-  }, []);
+    if (isPaused) return
 
-  useEffect(() => {
-    if (!isAutoPlay) return;
+    const interval = window.setInterval(() => {
+      setCurrentView((current) => (current + 1) % dashboardViews.length)
+    }, 4500)
 
-    const interval = setInterval(() => {
-      setCurrentView((prev) => (prev + 1) % dashboardViews.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [isAutoPlay]);
-
-  const view = dashboardViews[currentView];
+    return () => window.clearInterval(interval)
+  }, [isPaused])
 
   return (
-    <section className="relative min-h-screen overflow-hidden pt-32 pb-16 md:py-32 lg:py-40">
-      {/* Animated background blobs */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute top-32 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <section className="relative isolate overflow-hidden px-4 pb-16 pt-32 md:pb-24 md:pt-40">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div className="hero-blob hero-blob-one absolute left-[8%] top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
+        <div className="hero-blob hero-blob-two absolute right-[8%] top-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="hero-blob hero-blob-three absolute bottom-10 left-1/2 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4 relative z-10">
-        <div className={`space-y-8 text-center transition-all duration-700 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className={`inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 transition-all duration-700 delay-100 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm text-primary font-medium">New: AI-assisted diagnostics</span>
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="hero-enter hero-enter-1 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            <span>New: AI-assisted diagnostics</span>
           </div>
 
-          <div className={`space-y-4 transition-all duration-700 delay-200 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance">
+          <div className="hero-enter hero-enter-2 mt-8 space-y-5">
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
               The operating system for modern auto garages.
             </h1>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground text-balance">
+            <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
               Manage job cards, inventory, appointments, and invoicing across every branch
               — with the polish your customers expect.
             </p>
           </div>
 
-          <div className={`flex flex-col gap-3 sm:flex-row sm:justify-center transition-all duration-700 delay-300 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="hero-enter hero-enter-3 mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-center">
             <Link href="/register">
-              <Button size="lg" className="gap-2">
+              <Button size="lg" className="w-full gap-2 sm:w-auto">
                 Start 14-day free trial
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto">
               See how it works
             </Button>
           </div>
 
-          {/* Trusted by section */}
-          <div className={`pt-8 transition-all duration-700 delay-400 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="hero-enter hero-enter-4 mt-12 w-full max-w-3xl">
+            <p className="mb-4 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
               Trusted by growing garages
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-              <div className="text-sm font-medium text-muted-foreground opacity-60">AutoCare Pro</div>
-              <div className="text-sm font-medium text-muted-foreground opacity-60">FastFix Garage</div>
-              <div className="text-sm font-medium text-muted-foreground opacity-60">TurboService</div>
-              <div className="text-sm font-medium text-muted-foreground opacity-60">Elite Motors</div>
-              <div className="text-sm font-medium text-muted-foreground opacity-60">QuickRepair Hub</div>
+            <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm font-semibold tracking-tight text-muted-foreground/65 sm:justify-between">
+              <span>AutoCare Pro</span>
+              <span>FastFix</span>
+              <span>TurboService</span>
+              <span>Elite Motors</span>
+              <span>QuickRepair</span>
             </div>
           </div>
         </div>
 
-        {/* Dashboard Preview with Carousel */}
-        <div className={`mt-16 transition-all duration-700 delay-500 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`} onMouseEnter={() => setIsAutoPlay(false)} onMouseLeave={() => setIsAutoPlay(true)}>
-          <div className="rounded-2xl border border-border bg-card p-2 shadow-xl md:p-4">
-            <div className="space-y-4 rounded-lg border border-border bg-background p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-red-400" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                  <div className="h-3 w-3 rounded-full bg-green-400" />
+        <div
+          className="hero-enter hero-enter-5 mx-auto mt-16 max-w-6xl"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocus={() => setIsPaused(true)}
+          onBlur={() => setIsPaused(false)}
+        >
+          <div className="rounded-2xl border border-border/80 bg-card/80 p-2 shadow-2xl shadow-primary/10 backdrop-blur-sm md:p-3">
+            <div className="overflow-hidden rounded-xl border border-border bg-background">
+              <div className="flex items-center gap-2 border-b border-border px-4 py-3 md:px-5">
+                <span className="h-2.5 w-2.5 rounded-full bg-destructive" />
+                <span className="h-2.5 w-2.5 rounded-full bg-landing-amber" />
+                <span className="h-2.5 w-2.5 rounded-full bg-landing-green" />
+                <div className="ml-3 min-w-0 flex-1 rounded-md border border-border bg-muted/50 px-3 py-1 text-left text-[10px] text-muted-foreground md:text-xs">
+                  garageos.com/<span aria-live="polite">{dashboardViews[currentView].path}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">app.garageos.com/{view.name.toLowerCase().replace(/\s+/g, '-')}</span>
               </div>
 
-              {/* Carousel content with fade transition */}
-              <div className="relative h-48 md:h-56">
-                <div className="absolute inset-0 transition-opacity duration-500">
-                  <div className="grid gap-4 grid-cols-2 md:grid-cols-4 h-full">
-                    {view.stats.map((stat, idx) => (
-                      <div key={idx} className="rounded-lg border border-border bg-card p-4 flex flex-col justify-center">
-                        <div className="text-xl md:text-2xl font-bold">{stat.value}</div>
-                        <div className="text-xs text-muted-foreground">{stat.label}</div>
+              <div className="relative h-[19rem] overflow-hidden p-4 md:h-[23rem] md:p-7">
+                {dashboardViews.map((dashboard, index) => {
+                  const Icon = dashboard.icon
+                  const isActive = index === currentView
+                  return (
+                    <div
+                      key={dashboard.id}
+                      className={`absolute inset-0 flex flex-col gap-5 p-4 transition-all duration-500 md:p-7 ${
+                        isActive ? 'translate-x-0 opacity-100' : index < currentView ? '-translate-x-5 opacity-0' : 'translate-x-5 opacity-0'
+                      }`}
+                      aria-hidden={!isActive}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                            <Icon className="h-4 w-4" aria-hidden="true" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground md:text-base">{dashboard.name}</p>
+                            <p className="text-xs text-muted-foreground">Monday, October 14</p>
+                          </div>
+                        </div>
+                        <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:inline-flex">Live data</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              {/* Carousel indicators */}
-              <div className="flex items-center justify-center gap-2 mt-4">
-                {dashboardViews.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setCurrentView(idx);
-                      setIsAutoPlay(false);
-                    }}
-                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                      idx === currentView ? 'w-8 bg-primary' : 'w-2 bg-muted'
-                    }`}
-                    aria-label={`View ${idx + 1}`}
-                  />
-                ))}
+                      <div className="grid flex-1 grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+                        {dashboard.stats.map((stat) => (
+                          <div key={stat.label} className="flex flex-col justify-center rounded-xl border border-border bg-card p-3 md:p-5">
+                            <span className="text-xl font-bold tracking-tight text-foreground md:text-3xl">{stat.value}</span>
+                            <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-xs">{stat.label}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="rounded-lg border border-primary/10 bg-primary/5 px-4 py-3 text-xs text-muted-foreground md:text-sm">
+                        {dashboard.detail}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
+
+          <div className="mt-5 flex items-center justify-center gap-2" role="tablist" aria-label="Product preview views">
+            {dashboardViews.map((dashboard, index) => (
+              <button
+                key={dashboard.id}
+                type="button"
+                role="tab"
+                aria-selected={index === currentView}
+                aria-label={`Show ${dashboard.name}`}
+                onClick={() => setCurrentView(index)}
+                className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${index === currentView ? 'w-8 bg-primary' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60'}`}
+              />
+            ))}
+          </div>
+          <p className="sr-only" aria-live="polite">
+            Showing {dashboardViews[currentView].name}
+          </p>
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes blob {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
+        @keyframes hero-enter {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        .animate-blob {
-          animation: blob 7s infinite;
+        @keyframes hero-blob-drift {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(28px, -18px, 0) scale(1.08); }
         }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
+        .hero-enter { opacity: 0; animation: hero-enter 450ms ease-out forwards; }
+        .hero-enter-1 { animation-delay: 50ms; }
+        .hero-enter-2 { animation-delay: 120ms; }
+        .hero-enter-3 { animation-delay: 190ms; }
+        .hero-enter-4 { animation-delay: 260ms; }
+        .hero-enter-5 { animation-delay: 330ms; }
+        .hero-blob { animation: hero-blob-drift 9s ease-in-out infinite; }
+        .hero-blob-two { animation-delay: -3s; }
+        .hero-blob-three { animation-delay: -6s; }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-enter, .hero-blob { animation: none; opacity: 1; }
+          .transition-all, .transition-opacity { transition: none; }
         }
       `}</style>
     </section>
-  );
+  )
 }
