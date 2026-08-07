@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { LucideIcon } from 'lucide-react'
+import { LandingHero } from './hero'
 
 const features = [
   [Wrench, 'Digital Job Cards', 'From complaint to completion — track every step, part, and photo.'],
@@ -95,7 +96,7 @@ function DashboardPreview() {
 }
 
 export function Hero() {
-  return <section className="bg-landing-background px-5 pb-24 pt-24 lg:px-8 lg:pt-32"><div className="mx-auto max-w-5xl text-center"><div className="mx-auto inline-flex items-center gap-2 rounded-full bg-landing-blue-soft px-4 py-2 text-sm font-semibold text-landing-blue"><Sparkles className="size-4" />New: AI-assisted diagnostics</div><h1 className="mx-auto mt-8 max-w-4xl text-balance text-5xl font-bold leading-[1.03] tracking-[-0.055em] text-landing-foreground sm:text-6xl lg:text-7xl">The operating system for modern auto garages.</h1><p className="mx-auto mt-7 max-w-2xl text-pretty text-lg leading-8 text-landing-muted">Manage job cards, inventory, appointments, and invoicing across every branch — with the polish your customers expect.</p><div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/register" className="inline-flex items-center justify-center gap-2 rounded-full bg-landing-blue px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90">Start 14-day free trial <ArrowRight className="size-4" /></Link><a href="#features" className="inline-flex items-center justify-center rounded-full border border-landing-line bg-white px-6 py-3.5 text-sm font-semibold text-landing-foreground transition hover:border-landing-blue hover:text-landing-blue">See how it works</a></div></div><DashboardPreview /></section>
+  return <LandingHero />
 }
 
 function SectionIntro({ label, title, body, center = false }: { label: string; title: string; body: string; center?: boolean }) { return <div className={center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}><p className="text-sm font-bold uppercase tracking-[0.18em] text-landing-blue">{label}</p><h2 className="mt-4 text-balance text-4xl font-bold tracking-[-0.04em] text-landing-foreground sm:text-5xl">{title}</h2><p className="mt-5 text-pretty text-lg leading-8 text-landing-muted">{body}</p></div> }

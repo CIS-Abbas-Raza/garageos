@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Bell, Plus, Search } from "lucide-react";
+import { Bell, Plus, Search, Building2, MapPin } from "lucide-react";
+import { useGarageStore } from "@/lib/store/garage-store";
 
 interface DashboardHeaderProps {
   title: string;
@@ -10,11 +11,25 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ title, onNewClick }: DashboardHeaderProps) {
+  const { companies } = useGarageStore();
+  const selectedCompany = companies[0]?.name || "Select Company";
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-6 gap-4">
         <div className="flex items-center gap-4 flex-1">
           <h1 className="text-xl font-semibold">{title}</h1>
+          <div className="hidden lg:flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="max-w-xs truncate">{selectedCompany}</span>
+            </Button>
+
+            <Button variant="outline" size="sm" className="gap-2">
+              <MapPin className="h-4 w-4" />
+              <span>Main Branch</span>
+            </Button>
+          </div>
           <div className="hidden md:block flex-1 max-w-xs">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
