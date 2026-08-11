@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -583,8 +583,13 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const rows = ((store as any)[config.resource] ??
     (store as any).crudRecords?.[config.resource] ??
     []) as Record<string, any>[];
+  const typedAdd = (store as any)[
+    `add${singular.charAt(0).toUpperCase()}${singular.slice(1)}`
+  ];
   const add = (record: Record<string, any>) =>
-    (store as any).addCrudRecord(config.resource, record);
+    (typedAdd ?? ((store as any).addCrudRecord.bind(store, config.resource)))(
+      record,
+    );
   const update = (id: string, record: Record<string, any>) =>
     (store as any).updateCrudRecord(config.resource, id, record);
   const remove = (id: string) =>
@@ -610,6 +615,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
+  const seededResources = useRef(new Set<string>());
   const isLineItemModule =
     ["estimations", "jobCards", "taskCards", "invoices"].includes(
       config.resource,
@@ -635,7 +641,8 @@ export function EntityCrudPage({ config }: { config: Config }) {
     defaultValues: {},
   });
   useEffect(() => {
-    if (!rows.length) {
+    if (!rows.length && !seededResources.current.has(config.resource)) {
+      seededResources.current.add(config.resource);
       for (let index = 1; index <= 2; index += 1)
         add(
           Object.fromEntries(
