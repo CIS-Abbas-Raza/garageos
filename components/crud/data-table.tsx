@@ -56,8 +56,8 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -68,7 +68,7 @@ export function DataTable<T extends { id: string }>({
             />
           </div>
         </div>
-        <Button onClick={onAdd} className="gap-2">
+        <Button onClick={onAdd} className="w-full gap-2 sm:w-auto">
           <Plus className="h-4 w-4" />
           Add {title}
         </Button>
@@ -79,8 +79,8 @@ export function DataTable<T extends { id: string }>({
           <p className="text-muted-foreground">No {title.toLowerCase()} found</p>
         </div>
       ) : (
-        <div className="rounded-lg border border-border overflow-hidden">
-          <Table>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <Table className="min-w-[42rem]">
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (

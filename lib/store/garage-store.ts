@@ -136,6 +136,12 @@ interface GarageStore {
   updateExpense: (id: string, data: Partial<Types.Expense>) => void
   deleteExpense: (id: string) => void
 
+  // Generic module records for configuration-driven CRUD modules
+  crudRecords: Record<string, Record<string, any>[]>
+  addCrudRecord: (resource: string, record: Record<string, any>) => string
+  updateCrudRecord: (resource: string, id: string, data: Record<string, any>) => void
+  deleteCrudRecord: (resource: string, id: string) => void
+
   // Settings
   settings: Record<string, Types.GarageSettings>
   updateSettings: (companyId: string, settings: Partial<Types.GarageSettings>) => void
@@ -500,6 +506,16 @@ export const useGarageStore = create<GarageStore>()(
       },
       updateExpense: (id, data) => set((state) => ({ expenses: state.expenses.map((expense) => expense.id === id ? { ...expense, ...data } : expense) })),
       deleteExpense: (id) => set((state) => ({ expenses: state.expenses.filter((expense) => expense.id !== id) })),
+
+      // Generic module records
+      crudRecords: {},
+      addCrudRecord: (resource, record) => {
+        const id = generateId()
+        set((state) => ({ crudRecords: { ...state.crudRecords, [resource]: [...(state.crudRecords[resource] ?? []), { ...record, id, createdAt: new Date() }] } }))
+        return id
+      },
+      updateCrudRecord: (resource, id, data) => set((state) => ({ crudRecords: { ...state.crudRecords, [resource]: (state.crudRecords[resource] ?? []).map((record) => record.id === id ? { ...record, ...data, updatedAt: new Date() } : record) } })),
+      deleteCrudRecord: (resource, id) => set((state) => ({ crudRecords: { ...state.crudRecords, [resource]: (state.crudRecords[resource] ?? []).filter((record) => record.id !== id) } })),
 
       // Settings
       settings: {},

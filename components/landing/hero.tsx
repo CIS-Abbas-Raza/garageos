@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ArrowRight, BarChart3, ClipboardList, FileText, Sparkles } from 'lucide-react'
+import { ArrowRight, BarChart3, Check, ClipboardList, FileText, Sparkles, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 type DashboardView = {
@@ -59,6 +59,11 @@ const dashboardViews: DashboardView[] = [
 export function LandingHero() {
   const [currentView, setCurrentView] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [currentTime, setCurrentTime] = useState('—')
+
+  useEffect(() => {
+    setCurrentTime(new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(new Date()))
+  }, [])
 
   useEffect(() => {
     if (isPaused) return
@@ -85,7 +90,16 @@ export function LandingHero() {
             <span>New: AI-assisted diagnostics</span>
           </div>
 
-          <div className="hero-enter hero-enter-2 mt-8 space-y-5">
+          <div className="hero-enter hero-enter-2 mt-7 flex flex-wrap items-center justify-center gap-2.5 text-xs font-medium text-muted-foreground sm:gap-3">
+            {['No card required', '5-minute setup', '14-day free trial'].map((item) => (
+              <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/70 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+                <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <div className="hero-enter hero-enter-2 mt-7 space-y-5">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
               The operating system for modern auto garages.
             </h1>
@@ -107,7 +121,24 @@ export function LandingHero() {
             </Button>
           </div>
 
-          <div className="hero-enter hero-enter-4 mt-12 w-full max-w-3xl">
+          <div className="hero-enter hero-enter-4 mt-10 grid w-full max-w-3xl grid-cols-1 divide-y divide-border/70 rounded-2xl border border-border/70 bg-card/50 px-4 py-3 backdrop-blur-sm sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-2">
+            <div className="flex flex-col items-center gap-0.5 px-3 py-2 sm:py-1">
+              <span className="text-xl font-bold tracking-tight text-foreground">1,200+</span>
+              <span className="text-[11px] text-muted-foreground">job cards managed</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 px-3 py-2 sm:py-1">
+              <span className="text-xl font-bold tracking-tight text-foreground">500+</span>
+              <span className="text-[11px] text-muted-foreground">garages onboarded</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 px-3 py-2 sm:py-1">
+              <span className="inline-flex items-center gap-1 text-xl font-bold tracking-tight text-foreground">
+                4.9/5 <Star className="h-4 w-4 fill-landing-amber text-landing-amber" aria-hidden="true" />
+              </span>
+              <span className="text-[11px] text-muted-foreground">from 200+ reviews</span>
+            </div>
+          </div>
+
+          <div className="hero-enter hero-enter-5 mt-12 w-full max-w-3xl">
             <p className="mb-4 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
               Trusted by growing garages
             </p>
@@ -136,6 +167,13 @@ export function LandingHero() {
                 <span className="h-2.5 w-2.5 rounded-full bg-landing-green" />
                 <div className="ml-3 min-w-0 flex-1 rounded-md border border-border bg-muted/50 px-3 py-1 text-left text-[10px] text-muted-foreground md:text-xs">
                   garageos.com/<span aria-live="polite">{dashboardViews[currentView].path}</span>
+                </div>
+                <div className="hidden items-center gap-2 text-[10px] font-medium text-muted-foreground sm:flex md:text-xs">
+                  <span aria-live="polite">{currentTime}</span>
+                  <span className="inline-flex items-center gap-1.5 text-landing-green">
+                    <span className="h-1.5 w-1.5 rounded-full bg-landing-green" aria-hidden="true" />
+                    Live / Synced
+                  </span>
                 </div>
               </div>
 
