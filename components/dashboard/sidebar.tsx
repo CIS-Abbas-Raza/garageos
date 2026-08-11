@@ -109,10 +109,14 @@ export function DashboardSidebar() {
   const router = useRouter()
   const { email, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ Main: true })
 
   useEffect(() => {
-    const toggleSidebar = () => setCollapsed((current) => !current)
+    const toggleSidebar = () => {
+      if (window.matchMedia('(max-width: 767px)').matches) setMobileOpen((current) => !current)
+      else setCollapsed((current) => !current)
+    }
     window.addEventListener('garageos:toggle-sidebar', toggleSidebar)
     return () => window.removeEventListener('garageos:toggle-sidebar', toggleSidebar)
   }, [])
@@ -124,7 +128,9 @@ export function DashboardSidebar() {
   }
 
   return (
-    <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-300 ${collapsed ? 'w-20' : 'w-72 max-md:w-20'}`}>
+    <>
+      {mobileOpen && <button type="button" aria-label="Close navigation" className="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)} />}
+      <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-300 max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${collapsed ? 'w-20' : 'w-72'} ${mobileOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'}`}>
       <div className="flex items-start justify-between border-b border-sidebar-border px-5 py-5 max-md:px-3">
         <Link href="/dashboard" className="flex min-w-0 items-start gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/10 text-sidebar-primary">
@@ -165,7 +171,7 @@ export function DashboardSidebar() {
                     {section.items.map((item) => {
                       const Icon = item.icon
                       return (
-                        <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${collapsed ? 'justify-center px-2' : 'max-md:justify-center max-md:px-2'} ${item.href === '/dashboard' ? 'bg-sidebar-accent font-medium' : ''}`}>
+                        <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} title={collapsed ? item.label : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${collapsed ? 'justify-center px-2' : 'max-md:justify-center max-md:px-2'} ${item.href === '/dashboard' ? 'bg-sidebar-accent font-medium' : ''}`}>
                           <Icon className="size-[18px] shrink-0" />
                           <span className={`${collapsed ? 'hidden' : 'inline'} max-md:hidden`}>{item.label}</span>
                         </Link>
@@ -194,5 +200,6 @@ export function DashboardSidebar() {
         </div>
       </div>
     </aside>
+    </>
   )
 }
