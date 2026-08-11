@@ -42,6 +42,7 @@ const menuSections = [
       { href: '/users', label: 'Users', icon: Users },
       { href: '/company-users', label: 'Company Users', icon: UserCog },
       { href: '/roles', label: 'Roles', icon: ShieldCheck },
+      { href: '/role-assignments', label: 'Role Assignments', icon: UserCog },
       { href: '/settings', label: 'Settings', icon: Settings },
     ],
   },
@@ -60,6 +61,7 @@ const menuSections = [
     icon: Wrench,
     items: [
       { href: '/vehicles', label: 'Vehicles', icon: Truck },
+      { href: '/vehicle-inspections', label: 'Vehicle Inspections', icon: ClipboardList },
       { href: '/job-cards', label: 'Job Cards', icon: FileText },
       { href: '/quotations', label: 'Quotations', icon: ClipboardList },
       { href: '/inventory', label: 'Inventory', icon: Package },
@@ -81,6 +83,7 @@ const menuSections = [
     items: [
       { href: '/parts', label: 'Parts', icon: Boxes },
       { href: '/suppliers', label: 'Suppliers', icon: Truck },
+      { href: '/purchase-orders', label: 'Purchase Orders', icon: ClipboardList },
     ],
   },
   {
@@ -90,6 +93,9 @@ const menuSections = [
       { href: '/reports', label: 'Reports', icon: BarChart3 },
       { href: '/reviews', label: 'Reviews', icon: FileText },
       { href: '/communication-settings', label: 'Communications', icon: Bell },
+      { href: '/sms-settings', label: 'SMS Settings', icon: Bell },
+      { href: '/whatsapp-settings', label: 'WhatsApp Settings', icon: Bell },
+      { href: '/email-settings', label: 'Email Settings', icon: Bell },
       { href: '/profile', label: 'Profile', icon: UserRoundCog },
     ],
   },
