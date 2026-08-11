@@ -652,7 +652,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
           ),
         );
     }
-  }, [rows.length, config.resource]);
+  }, [add, config.resource, fields, rows.length]);
   const filtered = useMemo(
     () =>
       rows

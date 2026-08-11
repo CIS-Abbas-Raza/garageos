@@ -59,6 +59,11 @@ const dashboardViews: DashboardView[] = [
 export function LandingHero() {
   const [currentView, setCurrentView] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [currentTime, setCurrentTime] = useState('—')
+
+  useEffect(() => {
+    setCurrentTime(new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(new Date()))
+  }, [])
 
   useEffect(() => {
     if (isPaused) return
@@ -164,7 +169,7 @@ export function LandingHero() {
                   garageos.com/<span aria-live="polite">{dashboardViews[currentView].path}</span>
                 </div>
                 <div className="hidden items-center gap-2 text-[10px] font-medium text-muted-foreground sm:flex md:text-xs">
-                  <span>{new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(new Date())}</span>
+                  <span aria-live="polite">{currentTime}</span>
                   <span className="inline-flex items-center gap-1.5 text-landing-green">
                     <span className="h-1.5 w-1.5 rounded-full bg-landing-green" aria-hidden="true" />
                     Live / Synced
