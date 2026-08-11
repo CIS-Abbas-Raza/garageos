@@ -29,6 +29,8 @@ import {
   UserRoundCog,
   Users,
   Wrench,
+  Image,
+  CalendarCheck,
 } from 'lucide-react'
 
 const menuSections = [
@@ -62,6 +64,8 @@ const menuSections = [
     items: [
       { href: '/vehicles', label: 'Vehicles', icon: Truck },
       { href: '/vehicle-inspections', label: 'Vehicle Inspections', icon: ClipboardList },
+      { href: '/vehicle-maintenance-pictures', label: 'Maintenance Pictures', icon: Image },
+      { href: '/demo-bookings', label: 'Demo Bookings', icon: CalendarCheck },
       { href: '/job-cards', label: 'Job Cards', icon: FileText },
       { href: '/quotations', label: 'Quotations', icon: ClipboardList },
       { href: '/inventory', label: 'Inventory', icon: Package },

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/auth-store'
 
@@ -11,14 +11,19 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter()
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/login')
-    }
-  }, [isLoggedIn, router])
+    setHydrated(true)
+  }, [])
 
-  if (!isLoggedIn) {
+  useEffect(() => {
+    if (hydrated && !isLoggedIn) {
+      router.replace('/login')
+    }
+  }, [hydrated, isLoggedIn, router])
+
+  if (!hydrated || !isLoggedIn) {
     return null
   }
 
