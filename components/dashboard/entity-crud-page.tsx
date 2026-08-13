@@ -1,24 +1,43 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowUpDown,
+  ChevronDown,
+  CircleX,
   Eye,
+  EyeOff,
   FileImage,
+  LayoutGrid,
+  List,
+  Columns3,
   MoreHorizontal,
   Pencil,
   Plus,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
+  ShieldCheck,
+  ClipboardList,
+  Building2,
+  Users,
+  UserCog,
+  Truck,
+  FileText,
+  Calendar,
+  UserRoundCog,
+  CreditCard,
+  Package,
+  Boxes,
+  Bell,
+  CalendarCheck,
+  Image as ImageIcon,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -39,8 +58,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useGarageStore } from "@/lib/store/garage-store";
 
+/* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
   | "text"
   | "email"
@@ -51,11 +77,18 @@ type FieldType =
   | "select"
   | "textarea"
   | "checkbox"
-  | "file";
+  | "toggle"
+  | "star"
+  | "file"
+  | "dynamic-list";
 type Field = {
   key: string;
   label: string;
   type?: FieldType;
+  /** On update modals, field becomes optional (e.g. password) */
+  optionalOnUpdate?: boolean;
+  /** Override input type when editing (e.g. registration_no is number on Create, text on Update) */
+  updateType?: FieldType;
   options?: { label: string; value: string }[];
   required?: boolean;
   readOnly?: boolean;
@@ -65,6 +98,7 @@ type Config = {
   resource: string;
   title: string;
   description: string;
+  icon?: React.ComponentType<{ className?: string }>;
   fields: Field[];
   columns: string[];
   empty: string;
@@ -80,6 +114,43 @@ type LineItem = {
   amount?: number;
 };
 
+/* ──────────────────────── Icon Map ────────────────────── */
+const iconMap: Record<string, any> = {
+  "Admin": ShieldCheck,
+  "Packages": ClipboardList,
+  "Roles": ShieldCheck,
+  "Companies": Building2,
+  "Company Users": Users,
+  "User Role Assignments": UserCog,
+  "Customers": Users,
+  "Vehicles": Truck,
+  "Vehicle Inspections": ClipboardList,
+  "Quotations": ClipboardList,
+  "Task Cards": FileText,
+  "Appointments": Calendar,
+  "Mechanics": UserRoundCog,
+  "Customer Review": FileText,
+  "Invoices": FileText,
+  "Invoice Payments": CreditCard,
+  "Daily Expenses": CreditCard,
+  "Inventory": Package,
+  "Suppliers": Truck,
+  "Purchase Orders": ClipboardList,
+  "SMS Settings": Bell,
+  "WhatsApp Settings": Bell,
+  "Email Settings": Bell,
+  "Users": Users,
+  "Role Assignments": UserCog,
+  "Reviews": FileText,
+  "Demo Bookings": CalendarCheck,
+  "Vehicle Maintenance Pictures": ImageIcon,
+  "SMS Setting": Bell,
+  "WhatsApp Setting": Bell,
+  "Email Setting (SendGrid)": Bell,
+  "Reviews": Star,
+  "Customer Reviews": Star,
+};
+
 const options = (values: string[]) =>
   values.map((value) => ({ label: value.replaceAll("_", " "), value }));
 const statusField: Field = {
@@ -89,35 +160,39 @@ const statusField: Field = {
   required: true,
   options: options(["1", "0"]),
 };
+
 const exactFields: Record<string, Field[]> = {
   packages: [
     { key: "name", label: "Name", required: true },
-    { key: "monthly", label: "Monthly", type: "number", required: true },
-    { key: "yearly", label: "Yearly", type: "number", required: true },
+    { key: "monthly", label: "Monthly Price", type: "number", required: true },
+    { key: "yearly", label: "Yearly Price", type: "number", required: true },
     {
       key: "information",
       label: "Information",
-      type: "textarea",
+      type: "dynamic-list",
       required: true,
     },
   ],
   admin: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
-    { key: "password", label: "Password", type: "number", required: true },
+    { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
     { key: "phone", label: "Phone", type: "number", required: true },
   ],
   roles: [{ key: "name", label: "Name", required: true }],
   customers: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
-    { key: "password", label: "Password", type: "password", required: true },
+    // ⚠️ SPEC FLAG: Customers have a password field — this implies a customer-facing portal login.
+    // Confirm with team whether this is intentional for a garage internal admin tool.
+    { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
   ],
+  // Users module — global system users (no role field; role is Company User specific)
   employees: [
-    { key: "profile_photo", label: "Profile photo", type: "file" },
-    { key: "name", label: "Name", required: true },
+    { key: "profile_photo", label: "Profile Photo", type: "file" },
+    { key: "name", label: "Full Name", required: true },
     {
       key: "country",
       label: "Country",
@@ -131,7 +206,40 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
     { key: "email", label: "Email", type: "email", required: true },
-    { key: "password", label: "Password", type: "password", required: true },
+    {
+      key: "password",
+      label: "Password",
+      type: "password",
+      required: true,
+      optionalOnUpdate: true,
+    },
+    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "address", label: "Address", required: true },
+  ],
+  // Company Users module — users scoped to a specific company (includes role)
+  companyUsers: [
+    { key: "profile_photo", label: "Profile Photo", type: "file" },
+    { key: "name", label: "Full Name", required: true },
+    {
+      key: "country",
+      label: "Country",
+      type: "select",
+      required: true,
+      options: options([
+        "Pakistan",
+        "United Arab Emirates",
+        "Saudi Arabia",
+        "United Kingdom",
+      ]),
+    },
+    { key: "email", label: "Email", type: "email", required: true },
+    {
+      key: "password",
+      label: "Password",
+      type: "password",
+      required: true,
+      optionalOnUpdate: true,
+    },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
     {
@@ -139,16 +247,22 @@ const exactFields: Record<string, Field[]> = {
       label: "Role",
       type: "select",
       required: true,
+      // Spec: fixed list (Mechanic / Finance). Flag if dynamic Role module is needed.
       options: options(["Mechanic", "Finance"]),
     },
   ],
+  // ⚠️ SPEC FLAG: Company spec has no 'name' field — only 'user' (owner dropdown).
+  // A 'name' field has been added here for listing display. Confirm with team.
+  // ⚠️ SPEC FLAG: registration_no is 'number' on Create but 'text' on Update per spec.
+  // This is implemented as specified via updateType — flag as unusual inconsistency.
   companies: [
+    { key: "name", label: "Company Name", required: true },
     {
       key: "user",
-      label: "User",
+      label: "Owner / User",
       type: "select",
       required: true,
-      options: options(["Garage Admin"]),
+      options: options(["Garage Admin", "Manager User", "Branch Owner"]),
     },
     { key: "logo", label: "Logo", type: "file" },
     { key: "email", label: "Email", type: "email", required: true },
@@ -168,11 +282,14 @@ const exactFields: Record<string, Field[]> = {
     { key: "address", label: "Address", required: true },
     {
       key: "registration_no",
-      label: "Registration no.",
-      type: "number",
+      label: "Registration No.",
+      type: "number",      // number on Create
+      updateType: "text",  // text on Update (spec requirement)
       required: true,
     },
   ],
+  // ⚠️ SPEC FLAG: Vehicles has no customer/owner link field — a vehicle with no customer
+  // relationship is unusual for a garage system. Confirm with team if this is intentional.
   vehicles: [
     { key: "name", label: "Name", required: true },
     { key: "make", label: "Make", required: true },
@@ -181,7 +298,8 @@ const exactFields: Record<string, Field[]> = {
     { key: "year", label: "Year", type: "number", required: true },
     { key: "VIN", label: "VIN", type: "number", required: true },
     { key: "license_plate", label: "License plate", required: true },
-    { key: "insured", label: "Insured", type: "checkbox", required: true },
+    // Toggle (pill switch) — Yes = 1, No = 0
+    { key: "insured", label: "Insured", type: "toggle", required: true },
     { key: "insurance_number", label: "Insurance number", required: true },
     { key: "policy_number", label: "Policy number", required: true },
     { key: "expiry_date", label: "Expiry date", type: "date", required: true },
@@ -194,6 +312,8 @@ const exactFields: Record<string, Field[]> = {
       required: true,
     },
   ],
+  // ⚠️ SPEC FLAG: Appointments customer/vehicle fields are free-text rather than linked dropdowns.
+  // This prevents duplicate/mismatched data. Confirm with team if relational pickers are needed.
   appointments: [
     { key: "customer_name", label: "Customer name", required: true },
     {
@@ -225,13 +345,32 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
   ],
+  // Package Subscriptions: links Company + Package with date range
+  packageSubscriptions: [
+    {
+      key: "company",
+      label: "Company",
+      type: "select",
+      required: true,
+      options: options(["GarageOS Demo", "AutoFix Co", "FastLane Motors", "ProGarage Ltd"]),
+    },
+    {
+      key: "package",
+      label: "Package",
+      type: "select",
+      required: true,
+      options: options(["Basic", "Pro", "Enterprise"]),
+    },
+    { key: "start_date", label: "Start Date", type: "datetime-local", required: true },
+    { key: "end_date", label: "End Date", type: "datetime-local", required: true },
+  ],
   estimations: [
-    { key: "quotation_number", label: "Quotation number", required: true },
+    { key: "quotation_number", label: "Quotation Number", required: true },
     { key: "mileage", label: "Mileage", type: "number", required: true },
     { key: "note", label: "Note", type: "textarea" },
     {
       key: "quotation_status",
-      label: "Quotation status",
+      label: "Quotation Status",
       type: "select",
       required: true,
       options: options([
@@ -244,21 +383,22 @@ const exactFields: Record<string, Field[]> = {
     },
     { key: "subtotal", label: "Subtotal", type: "number", required: true },
     { key: "discount", label: "Discount", type: "number", required: true },
-    { key: "tax_amount", label: "Tax amount", type: "number", required: true },
+    { key: "tax_amount", label: "Tax Amount", type: "number", required: true },
     {
       key: "tax_percentage",
-      label: "Tax percentage",
+      label: "Tax Percentage",
       type: "number",
       required: true,
     },
     { key: "total", label: "Total", type: "number", required: true },
     {
       key: "creation_date",
-      label: "Creation date",
+      label: "Creation Date",
       type: "date",
       required: true,
     },
     { key: "document", label: "Document", type: "file" },
+    statusField, // present on Create here, unlike every other module
   ],
   taskCards: [
     {
@@ -343,7 +483,7 @@ const exactFields: Record<string, Field[]> = {
     },
   ],
   reviews: [
-    { key: "rating", label: "Rating (1-5)", type: "number", required: true },
+    { key: "rating", label: "Rating", type: "star", required: true },
     { key: "review", label: "Review", type: "textarea", required: true },
   ],
   demoBookings: [
@@ -356,45 +496,45 @@ const exactFields: Record<string, Field[]> = {
   vehicleMaintenancePictures: [
     {
       key: "before_pictures",
-      label: "Before pictures",
+      label: "Before Pictures",
       type: "file",
       required: true,
       multiple: true,
     },
     {
       key: "after_pictures",
-      label: "After pictures",
+      label: "After Pictures",
       type: "file",
       required: true,
       multiple: true,
     },
   ],
   smsSettings: [
-    { key: "sms_account_sid", label: "SMS account SID", required: true },
+    { key: "sms_account_sid", label: "SMS Account SID", required: true },
     {
       key: "sms_auth_token",
-      label: "SMS auth token",
-      type: "textarea",
+      label: "SMS Auth Token",
+      type: "password",
       required: true,
     },
-    { key: "sms_from_number", label: "SMS from number", required: true },
+    { key: "sms_from_number", label: "SMS From Number", required: true },
     statusField,
   ],
   whatsappSettings: [
     {
       key: "whatsapp_account_sid",
-      label: "WhatsApp account SID",
+      label: "WhatsApp Account SID",
       required: true,
     },
     {
       key: "whatsapp_auth_token",
-      label: "WhatsApp auth token",
-      type: "textarea",
+      label: "WhatsApp Auth Token",
+      type: "password",
       required: true,
     },
     {
       key: "whatsapp_from_number",
-      label: "WhatsApp from number",
+      label: "WhatsApp From Number",
       required: true,
     },
     statusField,
@@ -402,34 +542,36 @@ const exactFields: Record<string, Field[]> = {
   emailSettings: [
     {
       key: "sendgrid_api_key",
-      label: "SendGrid API key",
-      type: "textarea",
+      label: "SendGrid API Key",
+      type: "password",
       required: true,
     },
     statusField,
   ],
 };
 
+/* ──────────────────────── Utilities ────────────────────── */
 const singularize = (value: string) =>
   value.endsWith("ies")
     ? value.replace(/ies$/, "y")
     : value.endsWith("s")
       ? value.slice(0, -1)
       : value;
+
 const labelize = (value: string) =>
   value
     .replace(/([A-Z])/g, " $1")
     .replaceAll("_", " ")
     .replace(/^./, (v) => v.toUpperCase());
-const formatValue = (value: unknown) =>
-  value === null || value === undefined || value === ""
-    ? "—"
-    : typeof value === "boolean"
-      ? value
-        ? "Yes"
-        : "No"
-      : String(value);
 
+const formatValue = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return "—";
+  if (Array.isArray(value)) return `${value.length} items`;
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return String(value);
+};
+
+/* ──────────────────────── Line Items Sub-component ────────────────────── */
 function LineItems({
   resource,
   value,
@@ -568,21 +710,241 @@ function LineItems({
   );
 }
 
+/* ────────────────────── Dynamic Repeatable List Sub-component ────────────────────── */
+function DynamicListField({
+  field,
+  form,
+}: {
+  field: Field;
+  form: any;
+}) {
+  const { control, register } = form;
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: field.key,
+  });
+
+  const handleAdd = () => {
+    append({ value: "" });
+  };
+
+  return (
+    <div className="flex flex-col gap-2 md:col-span-2">
+      <Label className="text-sm font-semibold text-foreground">
+        {field.label}
+        {field.required && <span className="text-destructive ml-0.5"> *</span>}
+      </Label>
+      <div className="flex flex-col gap-2">
+        {fields.map((item, index) => (
+          <div key={item.id} className="flex items-center gap-2">
+            <Input
+              {...register(`${field.key}.${index}.value` as const, { required: "This field is required" })}
+              placeholder={`Enter ${field.label.toLowerCase()} line`}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive size-9 shrink-0"
+              onClick={() => remove(index)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleAdd}
+        className="w-fit gap-1.5 mt-1 border-dashed hover:bg-muted"
+      >
+        <Plus className="size-3.5" />
+        Add {field.label}
+      </Button>
+      {form.formState.errors[field.key] && (
+        <p className="text-xs text-destructive">
+          {form.formState.errors[field.key]?.message || "At least one entry is required."}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────── Form Field Renderer ────────────────────── */
+function FormFieldRenderer({
+  field,
+  form,
+  resourceKey,
+  isEditing = false,
+}: {
+  field: Field;
+  form: any;
+  resourceKey: string;
+  isEditing?: boolean;
+}) {
+  const [showPw, setShowPw] = useState(false);
+
+  if (field.type === "dynamic-list") {
+    return <DynamicListField field={field} form={form} />;
+  }
+
+  // Resolve the actual input type (updateType overrides type when editing)
+  const resolvedType = isEditing && field.updateType ? field.updateType : (field.type ?? "text");
+  const isOptional = isEditing && field.optionalOnUpdate;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label
+        htmlFor={`${resourceKey}-${field.key}`}
+        className="text-sm font-semibold text-foreground"
+      >
+        {field.label}
+        {field.required && !isOptional && <span className="text-destructive ml-0.5"> *</span>}
+        {isOptional && <span className="ml-1 text-xs font-normal text-muted-foreground">(Optional — leave blank to keep current)</span>}
+      </Label>
+      {resolvedType === "select" ? (
+        <Select
+          value={form.watch(field.key) ?? ""}
+          onValueChange={(value) =>
+            form.setValue(field.key, value, { shouldValidate: true })
+          }
+        >
+          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10">
+            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {field.options?.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      ) : resolvedType === "textarea" ? (
+        <Textarea
+          id={`${resourceKey}-${field.key}`}
+          {...form.register(field.key)}
+          className="min-h-[80px]"
+        />
+      ) : resolvedType === "checkbox" ? (
+        <label className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+          <input type="checkbox" {...form.register(field.key)} />
+          Yes
+        </label>
+      ) : resolvedType === "file" ? (
+        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-3 py-3 text-sm text-muted-foreground hover:border-primary/50 transition-colors">
+          <FileImage className="size-4" />
+          {form.watch(field.key) ? (
+            <span className="text-foreground font-medium truncate max-w-[180px]">{form.watch(field.key)}</span>
+          ) : (
+            <span>Choose file{field.multiple && "s"}</span>
+          )}
+          <input
+            className="sr-only"
+            type="file"
+            accept="image/*"
+            multiple={field.multiple}
+            onChange={(e) =>
+              form.setValue(field.key, e.target.files?.[0]?.name ?? "")
+            }
+          />
+        </label>
+      ) : resolvedType === "toggle" ? (
+        /* ── Toggle / pill-switch for binary Yes/No fields ── */
+        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.watch(field.key) === "1" || form.watch(field.key) === true}
+            onClick={() => {
+              const current = form.watch(field.key);
+              form.setValue(field.key, (current === "1" || current === true) ? "0" : "1", { shouldValidate: true });
+            }}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+              form.watch(field.key) === "1" || form.watch(field.key) === true
+                ? "bg-primary"
+                : "bg-muted-foreground/30"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+                form.watch(field.key) === "1" || form.watch(field.key) === true
+                  ? "translate-x-4"
+                  : "translate-x-0"
+              }`}
+            />
+          </button>
+          <span className="text-sm text-foreground select-none">
+            {form.watch(field.key) === "1" || form.watch(field.key) === true ? "Yes" : "No"}
+          </span>
+        </div>
+      ) : field.type === "password" ? (
+        /* ── Password field with show/hide toggle ── */
+        <div className="relative">
+          <Input
+            id={`${resourceKey}-${field.key}`}
+            type={showPw ? "text" : "password"}
+            placeholder={isOptional ? "Leave blank to keep current" : "Enter password"}
+            readOnly={field.readOnly}
+            {...form.register(field.key)}
+            className="h-10 pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPw((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={showPw ? "Hide password" : "Show password"}
+          >
+            {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
+      ) : (
+        <Input
+          id={`${resourceKey}-${field.key}`}
+          type={resolvedType}
+          readOnly={field.readOnly}
+          {...form.register(field.key)}
+          className="h-10"
+        />
+      )}
+      {form.formState.errors[field.key] && (
+        <p className="text-xs text-destructive">
+          {String(form.formState.errors[field.key]?.message)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/*                       MAIN COMPONENT                             */
+/* ══════════════════════════════════════════════════════════════════ */
 export function EntityCrudPage({ config }: { config: Config }) {
   const store = useGarageStore();
   const schemaKey =
     config.title === "Admin"
       ? "admin"
-      : config.title === "Users"
+      : config.title === "Users" || config.title === "User Management"
         ? "employees"
-        : config.title === "Task Cards"
-          ? "taskCards"
-          : config.resource;
+        : config.title === "Company Employees" || config.title === "Company Users"
+          ? "companyUsers"
+          : config.title === "Package Subscriptions" || config.resource === "packageSubscriptions"
+            ? "packageSubscriptions"
+            : config.title === "Task Cards"
+              ? "taskCards"
+              : config.resource;
   const fields = exactFields[schemaKey] ?? config.fields;
   const singular = singularize(config.resource);
   const rows = ((store as any)[config.resource] ??
     (store as any).crudRecords?.[config.resource] ??
     []) as Record<string, any>[];
+
   const typedAdd = (store as any)[
     `add${singular.charAt(0).toUpperCase()}${singular.slice(1)}`
   ];
@@ -594,6 +956,8 @@ export function EntityCrudPage({ config }: { config: Config }) {
     (store as any).updateCrudRecord(config.resource, id, record);
   const remove = (id: string) =>
     (store as any).deleteCrudRecord(config.resource, id);
+
+  /* ── State ── */
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
   const formFields =
@@ -611,7 +975,6 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const [viewing, setViewing] = useState<Record<string, any> | null>(null);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
-  const [menuId, setMenuId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
@@ -619,47 +982,92 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const isLineItemModule =
     ["estimations", "jobCards", "taskCards", "invoices"].includes(
       config.resource,
-    ) || schemaKey === "taskCards";
+    ) || schemaKey === "taskCards" || schemaKey === "estimations";
+
+  /* ── Form schema ── */
   const formSchema = useMemo(
-    () =>
-      z.object(
-        Object.fromEntries(
-          formFields.map((field) => [
+    () => {
+      const shape = Object.fromEntries(
+        formFields.map((field) => {
+          if (field.type === "dynamic-list") {
+            return [
+              field.key,
+              z.array(z.object({ value: z.string().min(1, "Entry cannot be empty") }))
+                .min(1, "At least one information entry is required"),
+            ];
+          }
+          const isRequired = field.required && !(editing && field.optionalOnUpdate);
+          return [
             field.key,
-            field.required
+            isRequired
               ? field.type === "number"
-                ? z.coerce.number({ message: `${field.label} is required` })
-                : z.string().min(1, `${field.label} is required`)
+                ? z.coerce.number({ message: `${field.label} is required` }).min(0, "Must be >= 0")
+                : field.type === "email"
+                  ? z.string().email("Invalid email format")
+                  : z.string().min(1, `${field.label} is required`)
               : z.any().optional(),
-          ]),
-        ),
-      ),
-    [formFields],
+          ];
+        }),
+      );
+      let schema = z.object(shape);
+      // Cross-field validation: end_date must be after start_date (Package Subscriptions)
+      if (schemaKey === "packageSubscriptions") {
+        schema = schema.superRefine((data: any, ctx: any) => {
+          if (data.start_date && data.end_date && data.end_date <= data.start_date) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "End date must be after start date",
+              path: ["end_date"],
+            });
+          }
+        }) as any;
+      }
+      return schema;
+    },
+    [formFields, editing, schemaKey],
   );
+
   const form = useForm<Record<string, any>>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
   });
+
+  /* ── Seed data ── */
   useEffect(() => {
     if (!rows.length && !seededResources.current.has(config.resource)) {
       seededResources.current.add(config.resource);
-      for (let index = 1; index <= 2; index += 1)
-        add(
-          Object.fromEntries(
-            fields.map((field) => [
+      for (let index = 1; index <= 2; index += 1) {
+        const seedRecord = Object.fromEntries(
+          fields.map((field) => {
+            if (field.type === "dynamic-list") {
+              return [
+                field.key,
+                [
+                  { value: `Information line 1 for ${config.title}` },
+                  { value: `Information line 2 for ${config.title}` },
+                ],
+              ];
+            }
+            return [
               field.key,
               field.type === "number"
-                ? index
-                : field.type === "checkbox"
-                  ? true
-                  : field.type === "select"
-                    ? (field.options?.[0]?.value ?? "1")
-                    : `${field.label} ${index}`,
-            ]),
-          ),
+                ? index * 50
+                : field.type === "star"
+                  ? 4
+                  : field.type === "toggle" || field.type === "checkbox"
+                    ? "1"
+                    : field.type === "select"
+                      ? (field.options?.[0]?.value ?? "1")
+                      : `${field.label} ${index}`,
+            ];
+          }),
         );
+        add(seedRecord);
+      }
     }
   }, [add, config.resource, fields, rows.length]);
+
+  /* ── Filtered / sorted data ── */
   const filtered = useMemo(
     () =>
       rows
@@ -675,176 +1083,319 @@ export function EntityCrudPage({ config }: { config: Config }) {
         ),
     [rows, query, status, sortKey, sortAsc],
   );
+
+  /* ── Handlers ── */
   const openCreate = () => {
     setEditing(null);
-    form.reset({});
+    form.reset({
+      information: [{ value: "" }], // Pre-populate one row for repeatable package field
+    });
     setLineItems([]);
     setOpen(true);
-    setMenuId(null);
   };
+
   const openEdit = (row: Record<string, any>) => {
     setEditing(row);
-    form.reset(row);
+    // Ensure information conforms to FieldArray structure if it's stored as array of strings
+    let formattedInfo = row.information;
+    if (formattedInfo && Array.isArray(formattedInfo) && typeof formattedInfo[0] === "string") {
+      formattedInfo = formattedInfo.map(v => ({ value: v }));
+    }
+    form.reset({
+      ...row,
+      information: formattedInfo || [{ value: "" }],
+    });
     setLineItems(row.lineItems ?? []);
     setOpen(true);
-    setMenuId(null);
   };
+
   const submit = (data: Record<string, any>) => {
-    const payload = { ...data, ...(isLineItemModule ? { lineItems } : {}) };
+    // Flatten information array of objects into simple array of strings before saving to store
+    let payload = { ...data };
+    if (data.information && Array.isArray(data.information)) {
+      payload.information = data.information.map((item: any) => item.value);
+    }
+    payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
     editing ? update(editing.id, payload) : add(payload);
     toast.success(
-      `${singular} ${editing ? "updated" : "created"} successfully`,
+      `${singularize(config.title)} ${editing ? "updated" : "created"} successfully`,
     );
     setOpen(false);
   };
-  const title = editing ? `Edit ${singular}` : `Add ${singular}`;
+
+  /* ── Get first two visible text fields for identity display ── */
+  const identityFields = fields.filter(
+    (f) => !["file", "checkbox", "textarea", "dynamic-list"].includes(f.type ?? "text"),
+  ).slice(0, 2);
+
+  /* ── Badge helpers for categorical columns ── */
+  const isBadgeColumn = (column: string) =>
+    ["status", "role", "scope", "priority", "payment_status", "invoice_status", "quotation_status", "appointments", "task_status", "payment_method", "active", "insured"].includes(column);
+
+  const getBadgeColor = (column: string, value: string) => {
+    const v = String(value).toLowerCase();
+    if (column === "status" || column === "active") {
+      return v === "1" || v === "active" || v === "true" || v === "yes"
+        ? "bg-green-100 text-green-800 border-green-200"
+        : "bg-red-100 text-red-800 border-red-200";
+    }
+    if (["approved", "completed", "verified", "confirmed"].includes(v))
+      return "bg-green-100 text-green-800 border-green-200";
+    if (["pending", "draft", "not_verified"].includes(v))
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    if (["rejected", "cancelled", "no_show"].includes(v))
+      return "bg-red-100 text-red-800 border-red-200";
+    if (["inprogress", "in-progress", "in_progress"].includes(v))
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    return "bg-primary/10 text-primary border-primary/20";
+  };
+
+  const IconComponent = config.icon || iconMap[config.title] || ShieldCheck;
+
+  /* ══════════════════════════════════════════════════════════════ */
+  /*                           RENDER                              */
+  /* ══════════════════════════════════════════════════════════════ */
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardHeader title={config.title} />
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <p className="text-sm font-medium text-primary">Operations</p>
-                <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-                  {config.title}
-                </h1>
-                <p className="mt-2 text-muted-foreground">
-                  {config.description}
-                </p>
-              </div>
-              <Button onClick={openCreate}>
-                <Plus data-icon="inline-start" />
-                Add {singular}
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 md:flex-row">
-              <div className="flex flex-1 items-center gap-3 rounded-lg border border-border px-3">
-                <Search className="size-4 text-muted-foreground" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={`Search ${config.title.toLowerCase()}...`}
-                  className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="size-4 text-muted-foreground" />
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                >
-                  <option value="all">All statuses</option>
-                  <option value="1">Active</option>
-                  <option value="0">Inactive</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-left text-sm">
-                  <thead className="border-b border-border bg-muted/40">
-                    <tr>
-                      {config.columns.map((column) => (
-                        <th key={column} className="px-5 py-4 font-semibold">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSortKey(column);
-                              setSortAsc(sortKey === column ? !sortAsc : true);
-                            }}
-                            className="inline-flex items-center gap-2"
-                          >
-                            {labelize(column)}
-                            <ArrowUpDown className="size-3.5 text-muted-foreground" />
-                          </button>
-                        </th>
-                      ))}
-                      <th className="px-5 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filtered.map((row) => (
-                      <tr key={row.id} className="hover:bg-muted/30">
-                        {config.columns.map((column) => (
-                          <td key={column} className="px-5 py-4">
-                            {column === "status" ? (
-                              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                                {row[column] === "0" ? "Inactive" : "Active"}
-                              </span>
-                            ) : (
-                              formatValue(row[column])
-                            )}
-                          </td>
-                        ))}
-                        <td className="relative px-5 py-4 text-right">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Row actions"
-                            onClick={() =>
-                              setMenuId(menuId === row.id ? null : row.id)
-                            }
-                          >
-                            <MoreHorizontal />
-                          </Button>
-                          {menuId === row.id && (
-                            <div className="absolute right-5 top-12 z-20 w-40 rounded-lg border border-border bg-popover p-1 text-left shadow-lg">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setViewing(row);
-                                  setMenuId(null);
-                                }}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                              >
-                                <Eye className="size-4" />
-                                View
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => openEdit(row)}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                              >
-                                <Pencil className="size-4" />
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  remove(row.id);
-                                  setMenuId(null);
-                                  toast.success(
-                                    `${singular} deleted successfully`,
-                                  );
-                                }}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-muted"
-                              >
-                                <Trash2 className="size-4" />
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+    <div className="p-6 lg:p-8 w-full">
+      <div className="mx-auto max-w-7xl">
+
+        {/* ═══ PAGE HEADER ═══ */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-center gap-3">
+            {IconComponent && (
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <IconComponent className="size-5" />
+              </span>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                {config.title}
+              </h1>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {config.description}
+              </p>
             </div>
           </div>
-        </main>
+          <Button
+            onClick={openCreate}
+            className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
+          >
+            <Plus className="size-4" />
+            Add {singularize(config.title)}
+          </Button>
+        </div>
+
+        {/* ═══ FILTER BAR ═══ */}
+        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
+          {/* Search */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Search...`}
+              className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          {/* Status filter */}
+          <div className="flex items-center gap-2">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none cursor-pointer"
+            >
+              <option value="all">All Status</option>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+          {/* View mode toggle (visual only for now) */}
+          <div className="flex items-center gap-0.5 ml-auto border border-border rounded-lg p-0.5 bg-muted/40">
+            <button type="button" className="p-1.5 rounded bg-background text-primary shadow-sm" aria-label="List view">
+              <List className="size-4" />
+            </button>
+            <button type="button" className="p-1.5 rounded text-muted-foreground hover:text-foreground" aria-label="Grid view">
+              <LayoutGrid className="size-4" />
+            </button>
+            <button type="button" className="p-1.5 rounded text-muted-foreground hover:text-foreground" aria-label="Column view">
+              <Columns3 className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* ═══ DATA TABLE ═══ */}
+        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="w-12 px-5 py-3">
+                    <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
+                  </th>
+                  {config.columns.map((column) => (
+                    <th key={column} className="px-5 py-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSortKey(column);
+                          setSortAsc(sortKey === column ? !sortAsc : true);
+                        }}
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {labelize(column)}
+                        <ChevronDown className={`size-3 transition-transform ${sortKey === column && !sortAsc ? "rotate-180" : ""}`} />
+                      </button>
+                    </th>
+                  ))}
+                  <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={config.columns.length + 2}
+                      className="px-5 py-12 text-center text-sm text-muted-foreground"
+                    >
+                      {config.empty}
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((row) => (
+                    <tr key={row.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-5 py-4">
+                        <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
+                      </td>
+                      {config.columns.map((column, colIdx) => (
+                        <td key={column} className="px-5 py-4">
+                          {isBadgeColumn(column) ? (
+                            <span
+                              className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase border ${getBadgeColor(column, row[column])}`}
+                            >
+                              {column === "status" || column === "active"
+                                ? row[column] === "0" || row[column] === false
+                                  ? "Inactive"
+                                  : "Active"
+                                : labelize(String(row[column] ?? "—"))}
+                            </span>
+                          ) : column === "information" ? (
+                            <span className="text-foreground font-medium">
+                              {Array.isArray(row[column]) ? `${row[column].length} items` : row[column] ? "1 item" : "0 items"}
+                            </span>
+                          ) : column === "rating" ? (
+                            /* Visual stars rendering in data-table cell */
+                            <div className="flex items-center gap-0.5 text-amber-400">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`size-3.5 ${
+                                    Number(row[column] ?? 0) >= star
+                                      ? "fill-current"
+                                      : "text-muted-foreground/20"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          ) : colIdx === 0 ? (
+                            /* First column: bold primary text + secondary below */
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-foreground">
+                                {formatValue(row[column])}
+                              </span>
+                              {/* Show email or second field as secondary text if available */}
+                              {row.email && column !== "email" && (
+                                <span className="text-xs text-muted-foreground mt-0.5">
+                                  {row.email}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-foreground">
+                              {formatValue(row[column])}
+                            </span>
+                          )}
+                        </td>
+                      ))}
+                      {/* Actions column */}
+                      <td className="px-5 py-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                            aria-label="Row actions"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={() => setViewing(row)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Eye className="size-4" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => openEdit(row)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Pencil className="size-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const updated = { ...row, status: row.status === "0" ? "1" : "0" };
+                                update(row.id, updated);
+                                toast.success(
+                                  `${singularize(config.title)} ${updated.status === "1" ? "activated" : "deactivated"} successfully`,
+                                );
+                              }}
+                              className="gap-2 cursor-pointer text-amber-600 focus:text-amber-600 text-xs"
+                            >
+                              <CircleX className="size-4" />
+                              Deactivate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (confirm("Are you sure you want to delete this record?")) {
+                                  remove(row.id);
+                                  toast.success(
+                                    `${singularize(config.title)} deleted successfully`,
+                                  );
+                                }
+                              }}
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
+                            >
+                              <Trash2 className="size-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*                   ADD / EDIT MODAL                         */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+        <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border">
           <DialogHeader className="shrink-0 border-b border-border px-6 py-5 pr-14">
-            <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>
-              Enter the required information below.
+            <DialogTitle className="text-lg font-bold text-foreground">
+              {editing
+                ? `Update ${singularize(config.title)}`
+                : `Add New ${singularize(config.title)}`}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              {editing
+                ? `Make changes to this ${singularize(config.title).toLowerCase()} below.`
+                : `Create a new ${singularize(config.title).toLowerCase()} record. Fields marked with * are required.`}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -852,102 +1403,55 @@ export function EntityCrudPage({ config }: { config: Config }) {
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-              <div className="grid gap-4 md:grid-cols-2">
-                {formFields
-              .filter(
-                (field) =>
-                  !(
-                    !editing &&
-                    field.key === "status" &&
-                    [
-                      "admin",
-                      "users",
-                      "roles",
-                      "companies",
-                      "employees",
-                      "vehicles",
-                      "appointments",
-                      "estimations",
-                      "invoices",
-                      "reviews",
-                      "demoBookings",
-                    ].includes(schemaKey)
-                  ),
-              )
-              .map((field) => (
-                <div key={field.key} className="flex flex-col gap-2">
-                  <Label htmlFor={`${config.resource}-${field.key}`}>
-                    {field.label}
-                    {field.required && (
-                      <span className="text-destructive"> *</span>
-                    )}
-                  </Label>
-                  {field.type === "select" ? (
-                    <Select
-                      value={form.watch(field.key) ?? ""}
-                      onValueChange={(value) =>
-                        form.setValue(field.key, value, {
-                          shouldValidate: true,
-                        })
-                      }
-                    >
-                      <SelectTrigger id={`${config.resource}-${field.key}`}>
-                        <SelectValue
-                          placeholder={`Select ${field.label.toLowerCase()}`}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {field.options?.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  ) : field.type === "textarea" ? (
-                    <Textarea
-                      id={`${config.resource}-${field.key}`}
-                      {...form.register(field.key)}
-                    />
-                  ) : field.type === "checkbox" ? (
-                    <label className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
-                      <input type="checkbox" {...form.register(field.key)} />
-                      Yes
-                    </label>
-                  ) : field.type === "file" ? (
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-3 py-3 text-sm text-muted-foreground">
-                      <FileImage className="size-4" />
-                      Choose file
-                      <input
-                        className="sr-only"
-                        type="file"
-                        accept="image/*"
-                        multiple={field.multiple}
-                        onChange={(e) =>
-                          form.setValue(
-                            field.key,
-                            e.target.files?.[0]?.name ?? "",
-                          )
-                        }
-                      />
-                    </label>
-                  ) : (
-                    <Input
-                      id={`${config.resource}-${field.key}`}
-                      type={field.type ?? "text"}
-                      readOnly={field.readOnly}
-                      {...form.register(field.key)}
-                    />
-                  )}
-                  {form.formState.errors[field.key] && (
-                    <p className="text-xs text-destructive">
-                      {String(form.formState.errors[field.key]?.message)}
+              {/* Edit mode: identity block */}
+              {editing && identityFields.length > 0 && (
+                <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
+                  <p className="font-semibold text-foreground">
+                    {formatValue(editing[identityFields[0].key])}
+                  </p>
+                  {identityFields[1] && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {formatValue(editing[identityFields[1].key])}
                     </p>
                   )}
                 </div>
-              ))}
+              )}
+              <div className="grid gap-4 md:grid-cols-2">
+                {formFields
+                  .filter(
+                    (field) =>
+                      !(
+                        !editing &&
+                        field.key === "status" &&
+                        [
+                          "admin",
+                          "users",
+                          "roles",
+                          "companies",
+                          "employees",
+                          "companyUsers",
+                          "customers",
+                          "vehicles",
+                          "appointments",
+                          "packageSubscriptions",
+                          "invoices",
+                          "reviews",
+                          "demoBookings",
+                          "packages",
+                          "taskCards",
+                          "vehicleMaintenancePictures",
+                        ].includes(schemaKey)
+                      ),
+                  )
+                  .map((field) => (
+                    <FormFieldRenderer
+                      key={field.key}
+                      field={field}
+                      form={form}
+                      resourceKey={config.resource}
+                      isEditing={Boolean(editing)}
+                    />
+                  ))}
                 {isLineItemModule && (
                   <LineItems
                     resource={config.resource}
@@ -956,8 +1460,28 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   />
                 )}
               </div>
+              {/* Edit mode: active toggle */}
+              {editing && (
+                <div className="mt-5 flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Active</p>
+                    <p className="text-xs text-muted-foreground">Enable or disable this record</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.watch("status") !== "0"}
+                      onChange={(e) =>
+                        form.setValue("status", e.target.checked ? "1" : "0")
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                  </label>
+                </div>
+              )}
             </div>
-            <DialogFooter className="shrink-0 border-t border-border px-6 py-4">
+            <DialogFooter className="shrink-0 border-t border-border px-6 py-4 bg-muted/20">
               <Button
                 type="button"
                 variant="outline"
@@ -965,32 +1489,95 @@ export function EntityCrudPage({ config }: { config: Config }) {
               >
                 Cancel
               </Button>
-              <Button type="submit">
-                {editing ? "Update" : "Create"} {singular}
+              <Button type="submit" className="font-semibold bg-primary hover:bg-primary/95 text-white">
+                {editing ? "Update" : "Create"} {singularize(config.title)}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*                     VIEW MODAL                             */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog
         open={Boolean(viewing)}
         onOpenChange={(value) => !value && setViewing(null)}
       >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{singular} details</DialogTitle>
-            <DialogDescription>Viewing assignment details.</DialogDescription>
+        <DialogContent className="max-w-2xl p-0 gap-0 bg-background border-border">
+          <DialogHeader className="border-b border-border px-6 py-5 pr-14">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              {singularize(config.title)} Details
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              Viewing details for this {singularize(config.title).toLowerCase()} record.
+            </DialogDescription>
           </DialogHeader>
           {viewing && (
-            <div className="grid gap-5 border-t border-border pt-5 sm:grid-cols-2">
-              {fields.map((field) => (
-                <div key={field.key}>
-                  <p className="text-sm text-muted-foreground">{field.label}</p>
-                  <p className="mt-1 font-medium">
-                    {formatValue(viewing[field.key])}
+            <div className="px-6 py-5">
+              {/* Identity block */}
+              {identityFields.length > 0 && (
+                <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
+                  <p className="font-semibold text-foreground">
+                    {formatValue(viewing[identityFields[0].key])}
                   </p>
+                  {identityFields[1] && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {formatValue(viewing[identityFields[1].key])}
+                    </p>
+                  )}
                 </div>
-              ))}
+              )}
+              {/* Fields grid */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {fields.map((field) => (
+                  <div key={field.key} className="border-b border-border/50 pb-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {field.label}
+                    </p>
+                    {field.type === "dynamic-list" ? (
+                      <ul className="mt-1 list-disc list-inside text-sm font-semibold text-foreground space-y-1">
+                        {Array.isArray(viewing[field.key]) ? (
+                          viewing[field.key].map((item: string, i: number) => (
+                            <li key={i}>{item}</li>
+                          ))
+                        ) : (
+                          <li>{formatValue(viewing[field.key])}</li>
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {formatValue(viewing[field.key])}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {/* Timestamps */}
+              {(viewing.createdAt || viewing.id) && (
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 border-t border-border pt-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Created
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-foreground">
+                      {viewing.createdAt
+                        ? new Date(viewing.createdAt).toLocaleDateString()
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Updated
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-foreground">
+                      {viewing.updatedAt
+                        ? new Date(viewing.updatedAt).toLocaleDateString()
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>

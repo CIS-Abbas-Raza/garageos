@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store/auth-store'
+import { useAuth } from '@/lib/auth-context'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -10,21 +10,28 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter()
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
-  const [hydrated, setHydrated] = useState(false)
+  const { isAuthenticated, isLoading } = useAuth()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setHydrated(true)
+    setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (hydrated && !isLoggedIn) {
+    if (mounted && !isLoading && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [hydrated, isLoggedIn, router])
+  }, [mounted, isLoading, isAuthenticated, router])
 
-  if (!hydrated || !isLoggedIn) {
-    return null
+  if (!mounted || isLoading || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return <>{children}</>

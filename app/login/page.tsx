@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { loginSchema, type LoginFormData } from '@/lib/schemas'
-import { useAuthStore } from '@/lib/store/auth-store'
+import { useAuth } from '@/lib/auth-context'
 
 const benefits = [
   { icon: UsersRound, value: '500+', label: 'Active customers' },
@@ -23,15 +23,14 @@ const benefits = [
 
 export default function LoginPage() {
   const router = useRouter()
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
-  const login = useAuthStore((state) => state.login)
+  const { isAuthenticated, login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       router.push('/dashboard')
     }
-  }, [isLoggedIn, router])
+  }, [isAuthenticated, router])
 
   const {
     register,
@@ -42,10 +41,13 @@ export default function LoginPage() {
   })
 
   async function onSubmit(data: LoginFormData) {
-    await new Promise((resolve) => setTimeout(resolve, 700))
-    login(data.email)
-    toast.success('Sign in successful! Welcome back to GarageOS.')
-    router.push('/dashboard')
+    try {
+      await login(data.email, data.password)
+      toast.success('Sign in successful! Welcome back to GarageOS.')
+      router.push('/dashboard')
+    } catch (error: any) {
+      toast.error(error?.message || 'Login failed. Please check your credentials.')
+    }
   }
 
   return (
@@ -78,7 +80,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="name@example.com"
+                  placeholder="admin@garageos.com"
                   {...register('email')}
                   aria-invalid={errors.email ? 'true' : 'false'}
                   className={errors.email ? 'border-destructive' : ''}
@@ -116,10 +118,9 @@ export default function LoginPage() {
             </form>
 
             <p className="mt-7 text-center text-sm text-muted-foreground">
-              New to GarageOS?{' '}
-              <Link href="/register" className="font-semibold text-primary hover:underline">
-                Create an account
-              </Link>
+              Demo credentials:{' '}
+              <span className="font-semibold text-primary">admin@garageos.com</span> /{' '}
+              <span className="font-semibold text-primary">password</span>
             </p>
           </div>
         </div>
