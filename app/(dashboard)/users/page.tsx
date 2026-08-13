@@ -1,2 +1,16 @@
 import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
-export default function UsersPage() { return <EntityCrudPage config={{ resource: 'employees', title: 'Users', description: 'Manage platform users and access across your garage workspace.', fields: [{ key: 'firstName', label: 'First name', required: true }, { key: 'lastName', label: 'Last name', required: true }, { key: 'email', label: 'Email', type: 'email', required: true }, { key: 'phone', label: 'Phone' }, { key: 'roleId', label: 'Role' }], columns: ['firstName', 'lastName', 'email', 'roleId', 'active'], empty: 'No users yet.' }} /> }
+
+export default function UsersPage() {
+  return (
+    <EntityCrudPage
+      config={{
+        resource: 'employees',
+        title: 'Users',
+        description: 'Manage system users, their access and account details.',
+        fields: [],
+        columns: ['name', 'country', 'phone', 'status'],
+        empty: 'No users configured yet.'
+      }}
+    />
+  )
+}

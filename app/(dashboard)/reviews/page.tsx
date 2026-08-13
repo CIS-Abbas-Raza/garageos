@@ -1,2 +1,19 @@
 import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
-export default function ReviewsPage() { return <EntityCrudPage config={{ resource: 'reviews', title: 'Reviews', description: 'Moderate customer feedback and highlight great service.', fields: [{ key: 'customerId', label: 'Customer ID', required: true }, { key: 'jobCardId', label: 'Job card ID' }, { key: 'rating', label: 'Rating', type: 'number', required: true }, { key: 'comment', label: 'Comment', required: true }, { key: 'status', label: 'Status', type: 'select', options: ['pending', 'approved', 'hidden'], required: true }], columns: ['customerId', 'rating', 'status', 'comment'], empty: 'No reviews to moderate.' }} /> }
+
+// ⚠️ SPEC FLAG: No customer-link field is present in the spec reviews fields —
+// confirm whether this should reference which Customer or job card the review belongs to.
+
+export default function ReviewsPage() {
+  return (
+    <EntityCrudPage
+      config={{
+        resource: 'reviews',
+        title: 'Customer Reviews',
+        description: 'Moderate customer feedback and highlight great service.',
+        fields: [],
+        columns: ['rating', 'review', 'status'],
+        empty: 'No reviews to moderate.'
+      }}
+    />
+  )
+}

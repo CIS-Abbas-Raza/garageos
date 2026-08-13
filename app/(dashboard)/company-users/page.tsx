@@ -1,2 +1,20 @@
 import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
-export default function CompanyUsersPage() { return <EntityCrudPage config={{ resource: 'employees', title: 'Company Users', description: 'Assign staff members to roles and keep team details current.', fields: [{ key: 'firstName', label: 'First name', required: true }, { key: 'lastName', label: 'Last name', required: true }, { key: 'email', label: 'Email', type: 'email', required: true }, { key: 'phone', label: 'Phone' }, { key: 'roleId', label: 'Role ID' }], columns: ['firstName', 'lastName', 'email', 'roleId'], empty: 'No company users yet.' }} /> }
+
+// Role field uses a fixed list: Mechanic / Finance (as per spec).
+// If roles should be pulled dynamically from the Role module, that is a follow-up
+// question for the team — not assumed here.
+
+export default function CompanyUsersPage() {
+  return (
+    <EntityCrudPage
+      config={{
+        resource: 'companyUsers',
+        title: 'Company Employees',
+        description: 'Assign staff members to roles and keep team details current.',
+        fields: [],
+        columns: ['name', 'country', 'phone', 'role', 'status'],
+        empty: 'No company employees configured yet.'
+      }}
+    />
+  )
+}
