@@ -1232,11 +1232,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
         </div>
 
         {/* ═══ DATA TABLE ═══ */}
-        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-[#FAFAFA]">
                   <th className="w-12 px-5 py-3">
                     <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                   </th>
@@ -1260,7 +1260,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border bg-white">
                 {filtered.length === 0 ? (
                   <tr>
                     <td
@@ -1272,7 +1272,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   </tr>
                 ) : (
                   filtered.map((row) => (
-                    <tr key={row.id} className="hover:bg-muted/30 transition-colors">
+                    <tr key={row.id} className="bg-white hover:bg-[#FAFAFA] transition-colors">
                       <td className="px-5 py-4">
                         <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                       </td>
