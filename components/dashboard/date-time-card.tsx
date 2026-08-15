@@ -1,35 +1,63 @@
 'use client'
 
-import { CalendarDays, Clock3 } from 'lucide-react'
+import { CalendarDays, Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function DateTimeCard() {
-  const [dateTime, setDateTime] = useState('')
+  const [date, setDate] = useState('')
+  const [time, setTime] = useState('')
 
   useEffect(() => {
-    const updateDateTime = () => {
+    const update = () => {
       const now = new Date()
-      const date = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-      const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      setDateTime(`${date} at ${time}`)
+      setDate(
+        now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      )
+      setTime(
+        now.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      )
     }
-    updateDateTime()
-    const interval = setInterval(updateDateTime, 1000)
+    update()
+    const interval = setInterval(update, 1000)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6" aria-label="Current date and time">
-      <div className="flex items-center gap-4">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><CalendarDays className="size-6" /></div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" aria-label="Current date and time">
+      {/* Date Card */}
+      <div className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+          <CalendarDays className="size-5 text-emerald-600" />
+        </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-muted-foreground">Current Date &amp; Time</p>
-          <div className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground sm:text-2xl">
-            <span className="truncate">{dateTime || 'Loading...'}</span>
-            <Clock3 className="hidden size-5 shrink-0 text-muted-foreground sm:block" />
-          </div>
+          <p className="truncate text-[17px] font-bold tracking-tight text-gray-900">
+            {date || '—'}
+          </p>
+          <p className="mt-0.5 text-[13px] text-gray-400 font-medium">Today's Date</p>
         </div>
       </div>
-    </section>
+
+      {/* Time Card */}
+      <div className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white px-6 py-7 shadow-sm">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+          <Clock className="size-5 text-emerald-600" />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-[17px] font-bold tracking-tight text-gray-900">
+            {time || '—'}
+          </p>
+          <p className="mt-0.5 text-[13px] text-gray-400 font-medium">Current Time</p>
+        </div>
+      </div>
+    </div>
   )
 }
