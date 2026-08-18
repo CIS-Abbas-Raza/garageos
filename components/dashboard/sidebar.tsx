@@ -140,7 +140,7 @@ export function DashboardSidebar() {
         />
       )}
       <aside
-        className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-300 max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${
+        className={`no-print sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-300 max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${
           collapsed ? 'w-20' : 'w-72'
         } ${mobileOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'}`}
       >
@@ -230,7 +230,8 @@ export function DashboardSidebar() {
                     <div className="mt-1 flex flex-col gap-0.5 border-l border-sidebar-border ml-5 pl-2">
                       {section.items.map((item) => {
                         const Icon = item.icon
-                        const isActive = pathname === item.href
+                        const isActive =
+                          pathname === item.href || pathname.startsWith(`${item.href}/`)
                         return (
                           <Link
                             key={item.href}

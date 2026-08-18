@@ -1,6 +1,8 @@
 "use client";
 
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -848,11 +850,23 @@ function FormFieldRenderer({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
+<<<<<<< HEAD
               {selectOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
+=======
+              {field.options?.map((option: any, idx: number) => {
+                const val = typeof option === "string" ? option : (option.value ?? String(option));
+                const lbl = typeof option === "string" ? option.replaceAll("_", " ") : (option.label ?? val);
+                return (
+                  <SelectItem key={val || idx} value={val}>
+                    {lbl}
+                  </SelectItem>
+                );
+              })}
+>>>>>>> 27f6b66c9d9731ef46c7eb873122ce4b2ba803fb
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -967,6 +981,7 @@ function FormFieldRenderer({
 /*                       MAIN COMPONENT                             */
 /* ══════════════════════════════════════════════════════════════════ */
 export function EntityCrudPage({ config }: { config: Config }) {
+  const router = useRouter();
   const store = useGarageStore();
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
@@ -1081,7 +1096,20 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 .min(1, "At least one information entry is required"),
             ];
           }
-          const isRequired = field.required && !(editing && field.optionalOnUpdate);
+          const isInsuranceField = [
+            "insurance_number",
+            "policy_number",
+            "expiry_date",
+            "claim_number",
+            "insurance_company",
+            "insurance_company_phone",
+          ].includes(field.key);
+
+          const isRequired =
+            field.required &&
+            !(editing && field.optionalOnUpdate) &&
+            !(schemaKey === "vehicles" && isInsuranceField);
+
           return [
             field.key,
             isRequired
@@ -1095,6 +1123,32 @@ export function EntityCrudPage({ config }: { config: Config }) {
         }),
       );
       let schema = z.object(shape);
+
+      if (schemaKey === "vehicles") {
+        schema = schema.superRefine((data: any, ctx: any) => {
+          const isInsured = data.insured === "1" || data.insured === true || data.insured === "Yes";
+          if (isInsured) {
+            const insuranceFields = [
+              { key: "insurance_number", label: "Insurance number" },
+              { key: "policy_number", label: "Policy number" },
+              { key: "expiry_date", label: "Expiry date" },
+              { key: "claim_number", label: "Claim number" },
+              { key: "insurance_company", label: "Insurance company" },
+              { key: "insurance_company_phone", label: "Insurance company phone" },
+            ];
+            for (const f of insuranceFields) {
+              if (data[f.key] === undefined || data[f.key] === null || String(data[f.key]).trim() === "") {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${f.label} is required`,
+                  path: [f.key],
+                });
+              }
+            }
+          }
+        }) as any;
+      }
+
       // Cross-field validation: end_date must be after start_date (Package Subscriptions)
       if (schemaKey === "packageSubscriptions") {
         schema = schema.superRefine((data: any, ctx: any) => {
@@ -1458,6 +1512,33 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && (
+                              <DropdownMenuItem
+                                onClick={() => router.push("/quotations")}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <ClipboardList className="size-4 text-blue-600" />
+                                Quotation
+                              </DropdownMenuItem>
+                            )}
+                            {(config.resource === "estimations" || schemaKey === "estimations" || config.title === "Quotations") && (
+                              <DropdownMenuItem
+                                onClick={() => router.push("/task-cards")}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <FileText className="size-4 text-blue-600" />
+                                Task Card
+                              </DropdownMenuItem>
+                            )}
+                            {(config.resource === "jobCards" || schemaKey === "taskCards" || config.title === "Task Cards") && (
+                              <DropdownMenuItem
+                                onClick={() => router.push("/invoices")}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <CreditCard className="size-4 text-blue-600" />
+                                Invoice
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               onClick={async () => {
                                 const updated = { ...row, status: row.status === "0" ? "1" : "0" };
@@ -1576,6 +1657,22 @@ export function EntityCrudPage({ config }: { config: Config }) {
                         ].includes(schemaKey)
                       ),
                   )
+                  .filter((field) => {
+                    if (schemaKey === "vehicles") {
+                      const isInsuranceField = [
+                        "insurance_number",
+                        "policy_number",
+                        "expiry_date",
+                        "claim_number",
+                        "insurance_company",
+                        "insurance_company_phone",
+                      ].includes(field.key);
+                      const insuredVal = form.watch("insured");
+                      const isInsured = insuredVal === "1" || insuredVal === true || insuredVal === "Yes";
+                      if (isInsuranceField && !isInsured) return false;
+                    }
+                    return true;
+                  })
                   .map((field) => (
                     <FormFieldRenderer
                       key={field.key}

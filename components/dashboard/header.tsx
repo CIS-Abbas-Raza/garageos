@@ -3,7 +3,7 @@
 import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useGarageStore } from '@/lib/store/garage-store'
+import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
@@ -28,8 +28,9 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     toast.success('You have been signed out.')
   }
 
-  const currentCompany = companies.find(c => c.id === selectedCompany)
-  const currentCompanyName = currentCompany?.name || companies[0]?.name || 'Select Company'
+  const activeCompanies = companies.length > 0 ? companies : defaultCompanies
+  const currentCompany = activeCompanies.find(c => c.id === selectedCompany) || activeCompanies[0]
+  const currentCompanyName = currentCompany?.name || 'Select Company'
 
   const branches = [
     { id: 'b1', name: 'Jinnah Branch' },
@@ -38,7 +39,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="no-print sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-16 items-center px-4 lg:px-6">
 
         {/* ── FAR LEFT: Hamburger toggle ── */}
@@ -68,7 +69,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
               <ChevronDown className="size-3 text-muted-foreground shrink-0" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              {companies.map((company) => (
+              {activeCompanies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setSelectedCompany(company.id)}
@@ -77,11 +78,6 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
                   {company.name}
                 </DropdownMenuItem>
               ))}
-              {companies.length === 0 && (
-                <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-                  No companies configured
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
 
