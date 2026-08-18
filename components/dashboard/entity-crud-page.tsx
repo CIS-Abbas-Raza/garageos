@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,6 +96,8 @@ type Field = {
 };
 type Config = {
   resource: string;
+  /** Relative API endpoint for resources that use the live backend. */
+  apiEndpoint?: string;
   title: string;
   description: string;
   icon?: React.ComponentType<{ className?: string }>;
@@ -177,7 +179,7 @@ const exactFields: Record<string, Field[]> = {
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", required: true },
   ],
   roles: [{ key: "name", label: "Name", required: true }],
   customers: [
@@ -927,6 +929,8 @@ function FormFieldRenderer({
 /* ══════════════════════════════════════════════════════════════════ */
 export function EntityCrudPage({ config }: { config: Config }) {
   const store = useGarageStore();
+  const apiEnabled = Boolean(config.apiEndpoint);
+  const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
   const schemaKey =
     config.title === "Admin"
       ? "admin"
@@ -941,9 +945,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
               : config.resource;
   const fields = exactFields[schemaKey] ?? config.fields;
   const singular = singularize(config.resource);
-  const rows = ((store as any)[config.resource] ??
-    (store as any).crudRecords?.[config.resource] ??
-    []) as Record<string, any>[];
+  const rows = (apiEnabled
+    ? apiRows
+    : (store as any)[config.resource] ??
+      (store as any).crudRecords?.[config.resource] ??
+      []) as Record<string, any>[];
 
   const typedAdd = (store as any)[
     `add${singular.charAt(0).toUpperCase()}${singular.slice(1)}`
@@ -956,6 +962,28 @@ export function EntityCrudPage({ config }: { config: Config }) {
     (store as any).updateCrudRecord(config.resource, id, record);
   const remove = (id: string) =>
     (store as any).deleteCrudRecord(config.resource, id);
+
+  const requestApi = useCallback(async (path = "", init?: RequestInit) => {
+    const response = await fetch(`${config.apiEndpoint}${path}`, {
+      ...init,
+      headers: { "Content-Type": "application/json", ...init?.headers },
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body.success === false) {
+      throw new Error(body.message || "Unable to complete the request.");
+    }
+    return body.data;
+  }, [config.apiEndpoint]);
+
+  const loadApiRows = useCallback(async () => {
+    if (!apiEnabled) return;
+    try {
+      const data = await requestApi();
+      setApiRows(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to load records.");
+    }
+  }, [apiEnabled, requestApi]);
 
   /* ── State ── */
   const [open, setOpen] = useState(false);
@@ -983,6 +1011,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
     ["estimations", "jobCards", "taskCards", "invoices"].includes(
       config.resource,
     ) || schemaKey === "taskCards" || schemaKey === "estimations";
+
+  useEffect(() => {
+    void loadApiRows();
+  }, [loadApiRows]);
 
   /* ── Form schema ── */
   const formSchema = useMemo(
@@ -1034,7 +1066,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   /* ── Seed data ── */
   useEffect(() => {
-    if (!rows.length && !seededResources.current.has(config.resource)) {
+    if (!apiEnabled && !rows.length && !seededResources.current.has(config.resource)) {
       seededResources.current.add(config.resource);
       for (let index = 1; index <= 2; index += 1) {
         const seedRecord = Object.fromEntries(
@@ -1065,7 +1097,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
         add(seedRecord);
       }
     }
-  }, [add, config.resource, fields, rows.length]);
+  }, [add, apiEnabled, config.resource, fields, rows.length]);
 
   /* ── Filtered / sorted data ── */
   const filtered = useMemo(
@@ -1109,18 +1141,30 @@ export function EntityCrudPage({ config }: { config: Config }) {
     setOpen(true);
   };
 
-  const submit = (data: Record<string, any>) => {
+  const submit = async (data: Record<string, any>) => {
     // Flatten information array of objects into simple array of strings before saving to store
     let payload = { ...data };
     if (data.information && Array.isArray(data.information)) {
       payload.information = data.information.map((item: any) => item.value);
     }
     payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
-    editing ? update(editing.id, payload) : add(payload);
-    toast.success(
-      `${singularize(config.title)} ${editing ? "updated" : "created"} successfully`,
-    );
-    setOpen(false);
+    try {
+      if (apiEnabled) {
+        const { id, createdAt, updatedAt, is_deleted, ...apiPayload } = payload;
+        if (!apiPayload.password) delete apiPayload.password;
+        await requestApi(editing ? `/${editing.id}` : "", {
+          method: editing ? "PUT" : "POST",
+          body: JSON.stringify(apiPayload),
+        });
+        await loadApiRows();
+      } else {
+        editing ? update(editing.id, payload) : add(payload);
+      }
+      toast.success(`${singularize(config.title)} ${editing ? "updated" : "created"} successfully`);
+      setOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save record.");
+    }
   };
 
   /* ── Get first two visible text fields for identity display ── */
@@ -1343,12 +1387,22 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={async () => {
                                 const updated = { ...row, status: row.status === "0" ? "1" : "0" };
-                                update(row.id, updated);
-                                toast.success(
-                                  `${singularize(config.title)} ${updated.status === "1" ? "activated" : "deactivated"} successfully`,
-                                );
+                                try {
+                                  if (apiEnabled) {
+                                    await requestApi(`/${row.id}`, {
+                                      method: "PUT",
+                                      body: JSON.stringify({ status: updated.status }),
+                                    });
+                                    await loadApiRows();
+                                  } else {
+                                    update(row.id, updated);
+                                  }
+                                  toast.success(`${singularize(config.title)} ${updated.status === "1" ? "activated" : "deactivated"} successfully`);
+                                } catch (error) {
+                                  toast.error(error instanceof Error ? error.message : "Unable to update record.");
+                                }
                               }}
                               className="gap-2 cursor-pointer text-amber-600 focus:text-amber-600 text-xs"
                             >
@@ -1356,12 +1410,19 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               Deactivate
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={async () => {
                                 if (confirm("Are you sure you want to delete this record?")) {
-                                  remove(row.id);
-                                  toast.success(
-                                    `${singularize(config.title)} deleted successfully`,
-                                  );
+                                  try {
+                                    if (apiEnabled) {
+                                      await requestApi(`/${row.id}`, { method: "DELETE" });
+                                      await loadApiRows();
+                                    } else {
+                                      remove(row.id);
+                                    }
+                                    toast.success(`${singularize(config.title)} deleted successfully`);
+                                  } catch (error) {
+                                    toast.error(error instanceof Error ? error.message : "Unable to delete record.");
+                                  }
                                 }
                               }}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
