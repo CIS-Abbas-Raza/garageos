@@ -5,6 +5,7 @@ export default function UsersPage() {
     <EntityCrudPage
       config={{
         resource: 'employees',
+        apiEndpoint: '/backend-api/users',
         title: 'Users',
         description: 'Manage system users, their access and account details.',
         fields: [],

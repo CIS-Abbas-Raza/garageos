@@ -14,10 +14,11 @@ export default function CompaniesPage() {
     <EntityCrudPage
       config={{
         resource: 'companies',
+        apiEndpoint: '/backend-api/companies',
         title: 'Companies',
         description: 'Manage garage companies, branches, and platform access.',
         fields: [],
-        columns: ['name', 'country', 'phone', 'registration_no', 'status'],
+        columns: ['owner_id', 'country', 'phone', 'registration_no', 'status'],
         empty: 'No companies configured yet.'
       }}
     />

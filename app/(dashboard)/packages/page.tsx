@@ -5,6 +5,7 @@ export default function PackagesPage() {
     <EntityCrudPage
       config={{
         resource: 'packages',
+        apiEndpoint: '/backend-api/packages',
         title: 'Packages',
         description: 'Create reusable service packages for estimates and job cards.',
         fields: [

@@ -90,6 +90,8 @@ type Field = {
   /** Override input type when editing (e.g. registration_no is number on Create, text on Update) */
   updateType?: FieldType;
   options?: { label: string; value: string }[];
+  /** Endpoint returning `{ success, data }` records for a select field. */
+  optionsEndpoint?: string;
   required?: boolean;
   readOnly?: boolean;
   multiple?: boolean;
@@ -214,7 +216,7 @@ const exactFields: Record<string, Field[]> = {
       required: true,
       optionalOnUpdate: true,
     },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", required: true },
     { key: "address", label: "Address", required: true },
   ],
   // Company Users module — users scoped to a specific company (includes role)
@@ -257,13 +259,12 @@ const exactFields: Record<string, Field[]> = {
   // ⚠️ SPEC FLAG: registration_no is 'number' on Create but 'text' on Update per spec.
   // This is implemented as specified via updateType — flag as unusual inconsistency.
   companies: [
-    { key: "name", label: "Company Name", required: true },
     {
-      key: "user",
-      label: "Owner / User",
+      key: "owner_id",
+      label: "Owner",
       type: "select",
       required: true,
-      options: options(["Garage Admin", "Manager User", "Branch Owner"]),
+      optionsEndpoint: "/backend-api/users",
     },
     { key: "logo", label: "Logo", type: "file" },
     { key: "email", label: "Email", type: "email", required: true },
@@ -349,18 +350,18 @@ const exactFields: Record<string, Field[]> = {
   // Package Subscriptions: links Company + Package with date range
   packageSubscriptions: [
     {
-      key: "company",
+      key: "company_id",
       label: "Company",
       type: "select",
       required: true,
-      options: options(["GarageOS Demo", "AutoFix Co", "FastLane Motors", "ProGarage Ltd"]),
+      optionsEndpoint: "/backend-api/companies",
     },
     {
-      key: "package",
+      key: "package_id",
       label: "Package",
       type: "select",
       required: true,
-      options: options(["Basic", "Pro", "Enterprise"]),
+      optionsEndpoint: "/backend-api/packages",
     },
     { key: "start_date", label: "Start Date", type: "datetime-local", required: true },
     { key: "end_date", label: "End Date", type: "datetime-local", required: true },
@@ -787,6 +788,29 @@ function FormFieldRenderer({
   isEditing?: boolean;
 }) {
   const [showPw, setShowPw] = useState(false);
+  const [endpointOptions, setEndpointOptions] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    if (!field.optionsEndpoint) return;
+
+    const loadOptions = async () => {
+      try {
+        const response = await fetch(field.optionsEndpoint!);
+        const body = await response.json();
+        if (!response.ok || body.success === false || !Array.isArray(body.data)) return;
+        setEndpointOptions(
+          body.data.map((record: { id: string | number; name?: string; email?: string }) => ({
+            value: String(record.id),
+            label: record.name ?? record.email ?? `User ${record.id}`,
+          })),
+        );
+      } catch {
+        setEndpointOptions([]);
+      }
+    };
+
+    void loadOptions();
+  }, [field.optionsEndpoint]);
 
   if (field.type === "dynamic-list") {
     return <DynamicListField field={field} form={form} />;
@@ -795,6 +819,10 @@ function FormFieldRenderer({
   // Resolve the actual input type (updateType overrides type when editing)
   const resolvedType = isEditing && field.updateType ? field.updateType : (field.type ?? "text");
   const isOptional = isEditing && field.optionalOnUpdate;
+  const selectOptions = field.optionsEndpoint ? endpointOptions : field.options ?? [];
+  const selectedOption = selectOptions.find(
+    (option) => option.value === String(form.watch(field.key) ?? ""),
+  );
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -808,17 +836,19 @@ function FormFieldRenderer({
       </Label>
       {resolvedType === "select" ? (
         <Select
-          value={form.watch(field.key) ?? ""}
+          value={String(form.watch(field.key) ?? "")}
           onValueChange={(value) =>
             form.setValue(field.key, value, { shouldValidate: true })
           }
         >
-          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10">
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10 w-full">
+            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`}>
+              {selectedOption?.label}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {field.options?.map((option) => (
+              {selectOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -852,13 +882,15 @@ function FormFieldRenderer({
               accept="image/*"
               multiple={field.multiple}
               onChange={(e) =>
-                form.setValue(field.key, e.target.files?.[0]?.name ?? "")
+                form.setValue(field.key, e.target.files?.[0] ?? "")
               }
             />
           </label>
           <div className="flex flex-col gap-0.5">
             {form.watch(field.key) ? (
-              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{form.watch(field.key)}</span>
+              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">
+                {form.watch(field.key) instanceof File ? form.watch(field.key).name : form.watch(field.key)}
+              </span>
             ) : (
               <span className="text-sm text-slate-500 font-medium">JPEG, PNG, or WebP. Max 5MB.</span>
             )}
@@ -972,9 +1004,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
     (store as any).deleteCrudRecord(config.resource, id);
 
   const requestApi = useCallback(async (path = "", init?: RequestInit) => {
+    const isFormData = init?.body instanceof FormData;
     const response = await fetch(`${config.apiEndpoint}${path}`, {
       ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      headers: isFormData
+        ? init?.headers
+        : { "Content-Type": "application/json", ...init?.headers },
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body.success === false) {
@@ -987,7 +1022,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
     if (!apiEnabled) return;
     try {
       const data = await requestApi();
-      setApiRows(Array.isArray(data) ? data : []);
+      const records = Array.isArray(data) ? data : [];
+      setApiRows(
+        config.resource === "packages"
+          ? records.map((record) => ({
+              ...record,
+              information:
+                record.information ??
+                record.packageInfos?.map((item: { information?: string }) => item.information) ??
+                [],
+            }))
+          : records,
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
@@ -1144,6 +1190,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
     form.reset({
       ...row,
       information: formattedInfo || [{ value: "" }],
+      ...(schemaKey === "packageSubscriptions" && {
+        start_date: row.start_date ? String(row.start_date).slice(0, 16) : "",
+        end_date: row.end_date ? String(row.end_date).slice(0, 16) : "",
+      }),
     });
     setLineItems(row.lineItems ?? []);
     setOpen(true);
@@ -1158,11 +1208,26 @@ export function EntityCrudPage({ config }: { config: Config }) {
     payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
     try {
       if (apiEnabled) {
-        const { id, createdAt, updatedAt, is_deleted, ...apiPayload } = payload;
+        const { id, createdAt, updatedAt, is_deleted, packageInfos, ...apiPayload } = payload;
         if (!apiPayload.password) delete apiPayload.password;
+        const fileFields = fields.filter((field) => field.type === "file");
+        const hasFile = fileFields.some((field) => apiPayload[field.key] instanceof File);
+        const body = hasFile
+          ? (() => {
+              const formData = new FormData();
+              Object.entries(apiPayload).forEach(([key, value]) => {
+                if (value instanceof File) {
+                  formData.append(key, value);
+                } else if (!fileFields.some((field) => field.key === key)) {
+                  formData.append(key, String(value ?? ""));
+                }
+              });
+              return formData;
+            })()
+          : JSON.stringify(apiPayload);
         await requestApi(editing ? `/${editing.id}` : "", {
           method: editing ? "PUT" : "POST",
-          body: JSON.stringify(apiPayload),
+          body,
         });
         await loadApiRows();
       } else {
