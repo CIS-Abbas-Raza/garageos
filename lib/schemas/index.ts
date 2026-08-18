@@ -71,10 +71,52 @@ export const estimationSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
 })
 
-export const invoiceSchema = z.object({
+export const quotationLineItemSchema = z.object({
+  type: z.enum(['service', 'parts']),
+  description: z.string().min(1, 'Description is required'),
+  qty: z.coerce.number().min(1, 'Qty is required'),
+  unitPrice: z.coerce.number().min(0, 'Unit price is required'),
+  amount: z.coerce.number().min(0).optional(),
+})
+
+export const quotationSchema = z.object({
+  quotationNumber: z.string().min(1, 'Quotation number is required'),
   customerId: z.string().min(1, 'Customer is required'),
-  dueDate: z.date(),
-  notes: z.string().optional(),
+  vehicleId: z.string().min(1, 'Vehicle is required'),
+  mileage: z.coerce.number().min(0, 'Mileage is required'),
+  note: z.string().min(1, 'Note is required'),
+  status: z.enum(['draft', 'sent', 'accepted', 'rejected']),
+  creationDate: z.string().min(1, 'Creation date is required'),
+  documentName: z.string().optional(),
+  taxPercentage: z.coerce.number().min(0).max(100),
+  discountPercentage: z.coerce.number().min(0).max(100),
+  subtotal: z.coerce.number().min(0),
+  taxAmount: z.coerce.number().min(0),
+  discountAmount: z.coerce.number().min(0),
+  total: z.coerce.number().min(0),
+  lineItems: z.array(quotationLineItemSchema).min(1, 'Add at least one line item'),
+})
+
+export const invoiceLineItemSchema = quotationLineItemSchema
+
+export const invoiceSchema = z.object({
+  invoiceNumber: z.string().min(1, 'Invoice number is required'),
+  customerId: z.string().min(1, 'Customer is required'),
+  vehicleId: z.string().min(1, 'Vehicle is required'),
+  mileage: z.coerce.number().min(0, 'Mileage is required'),
+  status: z.enum(['draft', 'pending', 'approved']),
+  paymentStatus: z.enum(['pending', 'completed']),
+  creationDate: z.string().min(1, 'Creation date is required'),
+  dueDate: z.string().min(1, 'Due date is required'),
+  notes: z.string().min(1, 'Notes is required'),
+  documentName: z.string().optional(),
+  taxPercentage: z.coerce.number().min(0).max(100),
+  discountPercentage: z.coerce.number().min(0).max(100),
+  subtotal: z.coerce.number().min(0),
+  taxAmount: z.coerce.number().min(0),
+  discountAmount: z.coerce.number().min(0),
+  total: z.coerce.number().min(0),
+  lineItems: z.array(invoiceLineItemSchema).min(1, 'Add at least one line item'),
 })
 
 export const paymentSchema = z.object({
@@ -109,6 +151,9 @@ export type PartFormData = z.infer<typeof partSchema>
 export type AppointmentFormData = z.infer<typeof appointmentSchema>
 export type JobCardFormData = z.infer<typeof jobCardSchema>
 export type EstimationFormData = z.infer<typeof estimationSchema>
+export type QuotationLineItemFormData = z.infer<typeof quotationLineItemSchema>
+export type QuotationFormData = z.infer<typeof quotationSchema>
+export type InvoiceLineItemFormData = z.infer<typeof invoiceLineItemSchema>
 export type InvoiceFormData = z.infer<typeof invoiceSchema>
 export type PaymentFormData = z.infer<typeof paymentSchema>
 export type SupplierFormData = z.infer<typeof supplierSchema>

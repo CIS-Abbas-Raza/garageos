@@ -88,6 +88,16 @@ export interface Estimation {
   vehicleId: string;
   customerId: string;
   description: string;
+  quotationNumber?: string;
+  mileage?: number;
+  note?: string;
+  creationDate?: string;
+  documentName?: string;
+  taxPercentage?: number;
+  discountPercentage?: number;
+  taxAmount?: number;
+  discountAmount?: number;
+  quotationStatus?: "draft" | "sent" | "accepted" | "rejected";
   lineItems: LineItem[];
   subtotal: number;
   tax: number;
@@ -210,12 +220,18 @@ export interface Invoice {
   lineItems: LineItem[];
   subtotal: number;
   tax: number;
+  taxPercentage?: number;
   discount: number;
+  discountPercentage?: number;
   total: number;
   amountPaid: number;
-  status: "draft" | "sent" | "paid" | "partially-paid" | "overdue" | "cancelled";
+  paymentStatus?: "pending" | "completed";
+  status: "draft" | "pending" | "approved" | "sent" | "paid" | "partially-paid" | "overdue" | "cancelled";
+  mileage?: number;
   dueDate: Date;
   issuedDate: Date;
+  creationDate?: string;
+  documentName?: string;
   notes?: string;
   createdAt: Date;
 }

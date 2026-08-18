@@ -38,7 +38,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="no-print sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-16 items-center px-4 lg:px-6">
 
         {/* ── FAR LEFT: Hamburger toggle ── */}
