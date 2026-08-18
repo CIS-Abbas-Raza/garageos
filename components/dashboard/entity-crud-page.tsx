@@ -850,13 +850,6 @@ function FormFieldRenderer({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-<<<<<<< HEAD
-              {selectOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-=======
               {field.options?.map((option: any, idx: number) => {
                 const val = typeof option === "string" ? option : (option.value ?? String(option));
                 const lbl = typeof option === "string" ? option.replaceAll("_", " ") : (option.label ?? val);
@@ -866,7 +859,6 @@ function FormFieldRenderer({
                   </SelectItem>
                 );
               })}
->>>>>>> 27f6b66c9d9731ef46c7eb873122ce4b2ba803fb
             </SelectGroup>
           </SelectContent>
         </Select>
