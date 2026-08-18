@@ -2,16 +2,23 @@
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { CarFront, Calendar, FileText, Pencil, Plus, User } from 'lucide-react'
+import { CarFront, Calendar, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
 
 export default function InvoicesPage() {
   const router = useRouter()
-  const { invoices, customers, vehicles } = useGarageStore()
+  const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
 
   const rows = useMemo(
     () =>
@@ -131,12 +138,37 @@ export default function InvoicesPage() {
                         <span>{new Date(invoice.createdAt).toLocaleDateString()}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/invoices/edit/${invoice.id}`)}>
-                          <Pencil className="size-4" />
-                          Edit
-                        </Button>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                            aria-label="Row actions"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Pencil className="size-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this invoice?')) {
+                                  deleteCrudRecord('invoices', invoice.id)
+                                  toast.success('Invoice deleted successfully')
+                                }
+                              }}
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
+                            >
+                              <Trash2 className="size-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>

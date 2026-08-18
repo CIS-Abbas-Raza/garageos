@@ -5,7 +5,7 @@ import type { JobCard } from "@/lib/types/store"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react"
+import { Eye, MoreHorizontal, Pencil, Trash, CreditCard } from "lucide-react"
 import { format } from "date-fns"
 
 export function createJobCardColumns(
@@ -88,6 +88,9 @@ export function createJobCardColumns(
                   <Pencil className="h-4 w-4" /> Edit Job Card
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => window.location.href = '/invoices'} className="text-[13px] cursor-pointer gap-2 font-medium text-slate-700">
+                <CreditCard className="h-4 w-4 text-blue-600" /> Invoice
+              </DropdownMenuItem>
               {onDelete && (
                 <DropdownMenuItem onClick={() => onDelete(jobCard)} className="text-[13px] cursor-pointer text-red-600 focus:text-red-600 gap-2">
                   <Trash className="h-4 w-4" /> Delete

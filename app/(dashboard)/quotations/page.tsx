@@ -2,16 +2,23 @@
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
 
 export default function QuotationsPage() {
   const router = useRouter()
-  const { estimations, customers, vehicles } = useGarageStore()
+  const { estimations, customers, vehicles, deleteCrudRecord } = useGarageStore()
 
   const rows = useMemo(
     () =>
@@ -115,12 +122,44 @@ export default function QuotationsPage() {
                     <td className="px-5 py-4 text-muted-foreground">
                       {new Date(quotation.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/quotations/edit/${quotation.id}`)}>
-                          <Pencil className="size-4" />
-                          Edit
-                        </Button>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                            aria-label="Row actions"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/quotations/edit/${quotation.id}`)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Pencil className="size-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => router.push('/task-cards')}
+                              className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                            >
+                              <FileText className="size-4 text-blue-600" />
+                              Task Card
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this quotation?')) {
+                                  deleteCrudRecord('estimations', quotation.id)
+                                  toast.success('Quotation deleted successfully')
+                                }
+                              }}
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
+                            >
+                              <Trash2 className="size-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>

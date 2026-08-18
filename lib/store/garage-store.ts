@@ -149,13 +149,49 @@ interface GarageStore {
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
+export const defaultCompanies: Types.Company[] = [
+  {
+    id: 'c1',
+    name: 'GarageOS Auto Workshop',
+    email: 'contact@garageos.com',
+    phone: '+1 555-0192',
+    address: '123 Main Street, Suite 100',
+    city: 'New York',
+    state: 'NY',
+    zipCode: '10001',
+    createdAt: new Date('2025-01-01'),
+  },
+  {
+    id: 'c2',
+    name: 'AutoFix Motors & Care',
+    email: 'info@autofix.com',
+    phone: '+1 555-0193',
+    address: '456 Service Blvd',
+    city: 'Los Angeles',
+    state: 'CA',
+    zipCode: '90001',
+    createdAt: new Date('2025-01-01'),
+  },
+  {
+    id: 'c3',
+    name: 'FastLane Garage Ltd',
+    email: 'support@fastlane.com',
+    phone: '+1 555-0194',
+    address: '789 Speed Way',
+    city: 'Chicago',
+    state: 'IL',
+    zipCode: '60601',
+    createdAt: new Date('2025-01-01'),
+  },
+]
+
 export const useGarageStore = create<GarageStore>()(
   persist(
     (set, get) => ({
       // Company
-      currentCompanyId: '',
+      currentCompanyId: 'c1',
       setCurrentCompanyId: (id) => set({ currentCompanyId: id }),
-      companies: [],
+      companies: defaultCompanies,
       addCompany: (company) => {
         const id = generateId()
         set((state) => ({
