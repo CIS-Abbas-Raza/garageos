@@ -251,7 +251,7 @@ export function DataTable<TData, TValue>({
           </div>
         ) : viewMode === "list" ? (
           <Table className="w-full">
-            <TableHeader className="bg-gray-50/50 whitespace-nowrap">
+            <TableHeader className="bg-[#FAFAFA] whitespace-nowrap">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent border-gray-100">
                   {headerGroup.headers.map((header) => {
@@ -292,7 +292,7 @@ export function DataTable<TData, TValue>({
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="group">
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="group bg-white hover:bg-[#FAFAFA]">
                     {row.getVisibleCells().map((cell) => {
                       const align = (cell.column.columnDef.meta as any)?.align || "left"
                       return (
@@ -302,7 +302,7 @@ export function DataTable<TData, TValue>({
                             "px-6 py-4",
                             align === "left" && "!text-left",
                             align === "right" && "!text-right",
-                            cell.column.id === "actions" && "text-right sticky right-0 z-10 bg-white group-hover:bg-gray-50/80 group-data-[state=selected]:bg-muted transition-colors border-l border-gray-100 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]"
+                            cell.column.id === "actions" && "text-right sticky right-0 z-10 bg-white group-hover:bg-[#FAFAFA] group-data-[state=selected]:bg-muted transition-colors border-l border-gray-100 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]"
                           )}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}

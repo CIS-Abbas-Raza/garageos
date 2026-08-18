@@ -23,10 +23,10 @@ export default function DashboardPage() {
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm font-medium text-primary">Garage Operations</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Dashboard</h1>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Home Overview</h1>
           <p className="mt-2 text-sm text-muted-foreground sm:text-base">Overview of your garage operations and key metrics</p>
         </div>
-        <Button variant="outline" className="w-fit gap-2 rounded-full px-4"><Eye className="size-4" />Overview</Button>
+        {/* <Button variant="outline" className="w-fit gap-2 rounded-full px-4"><Eye className="size-4" />Overview</Button> */}
       </div>
 
       <DateTimeCard />

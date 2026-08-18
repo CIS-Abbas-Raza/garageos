@@ -143,7 +143,6 @@ const iconMap: Record<string, any> = {
   "Email Settings": Bell,
   "Users": Users,
   "Role Assignments": UserCog,
-  "Reviews": FileText,
   "Demo Bookings": CalendarCheck,
   "Vehicle Maintenance Pictures": ImageIcon,
   "SMS Setting": Bell,
@@ -601,17 +600,17 @@ function LineItems({
       value.map((item, itemIndex) =>
         itemIndex === index
           ? {
-              ...item,
-              ...patch,
-              ...((!task && patch.qty !== undefined) ||
+            ...item,
+            ...patch,
+            ...((!task && patch.qty !== undefined) ||
               patch.unit_price !== undefined
-                ? {
-                    amount:
-                      Number(patch.qty ?? item.qty) *
-                      Number(patch.unit_price ?? item.unit_price),
-                  }
-                : {}),
-            }
+              ? {
+                amount:
+                  Number(patch.qty ?? item.qty) *
+                  Number(patch.unit_price ?? item.unit_price),
+              }
+              : {}),
+          }
           : item,
       ),
     );
@@ -839,23 +838,33 @@ function FormFieldRenderer({
           Yes
         </label>
       ) : resolvedType === "file" ? (
-        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-3 py-3 text-sm text-muted-foreground hover:border-primary/50 transition-colors">
-          <FileImage className="size-4" />
-          {form.watch(field.key) ? (
-            <span className="text-foreground font-medium truncate max-w-[180px]">{form.watch(field.key)}</span>
-          ) : (
-            <span>Choose file{field.multiple && "s"}</span>
-          )}
-          <input
-            className="sr-only"
-            type="file"
-            accept="image/*"
-            multiple={field.multiple}
-            onChange={(e) =>
-              form.setValue(field.key, e.target.files?.[0]?.name ?? "")
-            }
-          />
-        </label>
+        <div className="flex items-center gap-4 mt-1">
+          <label className="flex size-14 cursor-pointer items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-blue-500 transition-colors shrink-0">
+            <div className="relative flex items-center justify-center">
+              <ImageIcon className="size-6 text-slate-400" />
+              <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-slate-200 shadow-sm flex items-center justify-center">
+                <Plus className="size-2 text-slate-500" />
+              </div>
+            </div>
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/*"
+              multiple={field.multiple}
+              onChange={(e) =>
+                form.setValue(field.key, e.target.files?.[0]?.name ?? "")
+              }
+            />
+          </label>
+          <div className="flex flex-col gap-0.5">
+            {form.watch(field.key) ? (
+              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{form.watch(field.key)}</span>
+            ) : (
+              <span className="text-sm text-slate-500 font-medium">JPEG, PNG, or WebP. Max 5MB.</span>
+            )}
+            <span className="text-xs text-slate-400">Click to upload or drag & drop</span>
+          </div>
+        </div>
       ) : resolvedType === "toggle" ? (
         /* ── Toggle / pill-switch for binary Yes/No fields ── */
         <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
@@ -867,18 +876,16 @@ function FormFieldRenderer({
               const current = form.watch(field.key);
               form.setValue(field.key, (current === "1" || current === true) ? "0" : "1", { shouldValidate: true });
             }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-              form.watch(field.key) === "1" || form.watch(field.key) === true
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${form.watch(field.key) === "1" || form.watch(field.key) === true
                 ? "bg-primary"
                 : "bg-muted-foreground/30"
-            }`}
+              }`}
           >
             <span
-              className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
-                form.watch(field.key) === "1" || form.watch(field.key) === true
+              className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${form.watch(field.key) === "1" || form.watch(field.key) === true
                   ? "translate-x-4"
                   : "translate-x-0"
-              }`}
+                }`}
             />
           </button>
           <span className="text-sm text-foreground select-none">
@@ -944,6 +951,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ? "taskCards"
               : config.resource;
   const fields = exactFields[schemaKey] ?? config.fields;
+  const isExcluded = ["taskCards", "estimations", "invoices"].includes(config.resource);
   const singular = singularize(config.resource);
   const rows = (apiEnabled
     ? apiRows
@@ -989,7 +997,6 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
   const formFields =
-    editing &&
     !fields.some((field) => field.key === "status") &&
     ![
       "packages",
@@ -1120,6 +1127,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const openCreate = () => {
     setEditing(null);
     form.reset({
+      status: "1",
       information: [{ value: "" }], // Pre-populate one row for repeatable package field
     });
     setLineItems([]);
@@ -1268,11 +1276,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
         </div>
 
         {/* ═══ DATA TABLE ═══ */}
-        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
+                <tr className="border-b border-border bg-[#FAFAFA]">
                   <th className="w-12 px-5 py-3">
                     <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                   </th>
@@ -1296,7 +1304,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border bg-white">
                 {filtered.length === 0 ? (
                   <tr>
                     <td
@@ -1308,7 +1316,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   </tr>
                 ) : (
                   filtered.map((row) => (
-                    <tr key={row.id} className="hover:bg-muted/30 transition-colors">
+                    <tr key={row.id} className="bg-white hover:bg-[#FAFAFA] transition-colors">
                       <td className="px-5 py-4">
                         <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                       </td>
@@ -1334,11 +1342,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                   key={star}
-                                  className={`size-3.5 ${
-                                    Number(row[column] ?? 0) >= star
+                                  className={`size-3.5 ${Number(row[column] ?? 0) >= star
                                       ? "fill-current"
                                       : "text-muted-foreground/20"
-                                  }`}
+                                    }`}
                                 />
                               ))}
                             </div>
@@ -1446,14 +1453,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
       {/*                   ADD / EDIT MODAL                         */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border">
-          <DialogHeader className="shrink-0 border-b border-border px-6 py-5 pr-14">
-            <DialogTitle className="text-lg font-bold text-foreground">
+        <DialogContent className={isExcluded ? "flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
+          <DialogHeader className={isExcluded ? "shrink-0 border-b border-border px-6 py-5 pr-14" : "shrink-0 px-6 pt-6 pb-4 space-y-1 pr-14"}>
+            <DialogTitle className={isExcluded ? "text-lg font-bold text-foreground" : "text-xl font-bold text-slate-900"}>
               {editing
                 ? `Update ${singularize(config.title)}`
                 : `Add New ${singularize(config.title)}`}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-1">
+            <DialogDescription className={isExcluded ? "text-xs text-muted-foreground mt-1" : "text-sm text-slate-500 font-normal mt-1"}>
               {editing
                 ? `Make changes to this ${singularize(config.title).toLowerCase()} below.`
                 : `Create a new ${singularize(config.title).toLowerCase()} record. Fields marked with * are required.`}
@@ -1463,7 +1470,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             onSubmit={form.handleSubmit(submit)}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div className={isExcluded ? "min-h-0 flex-1 overflow-y-auto px-6 py-5" : "min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-2"}>
               {/* Edit mode: identity block */}
               {editing && identityFields.length > 0 && (
                 <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
@@ -1521,14 +1528,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   />
                 )}
               </div>
-              {/* Edit mode: active toggle */}
-              {editing && (
-                <div className="mt-5 flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+              {/* Active Toggle (Mockup Style) */}
+              {!isExcluded && (
+                <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3">
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Active</p>
-                    <p className="text-xs text-muted-foreground">Enable or disable this record</p>
+                    <p className="text-sm font-semibold text-slate-800">Active</p>
+                    <p className="text-xs text-slate-500">Enable or disable this record</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={form.watch("status") !== "0"}
@@ -1537,20 +1544,24 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
                   </label>
                 </div>
               )}
             </div>
-            <DialogFooter className="shrink-0 border-t border-border px-6 py-4 bg-muted/20">
+            <DialogFooter className={isExcluded ? "shrink-0 border-t border-border px-6 py-4 bg-muted/20" : "shrink-0 border-t border-slate-200/80 px-6 py-4 bg-white flex justify-end gap-3"}>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className={isExcluded ? "" : "border-slate-200 text-slate-700 hover:bg-slate-50 h-10 px-4 rounded-lg"}
               >
                 Cancel
               </Button>
-              <Button type="submit" className="font-semibold bg-primary hover:bg-primary/95 text-white">
+              <Button
+                type="submit"
+                className={isExcluded ? "font-semibold bg-primary hover:bg-primary/95 text-white" : "bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4 rounded-lg transition-colors"}
+              >
                 {editing ? "Update" : "Create"} {singularize(config.title)}
               </Button>
             </DialogFooter>
@@ -1565,17 +1576,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
         open={Boolean(viewing)}
         onOpenChange={(value) => !value && setViewing(null)}
       >
-        <DialogContent className="max-w-2xl p-0 gap-0 bg-background border-border">
-          <DialogHeader className="border-b border-border px-6 py-5 pr-14">
-            <DialogTitle className="text-lg font-bold text-foreground">
+        <DialogContent className={isExcluded ? "max-w-2xl p-0 gap-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
+          <DialogHeader className={isExcluded ? "border-b border-border px-6 py-5 pr-14" : "shrink-0 px-6 pt-6 pb-4 space-y-1 pr-14"}>
+            <DialogTitle className={isExcluded ? "text-lg font-bold text-foreground" : "text-xl font-bold text-slate-900"}>
               {singularize(config.title)} Details
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-1">
+            <DialogDescription className={isExcluded ? "text-xs text-muted-foreground mt-1" : "text-sm text-slate-500 font-normal mt-1"}>
               Viewing details for this {singularize(config.title).toLowerCase()} record.
             </DialogDescription>
           </DialogHeader>
           {viewing && (
-            <div className="px-6 py-5">
+            <div className={isExcluded ? "px-6 py-5" : "min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-2"}>
               {/* Identity block */}
               {identityFields.length > 0 && (
                 <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">

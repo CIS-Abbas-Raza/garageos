@@ -190,7 +190,7 @@ export function DashboardSidebar() {
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                 pathname === '/dashboard'
                   ? 'bg-primary/10 text-primary font-bold border-l-2 border-primary rounded-l-none'
-                  : 'text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  : 'text-gray-800 font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               } ${collapsed ? 'justify-center px-2' : ''}`}
             >
               <Home className="size-4 shrink-0" />
@@ -209,7 +209,7 @@ export function DashboardSidebar() {
                         [section.label]: !isExpanded,
                       }))
                     }
-                    className={`flex w-full items-center rounded-lg px-3 py-2 text-sm text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors ${
+                    className={`flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors ${
                       collapsed ? 'justify-center' : 'justify-between'
                     }`}
                     aria-expanded={isExpanded}
@@ -239,10 +239,10 @@ export function DashboardSidebar() {
                             className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[13px] transition-colors ${
                               isActive
                                 ? 'bg-primary/10 text-primary font-bold border-l-2 border-primary rounded-l-none'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50'
+                                : 'text-gray-700 font-medium hover:text-gray-900 hover:bg-sidebar-accent/50'
                             }`}
                           >
-                            <span className={isActive ? 'text-primary' : 'text-muted-foreground'}>
+                            <span className={isActive ? 'text-primary' : 'text-gray-700 font-medium'}>
                               {item.label}
                             </span>
                           </Link>

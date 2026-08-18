@@ -86,7 +86,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
           </DropdownMenu>
 
           {/* Branch selector */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground outline-none hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-primary/30"
             >
@@ -105,7 +105,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
         </div>
 

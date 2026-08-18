@@ -87,61 +87,132 @@ export function CustomerDialog({ open, onOpenChange, customer, mode, onSubmit }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] bg-white">
-        <DialogHeader>
-          <DialogTitle>{mode === "add" ? "Add Customer" : "Edit Customer"}</DialogTitle>
-          <DialogDescription>
-            {mode === "add" ? "Enter the details of the new customer." : "Make changes to the customer details."}
+      <DialogContent className="sm:max-w-[650px] bg-white p-6 rounded-xl border border-slate-200 shadow-xl gap-0">
+        <DialogHeader className="space-y-1 mb-6">
+          <DialogTitle className="text-xl font-bold text-slate-900">
+            {mode === "add" ? "Add Customer" : "Edit Customer"}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-500 font-normal">
+            {mode === "add"
+              ? "Create a new customer entry."
+              : "Make changes to the customer details."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input id="firstName" {...form.register("firstName")} />
-              {form.formState.errors.firstName && <p className="text-xs text-red-500">{form.formState.errors.firstName.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="firstName" className="text-sm font-semibold text-slate-700">First Name *</Label>
+              <Input
+                id="firstName"
+                {...form.register("firstName")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="Enter first name"
+              />
+              {form.formState.errors.firstName && (
+                <p className="text-xs text-red-500">{form.formState.errors.firstName.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name *</Label>
-              <Input id="lastName" {...form.register("lastName")} />
-              {form.formState.errors.lastName && <p className="text-xs text-red-500">{form.formState.errors.lastName.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="lastName" className="text-sm font-semibold text-slate-700">Last Name *</Label>
+              <Input
+                id="lastName"
+                {...form.register("lastName")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="Enter last name"
+              />
+              {form.formState.errors.lastName && (
+                <p className="text-xs text-red-500">{form.formState.errors.lastName.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input id="email" type="email" {...form.register("email")} />
-              {form.formState.errors.email && <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                {...form.register("email")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="email@example.com"
+              />
+              {form.formState.errors.email && (
+                <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input id="phone" {...form.register("phone")} />
-              {form.formState.errors.phone && <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone *</Label>
+              <Input
+                id="phone"
+                {...form.register("phone")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="Enter phone number"
+              />
+              {form.formState.errors.phone && (
+                <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>
+              )}
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="address">Address *</Label>
-              <Input id="address" {...form.register("address")} />
-              {form.formState.errors.address && <p className="text-xs text-red-500">{form.formState.errors.address.message}</p>}
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="address" className="text-sm font-semibold text-slate-700">Address *</Label>
+              <Input
+                id="address"
+                {...form.register("address")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="Enter address"
+              />
+              {form.formState.errors.address && (
+                <p className="text-xs text-red-500">{form.formState.errors.address.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input id="city" {...form.register("city")} />
-              {form.formState.errors.city && <p className="text-xs text-red-500">{form.formState.errors.city.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="city" className="text-sm font-semibold text-slate-700">City *</Label>
+              <Input
+                id="city"
+                {...form.register("city")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="City"
+              />
+              {form.formState.errors.city && (
+                <p className="text-xs text-red-500">{form.formState.errors.city.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="zipCode">Zip Code *</Label>
-              <Input id="zipCode" {...form.register("zipCode")} />
-              {form.formState.errors.zipCode && <p className="text-xs text-red-500">{form.formState.errors.zipCode.message}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="zipCode" className="text-sm font-semibold text-slate-700">Zip Code *</Label>
+              <Input
+                id="zipCode"
+                {...form.register("zipCode")}
+                className="h-10 border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                placeholder="Zip Code"
+              />
+              {form.formState.errors.zipCode && (
+                <p className="text-xs text-red-500">{form.formState.errors.zipCode.message}</p>
+              )}
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" {...form.register("notes")} className="resize-none" rows={3} />
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="notes" className="text-sm font-semibold text-slate-700">Notes</Label>
+              <Textarea
+                id="notes"
+                {...form.register("notes")}
+                className="resize-none border-slate-200 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors"
+                rows={3}
+                placeholder="Enter notes"
+              />
             </div>
           </div>
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+          <div className="border-t border-slate-200/80 -mx-6 pt-4 px-6 flex justify-end gap-3 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="border-slate-200 text-slate-700 hover:bg-slate-50 h-10 px-4 rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-10 px-4 rounded-lg transition-colors"
+            >
               {mode === "add" ? "Create Customer" : "Save Changes"}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
