@@ -125,6 +125,8 @@ export interface JobCard {
   priority: "low" | "medium" | "high";
   dueDate?: Date;
   photos: string[];
+  beforePictures?: string[];
+  afterPictures?: string[];
   createdAt: Date;
 }
 
@@ -247,13 +249,27 @@ export interface Payment {
 }
 
 // Notifications
+export type NotificationType = "info" | "warning" | "success" | "error" | "job" | "alert" | "payment"
+export type NotificationRecipientType = "all" | "company" | "user"
+
+export interface NotificationRead {
+  notificationId: string
+  userId: string
+  isRead: boolean
+  readAt?: Date
+}
+
 export interface Notification {
   id: string;
-  companyId: string;
+  companyId?: string;
   title: string;
   message: string;
-  type: "info" | "success" | "warning" | "error";
-  read: boolean;
+  type: NotificationType;
+  recipientType?: NotificationRecipientType;
+  recipientId?: string;
+  status?: 0 | 1;
+  read?: boolean;
+  reads?: NotificationRead[];
   actionUrl?: string;
   createdAt: Date;
 }

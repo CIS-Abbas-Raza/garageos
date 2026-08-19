@@ -316,7 +316,9 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
         : 'pending') as any,
       priority: values.priority as any,
       dueDate: values.dueDate ? new Date(values.dueDate) : undefined,
-      photos: [],
+      photos: TaskCard?.photos ?? [],
+      beforePictures: TaskCard?.beforePictures ?? [],
+      afterPictures: TaskCard?.afterPictures ?? [],
       taskCardNumber: values.taskCardNumber,
       mileage: values.mileage,
       notes: values.notes,
@@ -648,7 +650,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                             <Select
                               value={watch(`lineItems.${index}.assignedTo`) ?? availableMechanics[0]?.name ?? 'Unassigned'}
                               onValueChange={(value) =>
-                                setValue(`lineItems.${index}.assignedTo`, value, {
+                                setValue(`lineItems.${index}.assignedTo`, value ?? 'Unassigned', {
                                   shouldDirty: true,
                                   shouldValidate: true,
                                 })
