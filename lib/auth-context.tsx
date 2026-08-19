@@ -3,7 +3,6 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import {
-  login as apiLogin,
   logout as apiLogout,
   me as apiMe,
   clearTokens,
@@ -18,6 +17,7 @@ interface AuthContextType {
   requiresPasswordChange: boolean
   roleScope: RoleScope | null
   login: (email: string, password: string) => Promise<void>
+  loginAdmin: (email: string, password: string) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
 }
@@ -64,12 +64,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    const result = await apiLogin(email, password)
-    if (!result.success || !result.user) {
-      throw new Error("Login failed")
+    const response = await fetch('/backend-api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok || result.success === false || !result.token || !result.user) {
+      throw new Error(result.message || 'Login failed.')
     }
-    setUser(result.user)
-    setRoleScope(computeScope(result.user.roles))
+
+    const userRoleScope = result.company_id ? RoleScope.COMPANY : RoleScope.SYSTEM
+    const loggedInUser: AuthUser = {
+      id: String(result.user.id),
+      userName: result.user.name || result.user.email,
+      email: result.user.email,
+      isPasswordChanged: true,
+      phoneNumber: result.user.phone ?? null,
+      permissions: [],
+      roles: [{
+        roleId: String(result.role || 'user'),
+        roleName: result.role || 'User',
+        roleTypeName: null,
+        scopeType: userRoleScope,
+        scopeId: result.company_id ? String(result.company_id) : null,
+      }],
+    }
+
+    setTokens(result.token, result.token)
+    localStorage.setItem('currentUser', JSON.stringify(loggedInUser))
+    setUser(loggedInUser)
+    setRoleScope(userRoleScope)
+  }
+
+  const loginAdmin = async (email: string, password: string) => {
+    const response = await fetch('/backend-api/admins/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok || result.success === false || !result.token || !result.user) {
+      throw new Error(result.message || 'Admin login failed.')
+    }
+
+    const adminUser: AuthUser = {
+      id: String(result.user.id),
+      userName: result.user.name || result.user.email,
+      email: result.user.email,
+      isPasswordChanged: true,
+      phoneNumber: result.user.phone ?? null,
+      permissions: ['all'],
+      roles: [{
+        roleId: 'super-admin',
+        roleName: result.role || 'Super Admin',
+        roleTypeName: 'System',
+        scopeType: RoleScope.SYSTEM,
+        scopeId: null,
+      }],
+    }
+
+    setTokens(result.token, result.token)
+    localStorage.setItem('currentUser', JSON.stringify(adminUser))
+    setUser(adminUser)
+    setRoleScope(RoleScope.SYSTEM)
   }
 
   const logout = async () => {
@@ -99,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         login,
+        loginAdmin,
         logout,
         isAuthenticated: !!user,
         isLoading,

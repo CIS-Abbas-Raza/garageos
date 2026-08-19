@@ -1,9 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { toast } from 'sonner'
@@ -18,18 +18,46 @@ interface DashboardHeaderProps {
   title: string
 }
 
+interface CompanyOption {
+  id: string
+  name: string
+}
+
 export function DashboardHeader({ title }: DashboardHeaderProps) {
-  const { companies } = useGarageStore()
+  const [companies, setCompanies] = useState<CompanyOption[]>([])
   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBranch()
   const { logout } = useAuth()
+
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        const response = await fetch('/backend-api/companies')
+        const body = await response.json()
+        const records = Array.isArray(body?.data) ? body.data : []
+
+        if (!response.ok || body?.success === false) {
+          throw new Error(body?.message || 'Unable to load companies.')
+        }
+
+        setCompanies(records.map((company: Record<string, unknown>) => ({
+          id: String(company.id),
+          name: String(company.name ?? company.company_name ?? company.email ?? `Company ${company.id}`),
+        })))
+      } catch (error) {
+        setCompanies([])
+        toast.error(error instanceof Error ? error.message : 'Unable to load companies.')
+      }
+    }
+
+    void loadCompanies()
+  }, [])
 
   const handleSignOut = () => {
     logout()
     toast.success('You have been signed out.')
   }
 
-  const activeCompanies = companies.length > 0 ? companies : defaultCompanies
-  const currentCompany = activeCompanies.find(c => c.id === selectedCompany) || activeCompanies[0]
+  const currentCompany = companies.find(c => c.id === selectedCompany) || companies[0]
   const currentCompanyName = currentCompany?.name || 'Select Company'
 
   const branches = [
@@ -69,7 +97,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
               <ChevronDown className="size-3 text-muted-foreground shrink-0" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              {activeCompanies.map((company) => (
+              {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setSelectedCompany(company.id)}

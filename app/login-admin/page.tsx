@@ -21,9 +21,9 @@ const benefits = [
   { icon: Building2, value: '3', label: 'Workshop locations' },
 ]
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter()
-  const { isAuthenticated, login } = useAuth()
+  const { isAuthenticated, loginAdmin } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
@@ -42,11 +42,11 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormData) {
     try {
-      await login(data.email, data.password)
-      toast.success('Sign in successful! Welcome back to GarageOS.')
+      await loginAdmin(data.email, data.password)
+      toast.success('Admin sign in successful! Welcome back to GarageOS.')
       router.push('/dashboard')
     } catch (error: any) {
-      toast.error(error?.message || 'Login failed. Please check your credentials.')
+      toast.error(error?.message || 'Admin login failed. Please check your credentials.')
     }
   }
 
@@ -69,8 +69,8 @@ export default function LoginPage() {
         <div className="flex flex-1 items-center py-14 lg:py-16">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Welcome back</h1>
-              <p className="mt-3 text-lg leading-7 text-muted-foreground">Sign in to access your workshop portal</p>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Admin login</h1>
+              <p className="mt-3 text-lg leading-7 text-muted-foreground">Sign in to access the GarageOS admin portal</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -113,10 +113,9 @@ export default function LoginPage() {
               </div>
 
               <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1 h-12 w-full text-base">
-                {isSubmitting ? 'Signing in...' : 'Sign in to your account'}
+                {isSubmitting ? 'Signing in...' : 'Sign in to admin account'}
               </Button>
             </form>
-
           </div>
         </div>
 
@@ -128,11 +127,11 @@ export default function LoginPage() {
         <div className="relative mx-auto w-full max-w-2xl">
           <div className="max-w-2xl">
             <h2 className="text-balance text-5xl font-bold leading-[1.05] tracking-tight xl:text-6xl">
-              Streamline Your
-              <span className="block text-primary">Workshop Management</span>
+              Manage Your
+              <span className="block text-primary">Workshop Platform</span>
             </h2>
             <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
-              Comprehensive tools to manage customers, vehicles, jobs, and invoices all in one powerful platform.
+              Access the administrative tools that keep your GarageOS platform running smoothly.
             </p>
           </div>
 
