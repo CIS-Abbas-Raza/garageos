@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import {
   logout as apiLogout,
   me as apiMe,
+  setTokens,
   clearTokens,
   RoleScope,
 } from "./api"
@@ -94,6 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setTokens(result.token, result.token)
     localStorage.setItem('currentUser', JSON.stringify(loggedInUser))
+    if (result.company_id) {
+      localStorage.setItem('selectedCompany', String(result.company_id))
+    } else {
+      localStorage.removeItem('selectedCompany')
+    }
     setUser(loggedInUser)
     setRoleScope(userRoleScope)
   }

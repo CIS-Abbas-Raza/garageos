@@ -67,6 +67,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGarageStore } from "@/lib/store/garage-store";
+import { useBranch } from "@/lib/branch-context";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -102,6 +103,8 @@ type Config = {
   resource: string;
   /** Relative API endpoint for resources that use the live backend. */
   apiEndpoint?: string;
+  /** Loads and saves records for the active company only. */
+  companyScoped?: boolean;
   title: string;
   description: string;
   icon?: React.ComponentType<{ className?: string }>;
@@ -248,12 +251,11 @@ const exactFields: Record<string, Field[]> = {
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
     {
-      key: "role",
+      key: "role_id",
       label: "Role",
       type: "select",
       required: true,
-      // Spec: fixed list (Mechanic / Finance). Flag if dynamic Role module is needed.
-      options: options(["Mechanic", "Finance"]),
+      optionsEndpoint: "/backend-api/roles",
     },
   ],
   // ⚠️ SPEC FLAG: Company spec has no 'name' field — only 'user' (owner dropdown).
@@ -850,7 +852,7 @@ function FormFieldRenderer({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {field.options?.map((option: any, idx: number) => {
+              {selectOptions.map((option: any, idx: number) => {
                 const val = typeof option === "string" ? option : (option.value ?? String(option));
                 const lbl = typeof option === "string" ? option.replaceAll("_", " ") : (option.label ?? val);
                 return (
@@ -975,6 +977,7 @@ function FormFieldRenderer({
 export function EntityCrudPage({ config }: { config: Config }) {
   const router = useRouter();
   const store = useGarageStore();
+  const { selectedCompany } = useBranch();
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
   const schemaKey =
@@ -1027,11 +1030,26 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const loadApiRows = useCallback(async () => {
     if (!apiEnabled) return;
+    if (config.companyScoped && !selectedCompany) {
+      setApiRows([]);
+      return;
+    }
     try {
-      const data = await requestApi();
+      const query = config.companyScoped
+        ? `?company_id=${encodeURIComponent(selectedCompany!)}`
+        : "";
+      const data = await requestApi(query);
       const records = Array.isArray(data) ? data : [];
       setApiRows(
-        config.resource === "packages"
+        config.resource === "companyUsers"
+          ? records.map((record) => ({
+              ...record,
+              ...record.user,
+              company_id: record.company_id,
+              role_id: String(record.role_id ?? record.role?.id ?? ""),
+              role: record.role?.name ?? record.role_id,
+            }))
+          : config.resource === "packages"
           ? records.map((record) => ({
               ...record,
               information:
@@ -1044,7 +1062,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
-  }, [apiEnabled, requestApi]);
+  }, [apiEnabled, config.companyScoped, config.resource, requestApi, selectedCompany]);
 
   /* ── State ── */
   const [open, setOpen] = useState(false);
@@ -1253,6 +1271,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
     }
     payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
     try {
+      if (config.companyScoped) {
+        if (!selectedCompany) {
+          throw new Error("Select a company before managing company employees.");
+        }
+        payload.company_id = selectedCompany;
+      }
       if (apiEnabled) {
         const { id, createdAt, updatedAt, is_deleted, packageInfos, ...apiPayload } = payload;
         if (!apiPayload.password) delete apiPayload.password;

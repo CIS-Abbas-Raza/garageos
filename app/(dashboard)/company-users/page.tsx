@@ -9,6 +9,8 @@ export default function CompanyUsersPage() {
     <EntityCrudPage
       config={{
         resource: 'companyUsers',
+        apiEndpoint: '/backend-api/company-users',
+        companyScoped: true,
         title: 'Company Employees',
         description: 'Assign staff members to roles and keep team details current.',
         fields: [],
