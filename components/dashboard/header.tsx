@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin, UserRound, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
+import { useGarageStore } from '@/lib/store/garage-store'
 import { toast } from 'sonner'
 import {
   DropdownMenu,

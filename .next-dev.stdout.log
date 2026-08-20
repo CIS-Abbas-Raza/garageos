@@ -512,3 +512,22 @@ Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', test
 ✓ Finished filesystem cache database compaction in 40s
  GET /quotations?vehicle_id=4 500 in 5.8s (next.js: 5.6s, application-code: 194ms)
 ✓ Finished writing to filesystem cache in 17.8s
+✓ Compiled in 5.9s
+ GET /quotations?vehicle_id=4 500 in 495ms (next.js: 416ms, application-code: 79ms)
+ GET / 500 in 1105ms (next.js: 838ms, application-code: 267ms)
+ GET / 500 in 375ms (next.js: 195ms, application-code: 180ms)
+ GET / 500 in 278ms (next.js: 108ms, application-code: 170ms)
+✓ Compiled in 8s
+ GET / 200 in 9.6s (next.js: 5.5s, application-code: 4.1s)
+ GET / 200 in 900ms (next.js: 143ms, application-code: 756ms)
+ GET /login 200 in 7.2s (next.js: 4.8s, application-code: 2.5s)
+ GET /dashboard 200 in 6.6s (next.js: 3.4s, application-code: 3.1s)
+ GET /dashboard 200 in 3.1s (next.js: 176ms, application-code: 2.9s)
+✓ Compiled in 11.4s
+ GET /dashboard 200 in 9.0s (next.js: 707ms, application-code: 8.3s)
+✓ Finished filesystem cache database compaction in 23.2s
+ GET /dashboard 200 in 997ms (next.js: 78ms, application-code: 920ms)
+ GET / 200 in 2.3s (next.js: 155ms, application-code: 2.1s)
+ GET /login 200 in 369ms (next.js: 181ms, application-code: 188ms)
+ GET /dashboard 200 in 246ms (next.js: 24ms, application-code: 222ms)
+ GET /dashboard 200 in 564ms (next.js: 70ms, application-code: 493ms)

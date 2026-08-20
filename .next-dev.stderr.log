@@ -154594,3 +154594,868 @@ Import traces:
 
     at <unknown> (Error: ./lib/auth-context.tsx:13:1)
     at <unknown> (Error: (./lib/auth-context.tsx:13:1)
+⨯ ./components/quotations/quotation-form-page.tsx:547:1
+Merge conflict marker encountered.
+  [90m545 |[0m     estimations,
+  [90m546 |[0m     settings,
+[31m[1m>[0m [90m547 |[0m <<<<<<< [33mHEAD[0m
+  [90m    |[0m [31m[1m^^^^^^^[0m
+  [90m548 |[0m =======
+  [90m549 |[0m     addEstimation,
+  [90m550 |[0m     addCustomer,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+
+./components/quotations/quotation-form-page.tsx:548:1
+Merge conflict marker encountered.
+  [90m546 |[0m     settings,
+  [90m547 |[0m <<<<<<< [33mHEAD[0m
+[31m[1m>[0m [90m548 |[0m =======
+  [90m    |[0m [31m[1m^^^^^^^[0m
+  [90m549 |[0m     addEstimation,
+  [90m550 |[0m     addCustomer,
+  [90m551 |[0m     addVehicle,
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+
+./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  [90m551 |[0m     addVehicle,
+  [90m552 |[0m     updateEstimation,
+[31m[1m>[0m [90m553 |[0m >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+  [90m    |[0m [31m[1m^^^^^^^[0m
+  [90m554 |[0m   } = useGarageStore()
+  [90m555 |[0m   [36mconst[0m [preselectedVehicleId, setPreselectedVehicleId] = useState<string | [36mundefined[0m>()
+  [90m556 |[0m   [36mconst[0m [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+[browser] Uncaught Error: ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/quotations/quotation-form-page.tsx:553:1)
+    at <unknown> (Error: (./components/quotations/quotation-form-page.tsx:553:1)
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/create/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/edit/[id]/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] Uncaught Error: ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/quotations/quotation-form-page.tsx:553:1)
+    at <unknown> (Error: (./components/quotations/quotation-form-page.tsx:553:1)
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/create/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/edit/[id]/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:553:1
+Merge conflict marker encountered.
+  551 |     addVehicle,
+  552 |     updateEstimation,
+> 553 | >>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
+      | ^^^^^^^
+  554 |   } = useGarageStore()
+  555 |   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  556 |   const [apiQuotation, setApiQuotation] = useState<any>()
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] Uncaught Error: ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/quotations/quotation-form-page.tsx:779:4)
+    at <unknown> (Error: (./components/quotations/quotation-form-page.tsx:779:4)
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/create/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/edit/[id]/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] Uncaught Error: ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/quotations/quotation-form-page.tsx:779:4)
+    at <unknown> (Error: (./components/quotations/quotation-form-page.tsx:779:4)
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/create/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/quotations/quotation-form-page.tsx
+    ./app/(dashboard)/quotations/edit/[id]/page.tsx 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] ./components/quotations/quotation-form-page.tsx:779:4
+Expression expected
+  777 |     })
+  778 |     setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+> 779 |   }, [addCustomer, currentCompany, customers.length, setValue])
+      |    ^
+  780 |
+  781 |   useEffect(() => {
+  782 |     if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/quotations/quotation-form-page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/quotations/quotation-form-page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component] 
+[browser] Uncaught ReferenceError: useState is not defined
+    at DashboardHeader (components/dashboard/header.tsx:27:37)
+    at DashboardLayout (app/(dashboard)/layout.tsx:28:13)
+  25 |
+  26 | export function DashboardHeader({ title }: DashboardHeaderProps) {
+> 27 |   const [companies, setCompanies] = useState<CompanyOption[]>([])
+     |                                     ^
+  28 |   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBr...
+  29 |   const { user, logout } = useAuth()
+  30 |   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageS...
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: useGarageStore is not defined
+    at DashboardHeader (components/dashboard/header.tsx:31:81)
+    at DashboardLayout (app/(dashboard)/layout.tsx:28:13)
+  29 | ...anch, setSelectedCompany, setSelectedBranch } = useBranch()
+  30 | ...
+> 31 | ...tionAsRead, markAllNotificationsAsRead } = useGarageStore()
+     |                                               ^
+  32 | ...
+  33 | ...
+  34 | ... {
+[browser] Uncaught ReferenceError: useGarageStore is not defined
+    at DashboardHeader (components/dashboard/header.tsx:31:81)
+    at DashboardLayout (app/(dashboard)/layout.tsx:28:13)
+  29 | ...anch, setSelectedCompany, setSelectedBranch } = useBranch()
+  30 | ...
+> 31 | ...tionAsRead, markAllNotificationsAsRead } = useGarageStore()
+     |                                               ^
+  32 | ...
+  33 | ...
+  34 | ... {

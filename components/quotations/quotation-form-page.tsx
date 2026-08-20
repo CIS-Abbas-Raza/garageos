@@ -544,13 +544,10 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     vehicles,
     estimations,
     settings,
-<<<<<<< HEAD
-=======
     addEstimation,
     addCustomer,
     addVehicle,
     updateEstimation,
->>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
   } = useGarageStore()
   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
   const [apiQuotation, setApiQuotation] = useState<any>()
@@ -766,6 +763,8 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       setValue('vehicleId', preselectedVehicleId, { shouldDirty: false, shouldValidate: true })
     }
   }, [mode, preselectedVehicleId, setValue])
+
+  useEffect(() => {
     if (!currentCompany?.id || customers.length > 0) return
 
     const customerId = addCustomer({
