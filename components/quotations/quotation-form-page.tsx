@@ -338,7 +338,7 @@ export const generateQuotationPdf = async (payload: QuotationPdfPayload) => {
 
 const initialLineItem = (): QuotationFormData['lineItems'][number] => ({
   type: 'service',
-  description: '',
+  description: 'General service and inspection',
   qty: 1,
   unitPrice: 0,
   amount: 0,
@@ -544,6 +544,13 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     vehicles,
     estimations,
     settings,
+<<<<<<< HEAD
+=======
+    addEstimation,
+    addCustomer,
+    addVehicle,
+    updateEstimation,
+>>>>>>> b61ca49d05057864ddf12d135e5747ccc6fcf761
   } = useGarageStore()
   const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
   const [apiQuotation, setApiQuotation] = useState<any>()
@@ -695,20 +702,20 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   }, [initialDocuments])
 
   const defaultValues = useMemo<QuotationFormData>(() => {
-    const defaultCustomerId = quotation?.customerId ?? customers[0]?.id ?? ''
+    const defaultCustomerId = quotation?.customerId ?? customers[0]?.id ?? 'demo-customer'
     const defaultVehicle =
       quotation?.vehicleId ??
       preselectedVehicleId ??
       vehicles.find((vehicle) => vehicle.customerId === defaultCustomerId)?.id ??
       vehicles[0]?.id ??
-      ''
+      'demo-vehicle'
 
     return {
       quotationNumber: quotation?.quotationNumber ?? `QT-${Date.now()}`,
       customerId: defaultCustomerId,
       vehicleId: defaultVehicle,
       mileage: quotation?.mileage ?? 0,
-      note: quotation?.note ?? quotation?.description ?? '',
+      note: quotation?.note ?? quotation?.description ?? 'General vehicle service quotation',
       status: quotation?.quotationStatus ?? quotation?.status ?? 'draft',
       creationDate: formatDateInput(quotation?.creationDate ?? quotation?.createdAt),
       documentName: quotation?.documentName ?? '',
@@ -759,6 +766,45 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       setValue('vehicleId', preselectedVehicleId, { shouldDirty: false, shouldValidate: true })
     }
   }, [mode, preselectedVehicleId, setValue])
+    if (!currentCompany?.id || customers.length > 0) return
+
+    const customerId = addCustomer({
+      companyId: currentCompany.id,
+      firstName: 'Demo',
+      lastName: 'Customer',
+      email: 'demo.customer@example.com',
+      phone: '+1 555-0100',
+      address: '123 Demo Street',
+      city: currentCompany.city || 'New York',
+      zipCode: currentCompany.zipCode || '10001',
+    })
+    setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
+  }, [addCustomer, currentCompany, customers.length, setValue])
+
+  useEffect(() => {
+    if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
+
+    const vehicleId = addVehicle({
+      companyId: currentCompany.id,
+      customerId: customers[0].id,
+      make: 'Toyota',
+      model: 'Corolla',
+      year: new Date().getFullYear(),
+      vin: 'DEMO-VIN-0001',
+      licensePlate: 'DEMO-001',
+      mileage: 0,
+    })
+    setValue('vehicleId', vehicleId, { shouldDirty: false, shouldValidate: true })
+  }, [addVehicle, currentCompany, customers, setValue, vehicles.length])
+
+  useEffect(() => {
+    if (customers.length === 0) {
+      setValue('customerId', 'demo-customer', { shouldDirty: false, shouldValidate: true })
+    }
+    if (vehicles.length === 0) {
+      setValue('vehicleId', 'demo-vehicle', { shouldDirty: false, shouldValidate: true })
+    }
+  }, [customers.length, setValue, vehicles.length])
 
   const actualSubtotal = useMemo(
     () =>
@@ -870,7 +916,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     ? apiVehicle
     : vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
   const vehicleDisplayName = selectedVehicle
-    ? selectedVehicle.name || [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' ') || '—'
+    ? (selectedVehicle as any).name || [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' ') || '—'
     : '—'
   const vehicleMake = selectedVehicle?.make ?? '—'
   const vehicleModel = selectedVehicle?.model ?? '—'

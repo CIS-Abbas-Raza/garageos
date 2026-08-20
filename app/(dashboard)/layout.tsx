@@ -24,9 +24,9 @@ export default function DashboardLayout({
       <BranchProvider>
         <div className="flex h-screen overflow-hidden bg-background">
           <DashboardSidebar />
-          <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <DashboardHeader title="GarageOS" />
-            <main className="flex-1 overflow-y-auto">
+            <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
               {children}
             </main>
           </div>

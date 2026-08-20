@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/lib/auth-context'
 import {
   BarChart3,
@@ -27,6 +28,7 @@ import {
   Truck,
   UserCog,
   UserRoundCog,
+  UserRoundCheck,
   Users,
   Wrench,
   Image,
@@ -77,6 +79,7 @@ const menuSections = [
     label: 'Other',
     icon: Settings,
     items: [
+      { href: '/notifications', label: 'Notifications', icon: Bell },
       { href: '/sms-settings', label: 'SMS Setting', icon: Bell },
       { href: '/whatsapp-settings', label: 'WhatsApp Setting', icon: Bell },
       { href: '/email-settings', label: 'Email Setting (SendGrid)', icon: Bell },
@@ -259,26 +262,19 @@ export function DashboardSidebar() {
 
         {/* BOTTOM USER PANEL */}
         <div className="border-t border-sidebar-border p-3 mt-auto">
-          <div className={`flex items-center gap-3 rounded-lg bg-sidebar-accent/40 p-2 ${collapsed ? 'justify-center' : ''}`}>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-              {initials}
-            </span>
-            <div className={`${collapsed ? 'hidden' : 'min-w-0'} flex-1`}>
-              <p className="truncate text-xs font-semibold text-foreground">{displayName}</p>
-              <p className="truncate text-[10px] text-muted-foreground">{displayEmail}</p>
-            </div>
-            {!collapsed && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSignOut}
-                className="size-7 text-muted-foreground hover:text-foreground hover:bg-destructive/10"
-                aria-label="Sign out"
-              >
-                <LogOut className="size-3.5" />
-              </Button>
-            )}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger className={`flex w-full items-center gap-3 rounded-lg bg-sidebar-accent/40 p-2 text-left outline-none hover:bg-sidebar-accent ${collapsed ? 'justify-center' : ''}`} aria-label="Account menu">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</span>
+              <span className={`${collapsed ? 'hidden' : 'min-w-0'} flex-1`}><span className="block truncate text-xs font-semibold text-foreground">{displayName}</span><span className="block truncate text-[10px] text-muted-foreground">{displayEmail}</span></span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-64">
+              <div className="flex items-center gap-3 border-b border-border px-2 pb-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</span><div className="min-w-0"><p className="truncate text-xs font-semibold">{displayName}</p><p className="truncate text-[10px] text-muted-foreground">{displayEmail}</p></div></div>
+              <DropdownMenuItem onClick={() => router.push('/settings/profile')} className="mt-2 cursor-pointer gap-2"><UserRoundCheck className="size-4 text-primary" /> Profile Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/my-notifications')} className="cursor-pointer gap-2"><Bell className="size-4 text-primary" /> Notifications</DropdownMenuItem>
+              <div className="my-2 border-t border-border" />
+              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive"><LogOut className="size-4" /> Log out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
     </>

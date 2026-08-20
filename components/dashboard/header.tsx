@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin } from 'lucide-react'
+import Link from 'next/link'
+import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin, UserRound, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useBranch } from '@/lib/branch-context'
@@ -26,7 +26,8 @@ interface CompanyOption {
 export function DashboardHeader({ title }: DashboardHeaderProps) {
   const [companies, setCompanies] = useState<CompanyOption[]>([])
   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBranch()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+  const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageStore()
 
   useEffect(() => {
     const loadCompanies = async () => {
@@ -65,6 +66,11 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     { id: 'b2', name: 'Iqbal Branch' },
   ]
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
+  const companyId = user?.roles.find((role) => role.scopeId)?.scopeId
+  const relevantNotifications = notifications
+    .filter((notification) => notification.status !== 0 && (!notification.recipientType || notification.recipientType === 'all' || (notification.recipientType === 'company' && notification.recipientId === companyId) || (notification.recipientType === 'user' && notification.recipientId === user?.id)))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const unreadCount = relevantNotifications.filter((notification) => !notification.read && !notification.reads?.some((read) => read.userId === user?.id && read.isRead)).length
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -137,29 +143,26 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
         <div className="ml-auto flex items-center gap-0.5 shrink-0">
 
           {/* Notification bell */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative size-9 text-foreground hover:bg-muted/60"
-            aria-label="Notifications"
-          >
-            <Bell className="size-[18px]" />
-            <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-destructive ring-2 ring-background" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="relative inline-flex size-9 items-center justify-center rounded-lg text-foreground outline-none hover:bg-muted/60" aria-label="Notifications">
+              <Bell className="size-[18px]" />
+              {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground ring-2 ring-background">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 p-0">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><p className="text-sm font-semibold">Notifications</p><p className="text-xs text-muted-foreground">{unreadCount} unread</p></div><button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline" onClick={() => markAllNotificationsAsRead(user?.id)}><CheckCheck className="size-3.5" /> Mark all</button></div>
+              <div className="max-h-80 overflow-y-auto">{relevantNotifications.slice(0, 5).map((notification) => { const read = notification.read || notification.reads?.some((item) => item.userId === user?.id && item.isRead); return <button type="button" key={notification.id} onClick={() => markNotificationAsRead(notification.id, user?.id)} className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left hover:bg-muted/40"><span className={`mt-1 size-2 shrink-0 rounded-full ${read ? 'bg-muted' : 'bg-primary'}`} /><span className="min-w-0 flex-1"><span className={`block truncate text-xs ${read ? 'font-medium' : 'font-bold'}`}>{notification.title}</span><span className="mt-0.5 block line-clamp-2 text-xs text-muted-foreground">{notification.message}</span><span className="mt-1 block text-[10px] text-muted-foreground">{new Date(notification.createdAt).toLocaleString()}</span></span></button> })}{relevantNotifications.length === 0 && <p className="px-4 py-8 text-center text-xs text-muted-foreground">You are all caught up.</p>}</div>
+              <div className="p-2"><Link href="/my-notifications" className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-primary hover:bg-primary/10">View All</Link></div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Dark / light toggle */}
           <ThemeToggle />
 
           {/* Logout */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSignOut}
-            className="size-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            aria-label="Sign out"
-          >
-            <LogOut className="size-[18px]" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground" aria-label="User menu"><UserRound className="size-[18px]" /></DropdownMenuTrigger>
+            <DropdownMenuContent align="end"><DropdownMenuItem onClick={() => { window.location.href = '/settings/profile' }} className="cursor-pointer gap-2"><UserRound className="size-4" /> Profile Settings</DropdownMenuItem><DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive"><LogOut className="size-4" /> Sign out</DropdownMenuItem></DropdownMenuContent>
+          </DropdownMenu>
 
         </div>
       </div>

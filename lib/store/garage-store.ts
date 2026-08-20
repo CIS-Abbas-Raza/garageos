@@ -119,10 +119,12 @@ interface GarageStore {
   // Notifications
   notifications: Types.Notification[]
   addNotification: (notification: Omit<Types.Notification, 'id' | 'createdAt'>) => string
-  markNotificationAsRead: (id: string) => void
+  updateNotification: (id: string, data: Partial<Types.Notification>) => void
+  markNotificationAsRead: (id: string, userId?: string) => void
+  markAllNotificationsAsRead: (userId?: string) => void
   deleteNotification: (id: string) => void
   clearAllNotifications: () => void
-  getUnreadNotifications: () => Types.Notification[]
+  getUnreadNotifications: (userId?: string) => Types.Notification[]
 
   // Reviews
   reviews: Types.Review[]
@@ -505,13 +507,44 @@ export const useGarageStore = create<GarageStore>()(
       addNotification: (notification) => {
         const id = generateId()
         set((state) => ({
-          notifications: [...state.notifications, { ...notification, id, createdAt: new Date() } as Types.Notification],
+          notifications: [...state.notifications, { ...notification, id, status: notification.status ?? 1, reads: [], createdAt: new Date() } as Types.Notification],
         }))
         return id
       },
-      markNotificationAsRead: (id) =>
+      updateNotification: (id, data) =>
         set((state) => ({
-          notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          notifications: state.notifications.map((notification) =>
+            notification.id === id ? { ...notification, ...data } : notification,
+          ),
+        })),
+      markNotificationAsRead: (id, userId = 'anonymous') =>
+        set((state) => ({
+          notifications: state.notifications.map((notification) => {
+            if (notification.id !== id) return notification
+            const reads = notification.reads ?? []
+            const existing = reads.find((read) => read.userId === userId)
+            return {
+              ...notification,
+              read: userId === 'anonymous' ? true : notification.read,
+              reads: existing
+                ? reads.map((read) => read.userId === userId ? { ...read, isRead: true, readAt: new Date() } : read)
+                : [...reads, { notificationId: id, userId, isRead: true, readAt: new Date() }],
+            }
+          }),
+        })),
+      markAllNotificationsAsRead: (userId = 'anonymous') =>
+        set((state) => ({
+          notifications: state.notifications.map((notification) => {
+            const reads = notification.reads ?? []
+            if (userId === 'anonymous') return { ...notification, read: true }
+            const existing = reads.find((read) => read.userId === userId)
+            return {
+              ...notification,
+              reads: existing
+                ? reads.map((read) => read.userId === userId ? { ...read, isRead: true, readAt: new Date() } : read)
+                : [...reads, { notificationId: notification.id, userId, isRead: true, readAt: new Date() }],
+            }
+          }),
         })),
       deleteNotification: (id) =>
         set((state) => ({
@@ -521,7 +554,11 @@ export const useGarageStore = create<GarageStore>()(
         set((state) => ({
           notifications: state.notifications.filter((n) => !n.read),
         })),
-      getUnreadNotifications: () => get().notifications.filter((n) => !n.read),
+      getUnreadNotifications: (userId = 'anonymous') => get().notifications.filter((notification) => {
+        if (notification.status === 0) return false
+        if (userId === 'anonymous') return !notification.read
+        return !notification.reads?.some((read) => read.userId === userId && read.isRead)
+      }),
 
       // Reviews
       reviews: [],

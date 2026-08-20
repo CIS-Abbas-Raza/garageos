@@ -25,6 +25,9 @@ export interface AuthUser {
   phoneNumber?: string | null
   permissions: string[]
   roles: RoleAssignment[]
+  address?: string | null
+  country?: string | null
+  profilePhoto?: string | null
 }
 
 // Mock credentials — accepted by the mock login
@@ -134,6 +137,38 @@ export async function me(): Promise<{
     return { success: true, user: JSON.parse(stored) as AuthUser }
   }
   return { success: false, user: null }
+}
+
+export async function updateProfile(
+  userId: string,
+  data: Pick<AuthUser, "userName" | "email" | "phoneNumber" | "address" | "country" | "profilePhoto">,
+): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+  await new Promise((resolve) => setTimeout(resolve, 250))
+  const stored = localStorage.getItem("currentUser")
+  if (!stored) return { success: false, message: "Your session has expired." }
+  const user = JSON.parse(stored) as AuthUser
+  if (user.id !== userId) return { success: false, message: "Unable to update this profile." }
+  const updated = { ...user, ...data }
+  localStorage.setItem("currentUser", JSON.stringify(updated))
+  return { success: true, user: updated }
+}
+
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ success: boolean; message?: string }> {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  const stored = localStorage.getItem("currentUser")
+  if (!stored) return { success: false, message: "Your session has expired." }
+  const user = JSON.parse(stored) as AuthUser
+  if (user.id !== userId) return { success: false, message: "Unable to update this password." }
+
+  const storedPassword = localStorage.getItem(`mockPassword:${userId}`) ?? (user.email === "admin@garageos.com" ? "password" : "password")
+  if (currentPassword !== storedPassword) return { success: false, message: "Current password is incorrect." }
+  localStorage.setItem(`mockPassword:${userId}`, newPassword)
+  localStorage.setItem("currentUser", JSON.stringify({ ...user, isPasswordChanged: true }))
+  return { success: true }
 }
 
 // ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Image } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -169,6 +169,13 @@ export default function TaskCardsListingPage() {
                             >
                               <Receipt className="size-4 text-emerald-600" />
                               Invoice
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/task-cards/${card.id}/vehicle-pictures`)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Image className="size-4 text-primary" />
+                              Vehicle Pictures
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDelete(card.id, (card as any).taskCardNumber || card.title)}

@@ -475,3 +475,40 @@ Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', test
  GET /quotations/edit/2?vehicle_id=4 500 in 1203ms
  GET /quotations?vehicle_id=4 500 in 222ms (next.js: 77ms, application-code: 144ms)
  GET /quotations?vehicle_id=4 500 in 312ms (next.js: 180ms, application-code: 132ms)
+○ Compiling /quotations ...
+ GET /quotations/edit/2?vehicle_id=4 200 in 32.3s (next.js: 13.9s, application-code: 18.4s)
+ GET /quotations?vehicle_id=4 200 in 36.1s (next.js: 26.9s, application-code: 9.2s)
+ GET /quotations?vehicle_id=4 200 in 36.2s (next.js: 26.1s, application-code: 10.1s)
+ GET /quotations?vehicle_id=4 200 in 46s (next.js: 37.9s, application-code: 8.4s)
+ GET /quotations/edit/2?vehicle_id=4 200 in 9.0s (next.js: 8.0s, application-code: 957ms)
+✓ Finished writing to filesystem cache in 30.1s
+ GET /quotations?vehicle_id=4 500 in 58s (next.js: 46s, application-code: 11.7s)
+ GET /quotations?vehicle_id=4 500 in 65s (next.js: 53s, application-code: 11.3s)
+ GET /quotations?vehicle_id=4 500 in 58s (next.js: 48s, application-code: 10.3s)
+ GET /quotations?vehicle_id=4 500 in 65s (next.js: 58s, application-code: 6.6s)
+ GET /quotations?vehicle_id=4 500 in 58s (next.js: 54s, application-code: 4.2s)
+ GET /quotations?vehicle_id=4 500 in 54s (next.js: 50s, application-code: 3.9s)
+ GET /quotations?vehicle_id=4 500 in 46s (next.js: 45s, application-code: 1224ms)
+ GET /quotations?vehicle_id=4 500 in 46s (next.js: 45s, application-code: 1100ms)
+ GET /quotations?vehicle_id=4 500 in 46s (next.js: 45s, application-code: 895ms)
+ GET /quotations?vehicle_id=4 500 in 46s (next.js: 46s, application-code: 118ms)
+ GET /quotations?vehicle_id=4 500 in 61s (next.js: 61s, application-code: 189ms)
+ GET /quotations?vehicle_id=4 500 in 61s (next.js: 61s, application-code: 75ms)
+✓ Finished writing to filesystem cache in 84s
+ GET /quotations?vehicle_id=4 500 in 88s (next.js: 65s, application-code: 23.7s)
+ GET /quotations?vehicle_id=4 500 in 89s (next.js: 65s, application-code: 23.5s)
+ GET /quotations?vehicle_id=4 500 in 89s (next.js: 65s, application-code: 23.3s)
+ GET /quotations?vehicle_id=4 500 in 89s (next.js: 65s, application-code: 23.1s)
+ GET /quotations?vehicle_id=4 500 in 74s (next.js: 53s, application-code: 20.7s)
+ GET /quotations?vehicle_id=4 500 in 74s (next.js: 60s, application-code: 14.2s)
+✓ Compiled in 199.6s
+✓ Finished filesystem cache database compaction in 48s
+ GET /quotations?vehicle_id=4 500 in 1277ms (next.js: 596ms, application-code: 682ms)
+ GET /quotations?vehicle_id=4 500 in 1333ms (next.js: 717ms, application-code: 615ms)
+ GET /quotations?vehicle_id=4 500 in 1329ms (next.js: 863ms, application-code: 465ms)
+ GET /quotations?vehicle_id=4 500 in 1334ms (next.js: 1015ms, application-code: 319ms)
+ GET /quotations?vehicle_id=4 500 in 1346ms (next.js: 1123ms, application-code: 224ms)
+ GET /quotations?vehicle_id=4 500 in 1369ms (next.js: 1203ms, application-code: 166ms)
+✓ Finished filesystem cache database compaction in 40s
+ GET /quotations?vehicle_id=4 500 in 5.8s (next.js: 5.6s, application-code: 194ms)
+✓ Finished writing to filesystem cache in 17.8s

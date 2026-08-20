@@ -6,6 +6,8 @@ import {
   logout as apiLogout,
   me as apiMe,
   setTokens,
+  updateProfile as apiUpdateProfile,
+  changePassword as apiChangePassword,
   clearTokens,
   RoleScope,
 } from "./api"
@@ -21,6 +23,8 @@ interface AuthContextType {
   loginAdmin: (email: string, password: string) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
+  updateProfile: (data: Parameters<typeof apiUpdateProfile>[1]) => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -153,6 +157,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const updateProfile = async (data: Parameters<typeof apiUpdateProfile>[1]) => {
+    if (!user) throw new Error("You must be signed in to update your profile.")
+    const result = await apiUpdateProfile(user.id, data)
+    if (!result.success || !result.user) throw new Error(result.message ?? "Profile update failed.")
+    setUser(result.user)
+  }
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    if (!user) throw new Error("You must be signed in to change your password.")
+    const result = await apiChangePassword(user.id, currentPassword, newPassword)
+    if (!result.success) throw new Error(result.message ?? "Password update failed.")
+    setUser((current) => current ? { ...current, isPasswordChanged: true } : current)
+  }
+
   const isSuperAdmin =
     user?.roles?.some(
       (r) => r.roleTypeName === "System" || r.roleName === "Super Admin"
@@ -172,6 +190,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         requiresPasswordChange,
         roleScope,
         refreshUser,
+        updateProfile,
+        changePassword,
       }}
     >
       {children}
