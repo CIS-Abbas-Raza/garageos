@@ -10,6 +10,7 @@ import {
   Building2,
   Download,
   Edit3,
+  Eye,
   FileText,
   Pencil,
   Plus,
@@ -21,6 +22,7 @@ import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,7 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { quotationSchema, type QuotationFormData } from '@/lib/schemas'
 import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
-import type { Estimation, LineItem as StoreLineItem } from '@/lib/types/store'
+import type { LineItem as StoreLineItem } from '@/lib/types/store'
 import { cn } from '@/lib/utils'
 
 type QuotationMode = 'create' | 'edit'
@@ -115,7 +117,7 @@ type PdfQuotationLineItem = {
   unitPrice: number
 }
 
-type QuotationPdfPayload = {
+export type QuotationPdfPayload = {
   companyName: string
   companyEmail: string
   companyCountry: string
@@ -147,7 +149,7 @@ type QuotationPdfPayload = {
   total: number
 }
 
-const generateQuotationPdf = async (payload: QuotationPdfPayload) => {
+export const generateQuotationPdf = async (payload: QuotationPdfPayload) => {
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -535,23 +537,119 @@ function QuotationPrintView({
 export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps) {
   const router = useRouter()
   const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const {
     companies,
     customers,
     vehicles,
     estimations,
     settings,
-    addEstimation,
-    updateEstimation,
   } = useGarageStore()
+  const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
+  const [apiQuotation, setApiQuotation] = useState<any>()
+  const [apiVehicle, setApiVehicle] = useState<any>()
+  const [apiCustomer, setApiCustomer] = useState<any>()
+  const [apiCompany, setApiCompany] = useState<any>()
+  const [isQuotationLoading, setIsQuotationLoading] = useState(mode === 'edit')
 
-  const quotation = useMemo(
-    () => (mode === 'edit' && quotationId ? estimations.find((item) => item.id === quotationId) : undefined),
-    [mode, quotationId, estimations],
+  useEffect(() => {
+    setPreselectedVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
+  }, [])
+
+  useEffect(() => {
+    if (mode !== 'edit' || !quotationId) return
+
+    const loadQuotation = async () => {
+      try {
+        const response = await fetch(`/backend-api/quotations/${quotationId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load quotation.')
+        }
+        const record = result.data
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${record.vehicle_id}`)
+        const vehicleResult = await vehicleResponse.json()
+        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+        }
+
+        const vehicle = vehicleResult.data
+        const customerId = vehicle.customer_id ?? vehicle.customerId
+        setApiVehicle(vehicle)
+
+        if (customerId) {
+          const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
+          const customerResult = await customerResponse.json()
+          if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+            throw new Error(customerResult.message || 'Unable to load customer details.')
+          }
+          setApiCustomer(customerResult.data)
+        }
+
+        setApiQuotation({
+          ...record,
+          companyId: record.company_id,
+          customerId: customerId ? String(customerId) : undefined,
+          vehicleId: String(record.vehicle_id),
+          quotationNumber: record.quotation_number,
+          note: record.note,
+          quotationStatus: record.quotation_status,
+          creationDate: record.creation_date,
+          documentNames: (record.documents ?? []).map((document: any) => document.document),
+          lineItems: (record.details ?? []).map((detail: any) => ({
+            id: String(detail.id),
+            type: detail.type === 'service' ? 'labour' : 'parts',
+            description: detail.description ?? '',
+            quantity: Number(detail.qty ?? 0),
+            unitPrice: Number(detail.unit_price ?? 0),
+            total: Number(detail.qty ?? 0) * Number(detail.unit_price ?? 0),
+          })),
+        })
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load quotation.')
+      } finally {
+        setIsQuotationLoading(false)
+      }
+    }
+
+    void loadQuotation()
+  }, [mode, quotationId])
+
+  const quotation = useMemo<any>(
+    () => (mode === 'edit' && quotationId ? apiQuotation ?? estimations.find((item) => item.id === quotationId) : undefined),
+    [mode, quotationId, apiQuotation, estimations],
   )
 
   const activeCompanies = companies.length > 0 ? companies : defaultCompanies
-  const currentCompany = activeCompanies.find((company) => company.id === selectedCompany) ?? activeCompanies[0]
+  const companyId = quotation?.companyId ? String(quotation.companyId) : selectedCompany ?? activeCompanies[0]?.id
+
+  useEffect(() => {
+    if (!companyId) {
+      setApiCompany(undefined)
+      return
+    }
+
+    let cancelled = false
+    const loadCompany = async () => {
+      try {
+        const response = await fetch(`/backend-api/companies/${companyId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load company details.')
+        }
+        if (!cancelled) setApiCompany(result.data)
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load company details.')
+      }
+    }
+
+    void loadCompany()
+    return () => { cancelled = true }
+  }, [companyId])
+
+  const currentCompany = apiCompany?.id && String(apiCompany.id) === String(companyId)
+    ? apiCompany
+    : activeCompanies.find((company) => company.id === companyId) ?? activeCompanies[0]
   const currentSettings = currentCompany?.id ? settings[currentCompany.id] : undefined
   const rawCompanyLogo =
     currentSettings?.logoUrl ??
@@ -569,7 +667,13 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     .join(', ') || '—'
   const companyRegNo = (currentCompany as any)?.registration_no ?? (currentCompany as any)?.registrationNo ?? '—'
 
-  const [includeLineItems, setIncludeLineItems] = useState<boolean>(() => (quotation as any)?.includeLineItems ?? true)
+  const [includeLineItems, setIncludeLineItems] = useState<boolean>(() => (quotation as any)?.includeLineItems ?? false)
+
+  // On edit, enable the section only when the saved quotation has details.
+  useEffect(() => {
+    const hasDetails = Boolean(quotation?.lineItems?.length)
+    setIncludeLineItems((current) => current === hasDetails ? current : hasDetails)
+  }, [quotation])
 
   const initialDocuments = useMemo<string[]>(() => {
     if ((quotation as any)?.documentNames && Array.isArray((quotation as any).documentNames)) {
@@ -582,11 +686,19 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   }, [quotation])
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>(initialDocuments)
+  // Keep the browser File objects separately from their display names. Names alone
+  // cannot be uploaded in a multipart request.
+  const [documentFiles, setDocumentFiles] = useState<File[]>([])
+
+  useEffect(() => {
+    setUploadedFiles(initialDocuments)
+  }, [initialDocuments])
 
   const defaultValues = useMemo<QuotationFormData>(() => {
     const defaultCustomerId = quotation?.customerId ?? customers[0]?.id ?? ''
     const defaultVehicle =
       quotation?.vehicleId ??
+      preselectedVehicleId ??
       vehicles.find((vehicle) => vehicle.customerId === defaultCustomerId)?.id ??
       vehicles[0]?.id ??
       ''
@@ -600,17 +712,17 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       status: quotation?.quotationStatus ?? quotation?.status ?? 'draft',
       creationDate: formatDateInput(quotation?.creationDate ?? quotation?.createdAt),
       documentName: quotation?.documentName ?? '',
-      taxPercentage: quotation?.taxPercentage ?? 10,
+      taxPercentage: quotation?.taxPercentage ?? 0,
       discountPercentage: quotation?.discountPercentage ?? 0,
       subtotal: quotation?.subtotal ?? 0,
       taxAmount: quotation?.taxAmount ?? quotation?.tax ?? 0,
       discountAmount: quotation?.discountAmount ?? quotation?.discount ?? 0,
       total: quotation?.total ?? 0,
-      lineItems: quotation?.lineItems?.length
-        ? quotation.lineItems.map((item) => normalizeLineItem(item as any))
-        : [initialLineItem()],
+      lineItems: includeLineItems && quotation?.lineItems?.length
+        ? quotation.lineItems.map((item: any) => normalizeLineItem(item))
+        : includeLineItems ? [initialLineItem()] : [],
     }
-  }, [quotation, customers, vehicles])
+  }, [quotation, customers, vehicles, preselectedVehicleId, includeLineItems])
 
   const {
     register,
@@ -619,6 +731,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     setValue,
     getValues,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<QuotationFormData>({
     resolver: zodResolver(quotationSchema) as any,
@@ -626,7 +739,11 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     mode: 'onChange',
   })
 
-  const { fields, append, remove, update } = useFieldArray({
+  useEffect(() => {
+    if (quotation) reset(defaultValues)
+  }, [quotation, defaultValues, reset])
+
+  const { fields, append, remove, replace, update } = useFieldArray({
     control,
     name: 'lineItems',
   })
@@ -636,6 +753,12 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   const watchedVehicleId = useWatch({ control, name: 'vehicleId' })
   const watchedTaxPercentage = Number(useWatch({ control, name: 'taxPercentage' }) ?? 0)
   const watchedDiscountPercentage = Number(useWatch({ control, name: 'discountPercentage' }) ?? 0)
+
+  useEffect(() => {
+    if (mode === 'create' && preselectedVehicleId) {
+      setValue('vehicleId', preselectedVehicleId, { shouldDirty: false, shouldValidate: true })
+    }
+  }, [mode, preselectedVehicleId, setValue])
 
   const actualSubtotal = useMemo(
     () =>
@@ -662,8 +785,65 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     }
   }, [customers, watchedCustomerId, setValue])
 
-  const selectedCustomer = customers.find((customer) => customer.id === watchedCustomerId)
-  const customerDisplayName = formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
+  useEffect(() => {
+    if (!watchedVehicleId) {
+      setApiVehicle(undefined)
+      return
+    }
+
+    let cancelled = false
+    const loadVehicle = async () => {
+      try {
+        const response = await fetch(`/backend-api/vehicles/${watchedVehicleId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load vehicle details.')
+        }
+        if (cancelled) return
+
+        const vehicle = result.data
+        setApiVehicle(vehicle)
+        const customerId = vehicle.customer_id ?? vehicle.customerId
+        if (customerId && String(customerId) !== watchedCustomerId) {
+          setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
+        }
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load vehicle details.')
+      }
+    }
+
+    void loadVehicle()
+    return () => { cancelled = true }
+  }, [watchedVehicleId, watchedCustomerId, setValue])
+
+  useEffect(() => {
+    if (!watchedCustomerId) {
+      setApiCustomer(undefined)
+      return
+    }
+
+    let cancelled = false
+    const loadCustomer = async () => {
+      try {
+        const response = await fetch(`/backend-api/customers/${watchedCustomerId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load customer details.')
+        }
+        if (!cancelled) setApiCustomer(result.data)
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load customer details.')
+      }
+    }
+
+    void loadCustomer()
+    return () => { cancelled = true }
+  }, [watchedCustomerId])
+
+  const selectedCustomer = apiCustomer?.id && String(apiCustomer.id) === watchedCustomerId
+    ? apiCustomer
+    : customers.find((customer) => customer.id === watchedCustomerId)
+  const customerDisplayName = selectedCustomer?.name ?? formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
   const customerEmail = selectedCustomer?.email ?? '—'
   const customerPhone = selectedCustomer?.phone ?? '—'
   const customerAddress = selectedCustomer?.address ?? '—'
@@ -677,14 +857,18 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   )
 
   useEffect(() => {
+    if (apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId) return
+    if (mode === 'create' && preselectedVehicleId === watchedVehicleId) return
     if (filteredVehicles.length === 0) return
     const currentVehicle = filteredVehicles.find((vehicle) => vehicle.id === watchedVehicleId)
     if (!currentVehicle) {
       setValue('vehicleId', filteredVehicles[0].id, { shouldDirty: false, shouldValidate: true })
     }
-  }, [filteredVehicles, watchedVehicleId, setValue])
+  }, [apiVehicle, filteredVehicles, mode, preselectedVehicleId, watchedVehicleId, setValue])
 
-  const selectedVehicle = vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
+  const selectedVehicle = apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId
+    ? apiVehicle
+    : vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
   const vehicleDisplayName = selectedVehicle
     ? selectedVehicle.name || [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' ') || '—'
     : '—'
@@ -694,6 +878,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   const vehicleYear = selectedVehicle?.year ? String(selectedVehicle.year) : '—'
   const vehicleVin = selectedVehicle?.vin ?? (selectedVehicle as any)?.VIN ?? '—'
   const vehicleLicensePlate = selectedVehicle?.licensePlate ?? (selectedVehicle as any)?.license_plate ?? '—'
+  const vehicleInsured = Number((selectedVehicle as any)?.insured) === 1 ? 'Yes' : 'No'
 
   useEffect(() => {
     watchedLineItems.forEach((item, index) => {
@@ -781,8 +966,9 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     })
   }
 
-  const onSubmit = (values: QuotationFormData) => {
-    if (!currentCompany?.id) {
+  const onSubmit = async (values: QuotationFormData) => {
+    const saveCompanyId = quotation?.companyId ?? selectedCompany ?? currentCompany?.id
+    if (!saveCompanyId) {
       toast.error('Please select a company before saving this quotation.')
       return
     }
@@ -798,40 +984,64 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
         }))
       : []
 
-    const payload: Omit<Estimation, 'id' | 'createdAt'> = {
-      companyId: currentCompany.id,
-      customerId: values.customerId,
-      vehicleId: values.vehicleId,
-      description: values.note,
-      quotationNumber: values.quotationNumber,
-      mileage: values.mileage,
+    const apiPayload = {
+      quotation_number: values.quotationNumber,
+      company_id: saveCompanyId,
+      vehicle_id: values.vehicleId,
+      mileage: Number(values.mileage ?? 0),
       note: values.note,
-      creationDate: values.creationDate,
-      documentName: uploadedFiles[0] ?? '',
-      documentNames: uploadedFiles,
-      includeLineItems,
-      taxPercentage: includeLineItems ? values.taxPercentage : 0,
-      discountPercentage: includeLineItems ? values.discountPercentage : 0,
-      taxAmount: includeLineItems ? taxAmount : 0,
-      discountAmount: includeLineItems ? discountAmount : 0,
-      quotationStatus: values.status,
-      lineItems: normalizedItems,
+      quotation_status: values.status,
       subtotal: includeLineItems ? subtotal : 0,
-      tax: includeLineItems ? taxAmount : 0,
       discount: includeLineItems ? discountAmount : 0,
+      tax_amount: includeLineItems ? taxAmount : 0,
+      tax_percentage: includeLineItems ? values.taxPercentage : 0,
       total: includeLineItems ? total : 0,
-      status: values.status,
-    } as any
-
-    if (mode === 'edit' && quotationId) {
-      updateEstimation(quotationId, payload)
-      toast.success('Quotation updated successfully.')
-    } else {
-      addEstimation(payload)
-      toast.success('Quotation created successfully.')
+      creation_date: values.creationDate,
+      created_by: user?.id,
+      status: 1,
+      ...(includeLineItems
+        ? {
+            details: normalizedItems.map((item) => ({
+              type: item.type === 'labour' ? 'service' : 'parts',
+              description: item.description,
+              qty: item.quantity,
+              unit_price: item.unitPrice,
+              discount: 0,
+              tax: 0,
+              status: 1,
+              is_deleted: 0,
+            })),
+          }
+        // Sending an empty list on edit tells the API to soft-delete old details.
+        : mode === 'edit' ? { details: [] } : {}),
     }
 
-    router.push('/quotations')
+    const formData = new FormData()
+    Object.entries(apiPayload).forEach(([key, value]) => {
+      formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value ?? ''))
+    })
+    documentFiles.forEach((file) => formData.append('documents', file))
+
+    try {
+      const response = await fetch(`/backend-api/quotations${mode === 'edit' && quotationId ? `/${quotationId}` : ''}`, {
+        method: mode === 'edit' && quotationId ? 'PUT' : 'POST',
+        // Let the browser supply the multipart boundary. Multer receives files
+        // under the field name expected by the quotation routes: "documents".
+        body: formData,
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || 'Unable to save quotation.')
+      }
+      toast.success(`Quotation ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
+      router.push(`/quotations?vehicle_id=${encodeURIComponent(String(values.vehicleId))}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to save quotation.')
+    }
+  }
+
+  if (mode === 'edit' && isQuotationLoading) {
+    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">Loading quotation...</div>
   }
 
   if (mode === 'edit' && quotationId && !quotation) {
@@ -968,6 +1178,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   <p><span className="text-muted-foreground">Year: </span><span>{vehicleYear}</span></p>
                   <p><span className="text-muted-foreground">VIN: </span><span>{vehicleVin}</span></p>
                   <p><span className="text-muted-foreground">License Plate: </span><span>{vehicleLicensePlate}</span></p>
+                  <p><span className="text-muted-foreground">Insured: </span><span>{vehicleInsured}</span></p>
                 </div>
               </section>
             </div>
@@ -1054,6 +1265,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                       if (files.length > 0) {
                         const names = files.map((f) => f.name)
                         setUploadedFiles((prev) => Array.from(new Set([...prev, ...names])))
+                        setDocumentFiles((prev) => [...prev, ...files])
                       }
                     }}
                   />
@@ -1065,23 +1277,50 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                       Attached Documents ({uploadedFiles.length})
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {uploadedFiles.map((fileName, idx) => (
+                      {uploadedFiles.map((fileName, idx) => {
+                        // Persisted documents use their API URL; selected files use
+                        // a temporary browser URL until the quotation is saved.
+                        const documentUrl = quotation?.documents?.find((document: any) => document.document === fileName)?.url
+                        const selectedFile = documentFiles.find((file) => file.name === fileName)
+                        return (
                         <div
                           key={idx}
                           className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-sm"
                         >
                           <FileText className="size-4 text-primary shrink-0" />
                           <span className="max-w-[220px] truncate">{fileName}</span>
+                          {(documentUrl || selectedFile) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const url = documentUrl ?? URL.createObjectURL(selectedFile!)
+                                window.open(url, '_blank', 'noopener,noreferrer')
+                              }}
+                              className="inline-flex items-center gap-1 text-primary hover:underline"
+                              aria-label={`View ${fileName} in a new tab`}
+                            >
+                              <Eye className="size-3.5" />
+                              View
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => setUploadedFiles((prev) => prev.filter((_, i) => i !== idx))}
+                            onClick={() => {
+                              const removedName = fileName
+                              setUploadedFiles((prev) => prev.filter((_, i) => i !== idx))
+                              setDocumentFiles((prev) => {
+                                const fileIndex = prev.findIndex((file) => file.name === removedName)
+                                return fileIndex < 0 ? prev : prev.filter((_, i) => i !== fileIndex)
+                              })
+                            }}
                             className="text-muted-foreground hover:text-destructive transition-colors ml-1"
                             aria-label={`Remove ${fileName}`}
                           >
                             <Trash2 className="size-3.5" />
                           </button>
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -1117,7 +1356,15 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
-                    setIncludeLineItems((prev) => !prev)
+                    const nextValue = !includeLineItems
+                    setIncludeLineItems(nextValue)
+                    if (nextValue && fields.length === 0) {
+                      append(initialLineItem(), { shouldFocus: false })
+                    }
+                    if (!nextValue) {
+                      // Do not validate or submit detail rows while this section is off.
+                      replace([])
+                    }
                   }}
                   className="flex items-center gap-3 cursor-pointer select-none rounded-xl border border-border bg-muted/20 px-3.5 py-2 hover:bg-muted/40 transition-colors"
                 >

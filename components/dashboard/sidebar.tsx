@@ -57,9 +57,9 @@ const menuSections = [
     icon: Wrench,
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
-      { href: '/vehicles', label: 'Vehicles', icon: Truck },
-      { href: '/quotations', label: 'Quotation', icon: ClipboardList },
-      { href: '/task-cards', label: 'Task Cards', icon: FileText },
+      // { href: '/vehicles', label: 'Vehicles', icon: Truck },
+      // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
+      // { href: '/task-cards', label: 'Task Cards', icon: FileText },
       { href: '/appointments', label: 'Appointments', icon: Calendar },
       { href: '/reviews', label: 'Customer Review', icon: FileText },
     ],
@@ -69,7 +69,7 @@ const menuSections = [
     icon: CreditCard,
     items: [
       { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
-      { href: '/invoices', label: 'Invoices', icon: FileText },
+      // { href: '/invoices', label: 'Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
     ],
   },

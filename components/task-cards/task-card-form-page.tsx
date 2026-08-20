@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -55,14 +56,6 @@ const priorityOptions = [
   { label: 'Low', value: 'low' },
   { label: 'Medium', value: 'medium' },
   { label: 'High', value: 'high' },
-]
-
-const defaultMechanicsList = [
-  { id: 'm1', name: 'John Smith' },
-  { id: 'm2', name: 'Sarah Johnson' },
-  { id: 'm3', name: 'Mike Davis' },
-  { id: 'm4', name: 'Lisa Rodriguez' },
-  { id: 'm5', name: 'Unassigned' },
 ]
 
 const formatDateInput = (value?: string | Date) => {
@@ -129,51 +122,80 @@ const initialLineItem = (): TaskCardFormData['lineItems'][number] => ({
   description: '',
   qty: 1,
   status: 'pending',
-  assignedTo: 'John Smith',
+  assignedTo: '',
 })
 
 const normalizeLineItem = (item?: any): TaskCardFormData['lineItems'][number] => {
   return {
+    ...(item?.id ? { id: Number(item.id) } : {}),
     type: item?.type === 'parts' ? 'parts' : 'service',
     description: item?.description ?? '',
     qty: Number(item?.qty ?? item?.quantity ?? 1) || 1,
     status: (['pending', 'Inprogress', 'compeleted', 'cancelled'].includes(item?.status)
       ? item?.status
       : 'pending') as any,
-    assignedTo: item?.assignedTo ?? item?.mechanic ?? 'John Smith',
+    assignedTo: item?.assignments?.[0]?.user_id ? String(item.assignments[0].user_id) : (item?.assignedTo ?? item?.mechanic ?? ''),
   }
 }
 
 export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
   const router = useRouter()
   const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const {
     companies,
     customers,
     vehicles,
-    jobCards,
-    mechanics,
     settings,
-    addJobCard,
-    updateJobCard,
   } = useGarageStore()
+  const [apiTaskCard, setApiTaskCard] = useState<any>()
+  const [quotationId, setQuotationId] = useState<string | undefined>()
+  const [isTaskCardLoading, setIsTaskCardLoading] = useState(mode === 'edit')
+  const [companyUsers, setCompanyUsers] = useState<{ id: string; name: string }[]>([])
+  const [filledQuotationId, setFilledQuotationId] = useState<string | undefined>()
+  const [apiVehicle, setApiVehicle] = useState<any>()
+  const [apiCustomer, setApiCustomer] = useState<any>()
+  const [apiCompany, setApiCompany] = useState<any>()
 
   const TaskCard = useMemo(
-    () => (mode === 'edit' && taskCardId ? jobCards.find((item) => item.id === taskCardId) : undefined),
-    [mode, taskCardId, jobCards],
+    () => apiTaskCard,
+    [apiTaskCard],
   )
 
+  useEffect(() => {
+    setQuotationId(new URLSearchParams(window.location.search).get('quotation_id') ?? undefined)
+  }, [])
+
+  useEffect(() => {
+    if (mode !== 'edit' || !taskCardId) return
+    const loadTaskCard = async () => {
+      try {
+        const response = await fetch(`/backend-api/task-cards/${taskCardId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) throw new Error(result.message || 'Unable to load task card.')
+        setApiTaskCard(result.data)
+        setQuotationId(String(result.data.quotation_id))
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load task card.')
+      } finally {
+        setIsTaskCardLoading(false)
+      }
+    }
+    void loadTaskCard()
+  }, [mode, taskCardId])
+
   const activeCompanies = companies.length > 0 ? companies : defaultCompanies
-  const currentCompany = activeCompanies.find((company) => company.id === selectedCompany) ?? activeCompanies[0]
-  const currentSettings = currentCompany?.id ? settings[currentCompany.id] : undefined
+  const currentCompany = apiCompany ?? activeCompanies.find((company) => company.id === selectedCompany) ?? activeCompanies[0]
+  const companyForDetails = apiCompany ?? currentCompany
+  const currentSettings = companyForDetails?.id ? settings[companyForDetails.id] : undefined
   const rawCompanyLogo =
     currentSettings?.logoUrl ??
-    (currentCompany as { logoUrl?: string; logo?: string } | undefined)?.logoUrl ??
-    (currentCompany as { logoUrl?: string; logo?: string } | undefined)?.logo
+    (companyForDetails as { logoUrl?: string; logo?: string } | undefined)?.logoUrl ??
+    (companyForDetails as { logoUrl?: string; logo?: string } | undefined)?.logo
   const companyLogoUrl = isValidImageSource(rawCompanyLogo) ? rawCompanyLogo : undefined
-  const companyInitials = createLogoFallback(currentCompany?.name ?? 'Company')
+  const companyInitials = createLogoFallback(companyForDetails?.name ?? 'Company')
 
-  const companyName = currentCompany?.name ?? 'Company'
+  const companyName = companyForDetails?.name ?? 'Company'
   const companyEmail = currentCompany?.email ?? '—'
   const companyCountry = (currentCompany as any)?.country ?? '—'
   const companyPhone = currentCompany?.phone ?? '—'
@@ -182,12 +204,26 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     .join(', ') || '—'
   const companyRegNo = (currentCompany as any)?.registration_no ?? (currentCompany as any)?.registrationNo ?? '—'
 
-  const availableMechanics = useMemo(() => {
-    if (mechanics.length > 0) {
-      return mechanics.map((m) => ({ id: m.id, name: `${m.firstName} ${m.lastName}` }))
+  useEffect(() => {
+    const companyId = apiCompany?.id ?? selectedCompany ?? currentCompany?.id
+    if (!companyId) return
+
+    const loadCompanyUsers = async () => {
+      try {
+        const response = await fetch(`/backend-api/company-users?company_id=${encodeURIComponent(String(companyId))}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load company users.')
+        setCompanyUsers((Array.isArray(result.data) ? result.data : []).map((companyUser: any) => ({
+          id: String(companyUser.user_id),
+          name: companyUser.user?.name || companyUser.user?.email || `User #${companyUser.user_id}`,
+        })))
+      } catch (error) {
+        setCompanyUsers([])
+        toast.error(error instanceof Error ? error.message : 'Unable to load company users.')
+      }
     }
-    return defaultMechanicsList
-  }, [mechanics])
+    void loadCompanyUsers()
+  }, [apiCompany?.id, selectedCompany, currentCompany?.id])
 
   const defaultValues = useMemo<TaskCardFormData>(() => {
     const defaultCustomerId = TaskCard?.customerId ?? customers[0]?.id ?? ''
@@ -199,7 +235,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     const defaultCreationDate = formatDateInput((TaskCard as any)?.creationDate ?? TaskCard?.createdAt)
 
     return {
-      taskCardNumber: (TaskCard as any)?.taskCardNumber ?? TaskCard?.title ?? `TC-${Date.now()}`,
+      taskCardNumber: (TaskCard as any)?.taskCardNumber ?? TaskCard?.title ?? (TaskCard?.id ? `TC-${TaskCard.id}` : `TC-${Date.now()}`),
       customerId: defaultCustomerId,
       vehicleId: defaultVehicle,
       mileage: (TaskCard as any)?.mileage ?? 0,
@@ -212,8 +248,8 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
         : 'medium') as any,
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(TaskCard?.dueDate ?? addDaysToDateInput(defaultCreationDate, 7)),
-      lineItems: TaskCard?.lineItems?.length
-        ? TaskCard.lineItems.map((item) => normalizeLineItem(item))
+      lineItems: ((TaskCard as any)?.tasks ?? TaskCard?.lineItems)?.length
+        ? ((TaskCard as any)?.tasks ?? TaskCard?.lineItems).map((item: any) => normalizeLineItem({ ...item, status: item.task_status ?? item.status }))
         : [initialLineItem()],
     }
   }, [TaskCard, customers, vehicles])
@@ -222,6 +258,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     register,
     control,
     handleSubmit,
+    reset,
     setValue,
     getValues,
     watch,
@@ -231,6 +268,75 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     defaultValues,
     mode: 'onChange',
   })
+
+  useEffect(() => {
+    reset(defaultValues)
+  }, [defaultValues, reset])
+
+  useEffect(() => {
+    if (!quotationId || filledQuotationId === quotationId) return
+
+    const loadQuotationTasks = async () => {
+      try {
+        const response = await fetch(`/backend-api/quotations/${quotationId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load quotation details.')
+        }
+
+        const quotation = result.data
+        if (quotation.company_id) {
+          const companyResponse = await fetch(`/backend-api/companies/${quotation.company_id}`)
+          const companyResult = await companyResponse.json()
+          if (!companyResponse.ok || companyResult.success === false || !companyResult.data) {
+            throw new Error(companyResult.message || 'Unable to load company details.')
+          }
+          setApiCompany(companyResult.data)
+        }
+        const quotationTasks = (Array.isArray(quotation.details) ? quotation.details : []).map((detail: any) => ({
+          type: detail.type === 'parts' ? 'parts' : 'service',
+          description: detail.description ?? '',
+          qty: Number(detail.qty ?? 1) || 1,
+          status: 'pending' as const,
+          assignedTo: '',
+        }))
+
+        if (mode === 'create' && quotationTasks.length) {
+          setValue('lineItems', quotationTasks, { shouldDirty: false, shouldValidate: true })
+        }
+        if (quotation.vehicle_id) {
+          const vehicleId = String(quotation.vehicle_id)
+          const vehicleResponse = await fetch(`/backend-api/vehicles/${vehicleId}`)
+          const vehicleResult = await vehicleResponse.json()
+          if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+            throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+          }
+          const vehicle = vehicleResult.data
+          setApiVehicle(vehicle)
+
+          const customerId = vehicle.customer_id ?? vehicle.customerId
+          if (customerId) {
+            setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
+            const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
+            const customerResult = await customerResponse.json()
+            if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+              throw new Error(customerResult.message || 'Unable to load customer details.')
+            }
+            setApiCustomer(customerResult.data)
+          }
+          setValue('vehicleId', vehicleId, { shouldDirty: false, shouldValidate: true })
+        }
+        if (quotation.mileage !== undefined && quotation.mileage !== null) {
+          setValue('mileage', Number(quotation.mileage), { shouldDirty: false, shouldValidate: true })
+        }
+        setFilledQuotationId(quotationId)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load quotation details.')
+      }
+    }
+
+    void loadQuotationTasks()
+  }, [mode, quotationId, filledQuotationId, setValue])
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -247,8 +353,10 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     }
   }, [customers, watchedCustomerId, setValue])
 
-  const selectedCustomer = customers.find((customer) => customer.id === watchedCustomerId)
-  const customerDisplayName = formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
+  const selectedCustomer = apiCustomer?.id && String(apiCustomer.id) === watchedCustomerId
+    ? apiCustomer
+    : customers.find((customer) => customer.id === watchedCustomerId)
+  const customerDisplayName = selectedCustomer?.name ?? formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
   const customerEmail = selectedCustomer?.email ?? '—'
   const customerPhone = selectedCustomer?.phone ?? '—'
   const customerAddress = selectedCustomer?.address ?? '—'
@@ -262,14 +370,17 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
   )
 
   useEffect(() => {
+    if (apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId) return
     if (filteredVehicles.length === 0) return
     const currentVehicle = filteredVehicles.find((vehicle) => vehicle.id === watchedVehicleId)
     if (!currentVehicle) {
       setValue('vehicleId', filteredVehicles[0].id, { shouldDirty: false, shouldValidate: true })
     }
-  }, [filteredVehicles, watchedVehicleId, setValue])
+  }, [apiVehicle, filteredVehicles, watchedVehicleId, setValue])
 
-  const selectedVehicle = vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
+  const selectedVehicle = apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId
+    ? apiVehicle
+    : vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
   const vehicleDisplayName = selectedVehicle
     ? (selectedVehicle as any).name || [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' ') || '—'
     : '—'
@@ -279,6 +390,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
   const vehicleYear = selectedVehicle?.year ? String(selectedVehicle.year) : '—'
   const vehicleVin = selectedVehicle?.vin ?? (selectedVehicle as any)?.VIN ?? '—'
   const vehicleLicensePlate = selectedVehicle?.licensePlate ?? (selectedVehicle as any)?.license_plate ?? '—'
+  const vehicleInsured = Number((selectedVehicle as any)?.insured) === 1 ? 'Yes' : 'No'
 
   const addRow = () => {
     append(initialLineItem(), { shouldFocus: false })
@@ -289,7 +401,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     })
   }
 
-  const onSubmit = (values: TaskCardFormData) => {
+  const onSubmit = async (values: TaskCardFormData) => {
     if (!currentCompany?.id) {
       toast.error('Please select a company before saving this Task Card.')
       return
@@ -323,18 +435,46 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
       creationDate: values.creationDate,
     } as any
 
-    if (mode === 'edit' && taskCardId) {
-      updateJobCard(taskCardId, payload)
-      toast.success('Task Card updated successfully.')
-    } else {
-      addJobCard(payload)
-      toast.success('Task Card created successfully.')
+    const resolvedQuotationId = quotationId ?? (TaskCard as any)?.quotation_id
+    if (!resolvedQuotationId) {
+      toast.error('Open task cards from a quotation so its quotation ID can be assigned.')
+      return
     }
 
-    router.push('/task-cards')
+    const apiPayload = {
+      company_id: apiCompany?.id ?? selectedCompany ?? currentCompany.id,
+      quotation_id: resolvedQuotationId,
+      status: values.status === 'cancelled' ? 0 : 1,
+      created_by: user?.id,
+      updated_by: user?.id,
+      tasks: values.lineItems.map((item: any) => ({
+        ...(item.id ? { id: item.id } : {}),
+        type: item.type,
+        description: item.description,
+        qty: Number(item.qty),
+        task_status: item.status,
+        status: item.status === 'cancelled' ? 0 : 1,
+        created_by: user?.id,
+        updated_by: user?.id,
+      })),
+    }
+
+    try {
+      const response = await fetch(`/backend-api/task-cards${mode === 'edit' && taskCardId ? `/${taskCardId}` : ''}`, {
+        method: mode === 'edit' && taskCardId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiPayload),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to save task card.')
+      toast.success(`Task Card ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
+      router.push(`/task-cards?quotation_id=${encodeURIComponent(String(resolvedQuotationId))}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to save task card.')
+    }
   }
 
-  if (mode === 'edit' && taskCardId && !TaskCard) {
+  if (mode === 'edit' && taskCardId && !TaskCard && !isTaskCardLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <EmptyState
@@ -435,6 +575,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                   <p><span className="text-muted-foreground">Year: </span><span>{vehicleYear}</span></p>
                   <p><span className="text-muted-foreground">VIN: </span><span>{vehicleVin}</span></p>
                   <p><span className="text-muted-foreground">License Plate: </span><span>{vehicleLicensePlate}</span></p>
+                  <p><span className="text-muted-foreground">Insured: </span><span>{vehicleInsured}</span></p>
                 </div>
               </section>
             </div>
@@ -646,21 +787,21 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                           {/* Assigned To */}
                           <td className="px-4 py-4">
                             <Select
-                              value={watch(`lineItems.${index}.assignedTo`) ?? availableMechanics[0]?.name ?? 'Unassigned'}
+                              value={watch(`lineItems.${index}.assignedTo`) || undefined}
                               onValueChange={(value) =>
-                                setValue(`lineItems.${index}.assignedTo`, value, {
+                                setValue(`lineItems.${index}.assignedTo`, value ?? '', {
                                   shouldDirty: true,
                                   shouldValidate: true,
                                 })
                               }
                             >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Assignee" />
+                              <SelectTrigger className="w-full" disabled={companyUsers.length === 0}>
+                                <SelectValue placeholder={companyUsers.length ? 'Select company user' : 'No company users'} />
                               </SelectTrigger>
                               <SelectContent>
-                                {availableMechanics.map((mech) => (
-                                  <SelectItem key={mech.id} value={mech.name}>
-                                    {mech.name}
+                                {companyUsers.map((companyUser) => (
+                                  <SelectItem key={companyUser.id} value={companyUser.id}>
+                                    {companyUser.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>

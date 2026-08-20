@@ -1,0 +1,477 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.6:3000
+✓ Ready in 4.6s
+Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', testMode: true }
+
+○ Compiling / ...
+✓ Finished writing to filesystem cache in 10.3s
+ GET /login 200 in 945ms (next.js: 77ms, application-code: 868ms)
+ GET / 200 in 40s (next.js: 32.2s, application-code: 8.2s)
+ GET /login 200 in 1718ms (next.js: 52ms, application-code: 1666ms)
+ GET /login 200 in 4.4s (next.js: 46ms, application-code: 4.4s)
+ GET /login 200 in 228ms (next.js: 22ms, application-code: 207ms)
+ GET /login 200 in 202ms (next.js: 15ms, application-code: 187ms)
+○ Compiling /dashboard ...
+ GET /dashboard 200 in 4.8s (next.js: 4.2s, application-code: 611ms)
+ GET /dashboard 200 in 24.8s (next.js: 23.4s, application-code: 1365ms)
+✓ Finished writing to filesystem cache in 10.1s
+○ Compiling /customers ...
+ GET /customers 200 in 14.8s (next.js: 14.6s, application-code: 126ms)
+ GET /customers 200 in 1347ms (next.js: 48ms, application-code: 1299ms)
+ GET /customers 200 in 396ms (next.js: 21ms, application-code: 375ms)
+ GET /login 200 in 841ms (next.js: 615ms, application-code: 226ms)
+ GET /login 200 in 1360ms (next.js: 385ms, application-code: 976ms)
+ GET /login 200 in 738ms (next.js: 258ms, application-code: 480ms)
+ GET /dashboard 200 in 305ms (next.js: 86ms, application-code: 218ms)
+ GET /dashboard 200 in 513ms (next.js: 126ms, application-code: 387ms)
+ GET /customers 200 in 162ms (next.js: 25ms, application-code: 137ms)
+○ Compiling /vehicles ...
+ GET /vehicles 200 in 6.9s (next.js: 5.9s, application-code: 935ms)
+ GET /vehicles 200 in 519ms (next.js: 335ms, application-code: 183ms)
+ GET /vehicles 200 in 216ms (next.js: 24ms, application-code: 192ms)
+ GET /customers 200 in 785ms (next.js: 34ms, application-code: 751ms)
+✓ Compiled in 1897ms
+ GET /customers 200 in 1540ms (next.js: 992ms, application-code: 549ms)
+ GET /customers 200 in 287ms (next.js: 108ms, application-code: 179ms)
+✓ Compiled in 3.5s
+ GET /customers 200 in 2.9s (next.js: 1158ms, application-code: 1733ms)
+ GET /vehicles 200 in 5.8s (next.js: 5.1s, application-code: 653ms)
+ GET /vehicles 200 in 227ms (next.js: 25ms, application-code: 203ms)
+ GET /customers 200 in 758ms (next.js: 72ms, application-code: 686ms)
+ GET /vehicles 200 in 170ms (next.js: 18ms, application-code: 152ms)
+✓ Compiled in 1358ms
+✓ Compiled in 3s
+ GET /vehicles 200 in 1658ms (next.js: 1177ms, application-code: 481ms)
+ GET /vehicles 200 in 781ms (next.js: 23ms, application-code: 759ms)
+ GET /vehicles 200 in 620ms (next.js: 177ms, application-code: 442ms)
+✓ Compiled in 2.2s
+ GET /vehicles 200 in 3.9s (next.js: 2.9s, application-code: 989ms)
+ GET /vehicles 200 in 4.8s (next.js: 19ms, application-code: 4.8s)
+ GET /vehicles 200 in 1247ms (next.js: 886ms, application-code: 360ms)
+ GET /customers 200 in 1368ms (next.js: 1037ms, application-code: 332ms)
+ GET /vehicles?customer_id=3 200 in 203ms (next.js: 63ms, application-code: 140ms)
+ GET /customers 200 in 161ms (next.js: 18ms, application-code: 143ms)
+ GET /vehicles?customer_id=2 200 in 159ms (next.js: 49ms, application-code: 110ms)
+ GET /customers 200 in 201ms (next.js: 21ms, application-code: 180ms)
+ GET /vehicles?customer_id=3 200 in 202ms (next.js: 29ms, application-code: 173ms)
+ GET /customers 200 in 465ms (next.js: 16ms, application-code: 449ms)
+○ Compiling /sms-settings ...
+ GET /sms-settings 200 in 15.2s (next.js: 14.7s, application-code: 436ms)
+✓ Finished filesystem cache database compaction in 17.8s
+○ Compiling /settings ...
+ GET /settings 200 in 15.2s (next.js: 10.8s, application-code: 4.3s)
+ GET /customers 200 in 402ms (next.js: 310ms, application-code: 92ms)
+ GET /vehicles?customer_id=3 200 in 183ms (next.js: 66ms, application-code: 117ms)
+○ Compiling /quotations ...
+ GET /quotations 200 in 12.2s (next.js: 11.9s, application-code: 285ms)
+ GET / 200 in 5.9s (next.js: 803ms, application-code: 5.1s)
+✓ Finished filesystem cache database compaction in 14.0s
+✓ Compiled in 3.2s
+ GET /quotations 200 in 1210ms (next.js: 891ms, application-code: 320ms)
+✓ Compiled in 2.7s
+○ Compiling /_error ...
+ GET /quotations 500 in 37.7s (next.js: 30.6s, application-code: 7.1s)
+ GET /quotations 500 in 17.8s (next.js: 17.5s, application-code: 276ms)
+ GET /quotations 500 in 1287ms (next.js: 1038ms, application-code: 249ms)
+✓ Compiled in 1140ms
+✓ Finished filesystem cache database compaction in 30.5s
+ GET /quotations 200 in 6.6s (next.js: 2.2s, application-code: 4.4s)
+ GET /quotations 200 in 232ms (next.js: 17ms, application-code: 215ms)
+○ Compiling /quotations/create ...
+ GET /quotations/create?vehicle_id=1 500 in 10.4s (next.js: 10.4s, application-code: 53ms)
+✓ Finished writing to filesystem cache in 62s
+✓ Finished filesystem cache database compaction in 15.2s
+✓ Finished writing to filesystem cache in 12.5s
+ GET /quotations 500 in 1498ms (next.js: 1324ms, application-code: 174ms)
+ GET /quotations 500 in 222ms (next.js: 91ms, application-code: 130ms)
+ GET /quotations 500 in 237ms (next.js: 121ms, application-code: 115ms)
+✓ Finished writing to filesystem cache in 11.2s
+ GET /quotations 500 in 48s (next.js: 47s, application-code: 994ms)
+ GET /quotations 500 in 48s (next.js: 47s, application-code: 440ms)
+ GET /quotations 500 in 48s (next.js: 47s, application-code: 286ms)
+ GET /quotations 500 in 1461ms
+ GET /quotations 500 in 1458ms
+ GET /quotations 500 in 1486ms
+ GET /quotations/create?vehicle_id=1 500 in 23.7s (next.js: 23.6s, application-code: 133ms)
+ GET /quotations 500 in 379ms (next.js: 71ms, application-code: 308ms)
+ GET /quotations 500 in 1908ms (next.js: 1200ms, application-code: 708ms)
+✓ Compiled in 9.3s
+ GET /quotations 200 in 3.3s (next.js: 1239ms, application-code: 2.1s)
+✓ Finished filesystem cache database compaction in 13.0s
+ GET /vehicles 200 in 938ms (next.js: 381ms, application-code: 557ms)
+ GET /customers 200 in 819ms (next.js: 568ms, application-code: 250ms)
+ GET /customers 200 in 184ms (next.js: 16ms, application-code: 168ms)
+ GET /vehicles?customer_id=3 200 in 285ms (next.js: 29ms, application-code: 256ms)
+ GET /quotations/create?vehicle_id=4 200 in 752ms (next.js: 601ms, application-code: 152ms)
+ GET /quotations 200 in 455ms (next.js: 333ms, application-code: 122ms)
+○ Compiling /quotations/edit/[id] ...
+ GET /quotations/edit/1 200 in 29.2s (next.js: 27.8s, application-code: 1327ms)
+ GET /quotations/edit/1 200 in 551ms (next.js: 303ms, application-code: 248ms)
+ GET /vehicles 200 in 73ms (next.js: 12ms, application-code: 61ms)
+ GET /quotations 200 in 111ms (next.js: 26ms, application-code: 85ms)
+ GET /customers 200 in 75ms (next.js: 16ms, application-code: 59ms)
+ GET /vehicles?customer_id=3 200 in 239ms (next.js: 36ms, application-code: 203ms)
+ GET /quotations/create?vehicle_id=4 200 in 160ms (next.js: 20ms, application-code: 140ms)
+ GET /quotations 200 in 146ms (next.js: 26ms, application-code: 120ms)
+ GET /customers 200 in 70ms (next.js: 12ms, application-code: 58ms)
+ GET /vehicles?customer_id=3 200 in 188ms (next.js: 20ms, application-code: 168ms)
+✓ Compiled in 4.2s
+ GET /vehicles?customer_id=3 200 in 2.5s (next.js: 2.0s, application-code: 495ms)
+✓ Compiled in 1842ms
+✓ Finished filesystem cache database compaction in 23.0s
+✓ Compiled in 2.1s
+ GET /vehicles?customer_id=3 200 in 5.8s (next.js: 3.9s, application-code: 1908ms)
+ GET /vehicles?customer_id=3 200 in 192ms (next.js: 14ms, application-code: 178ms)
+ GET /vehicles?customer_id=3 200 in 2.5s (next.js: 18ms, application-code: 2.5s)
+ GET /quotations?vehicle_id=4 200 in 846ms (next.js: 717ms, application-code: 129ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 1242ms (next.js: 723ms, application-code: 519ms)
+ GET /quotations?vehicle_id=4 200 in 2.5s (next.js: 28ms, application-code: 2.5s)
+ GET /quotations/edit/1?vehicle_id=4 200 in 948ms (next.js: 42ms, application-code: 906ms)
+○ Compiling /task-cards ...
+ GET /task-cards 200 in 6.6s (next.js: 6.3s, application-code: 214ms)
+○ Compiling /task-cards/create ...
+ GET /task-cards/create 200 in 7.4s (next.js: 6.7s, application-code: 702ms)
+✓ Finished writing to filesystem cache in 11.4s
+ GET /quotations 200 in 222ms (next.js: 70ms, application-code: 152ms)
+ GET /quotations 200 in 238ms (next.js: 190ms, application-code: 48ms)
+ GET /quotations 200 in 237ms (next.js: 63ms, application-code: 175ms)
+✓ Finished filesystem cache database compaction in 14.0s
+ GET /settings 200 in 761ms (next.js: 413ms, application-code: 349ms)
+ GET /quotations/edit/1 200 in 1107ms (next.js: 325ms, application-code: 782ms)
+ GET /quotations 200 in 475ms (next.js: 316ms, application-code: 159ms)
+ GET /vehicles 200 in 862ms (next.js: 53ms, application-code: 808ms)
+ GET /customers 200 in 2.4s (next.js: 1769ms, application-code: 615ms)
+ GET /customers 200 in 797ms (next.js: 41ms, application-code: 756ms)
+ GET /customers 200 in 502ms (next.js: 20ms, application-code: 483ms)
+✓ Compiled in 51.1s
+✓ Finished writing to filesystem cache in 34.3s
+ GET /customers 200 in 4.6s (next.js: 3.6s, application-code: 954ms)
+ GET /customers 200 in 4.6s (next.js: 3.8s, application-code: 801ms)
+ GET /customers 200 in 4.6s (next.js: 4.2s, application-code: 385ms)
+ GET /customers 200 in 4.7s (next.js: 3.4s, application-code: 1282ms)
+ GET /customers 200 in 4.7s (next.js: 3.0s, application-code: 1632ms)
+ GET /customers 200 in 90s (next.js: 48s, application-code: 42s)
+ GET /vehicles?customer_id=3 200 in 1301ms (next.js: 800ms, application-code: 501ms)
+ GET /quotations?vehicle_id=4 200 in 2.8s (next.js: 2.1s, application-code: 762ms)
+ GET /task-cards 200 in 1665ms (next.js: 1191ms, application-code: 474ms)
+✓ Compiled in 6.3s
+ GET /quotations?vehicle_id=4 200 in 3.6s (next.js: 2.4s, application-code: 1211ms)
+✓ Compiled in 7.2s
+ GET /quotations?vehicle_id=4 200 in 4.5s (next.js: 3.9s, application-code: 576ms)
+ GET /quotations?vehicle_id=4 200 in 742ms (next.js: 317ms, application-code: 425ms)
+✓ Compiled in 2.4s
+ GET /quotations?vehicle_id=4 500 in 199ms (next.js: 132ms, application-code: 67ms)
+ GET /quotations?vehicle_id=4 500 in 153ms (next.js: 88ms, application-code: 66ms)
+✓ Compiled in 2.1s
+ GET /quotations?vehicle_id=4 200 in 3.3s (next.js: 325ms, application-code: 3.0s)
+✓ Finished filesystem cache database compaction in 27.5s
+ GET /quotations?vehicle_id=4 200 in 1334ms (next.js: 829ms, application-code: 505ms)
+ GET /quotations?vehicle_id=4 200 in 918ms (next.js: 297ms, application-code: 620ms)
+ GET /quotations?vehicle_id=4 200 in 412ms (next.js: 33ms, application-code: 379ms)
+ GET /quotations?vehicle_id=4 200 in 451ms (next.js: 279ms, application-code: 172ms)
+ GET /quotations?vehicle_id=4 500 in 231ms (next.js: 117ms, application-code: 113ms)
+ GET /quotations?vehicle_id=4 500 in 234ms (next.js: 185ms, application-code: 49ms)
+ GET /quotations?vehicle_id=4 500 in 108ms (next.js: 54ms, application-code: 54ms)
+ GET /quotations?vehicle_id=4 500 in 116ms (next.js: 57ms, application-code: 59ms)
+ GET /quotations?vehicle_id=4 500 in 88ms (next.js: 47ms, application-code: 41ms)
+✓ Compiled in 997ms
+ GET /quotations?vehicle_id=4 200 in 3.6s (next.js: 1081ms, application-code: 2.5s)
+ GET /quotations?vehicle_id=4 200 in 1245ms (next.js: 439ms, application-code: 805ms)
+✓ Finished filesystem cache database compaction in 15.8s
+ GET /quotations?vehicle_id=4 200 in 2.6s (next.js: 70ms, application-code: 2.5s)
+ GET /task-cards?quotation_id=1 200 in 2.9s (next.js: 2.4s, application-code: 478ms)
+ GET /task-cards/create?quotation_id=1 200 in 2.2s (next.js: 1458ms, application-code: 765ms)
+ GET /task-cards?quotation_id=1 200 in 114ms (next.js: 17ms, application-code: 96ms)
+ GET /task-cards/create?quotation_id=1 200 in 400ms (next.js: 30ms, application-code: 369ms)
+✓ Compiled in 2.3s
+ GET /task-cards/create?quotation_id=1 200 in 774ms (next.js: 420ms, application-code: 354ms)
+✓ Compiled in 853ms
+ GET /task-cards/create?quotation_id=1 200 in 5.5s (next.js: 1641ms, application-code: 3.9s)
+✓ Compiled in 1227ms
+ GET /task-cards/create?quotation_id=1 200 in 951ms (next.js: 657ms, application-code: 294ms)
+ GET /task-cards?quotation_id=1 200 in 1142ms (next.js: 477ms, application-code: 666ms)
+ GET /task-cards/create?quotation_id=1 200 in 301ms (next.js: 52ms, application-code: 249ms)
+✓ Compiled in 1695ms
+ GET /task-cards/create?quotation_id=1 200 in 805ms (next.js: 336ms, application-code: 469ms)
+✓ Compiled in 1367ms
+ GET /task-cards/create?quotation_id=1 200 in 670ms (next.js: 366ms, application-code: 304ms)
+✓ Compiled in 765ms
+ GET /task-cards/create?quotation_id=1 200 in 630ms (next.js: 341ms, application-code: 289ms)
+✓ Compiled in 994ms
+ GET /task-cards/create?quotation_id=1 200 in 804ms (next.js: 483ms, application-code: 321ms)
+✓ Compiled in 722ms
+ GET /task-cards/create?quotation_id=1 200 in 539ms (next.js: 312ms, application-code: 227ms)
+✓ Compiled in 949ms
+ GET /task-cards/create?quotation_id=1 200 in 612ms (next.js: 321ms, application-code: 291ms)
+ GET /task-cards/create?quotation_id=1 200 in 6.8s (next.js: 71ms, application-code: 6.8s)
+ GET /customers 200 in 940ms (next.js: 668ms, application-code: 272ms)
+ GET /vehicles?customer_id=3 200 in 409ms (next.js: 204ms, application-code: 205ms)
+ GET /quotations?vehicle_id=4 200 in 369ms (next.js: 154ms, application-code: 215ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 1799ms (next.js: 1061ms, application-code: 737ms)
+✓ Compiled in 1803ms
+ GET /quotations/edit/1?vehicle_id=4 200 in 2.1s (next.js: 1475ms, application-code: 675ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 427ms (next.js: 49ms, application-code: 378ms)
+ GET /customers 200 in 598ms (next.js: 398ms, application-code: 200ms)
+ GET /vehicles?customer_id=3 200 in 273ms (next.js: 162ms, application-code: 111ms)
+ GET /quotations?vehicle_id=4 200 in 220ms (next.js: 145ms, application-code: 75ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 198ms (next.js: 47ms, application-code: 151ms)
+ GET /customers 200 in 130ms (next.js: 16ms, application-code: 114ms)
+ GET /vehicles?customer_id=3 200 in 246ms (next.js: 34ms, application-code: 212ms)
+ GET /quotations?vehicle_id=4 200 in 278ms (next.js: 31ms, application-code: 247ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 207ms (next.js: 46ms, application-code: 161ms)
+ GET /quotations/create?vehicle_id=4 200 in 1180ms (next.js: 1052ms, application-code: 129ms)
+ GET /customers 200 in 248ms (next.js: 32ms, application-code: 216ms)
+ GET /vehicles?customer_id=3 200 in 163ms (next.js: 23ms, application-code: 139ms)
+ GET /quotations?vehicle_id=4 200 in 122ms (next.js: 32ms, application-code: 91ms)
+ GET /quotations/create?vehicle_id=4 200 in 119ms (next.js: 16ms, application-code: 103ms)
+✓ Compiled in 4s
+ GET /quotations/create?vehicle_id=4 200 in 1207ms (next.js: 790ms, application-code: 417ms)
+✓ Compiled in 1987ms
+ GET /quotations/create?vehicle_id=4 200 in 945ms (next.js: 528ms, application-code: 417ms)
+ GET /customers 200 in 1535ms (next.js: 894ms, application-code: 641ms)
+ GET /vehicles?customer_id=3 200 in 576ms (next.js: 195ms, application-code: 381ms)
+ GET /quotations?vehicle_id=4 200 in 314ms (next.js: 132ms, application-code: 182ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 1818ms (next.js: 1390ms, application-code: 428ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 16.3s (next.js: 1469ms, application-code: 14.8s)
+✓ Finished filesystem cache database compaction in 31.0s
+ GET /customers 200 in 552ms (next.js: 320ms, application-code: 232ms)
+ GET /vehicles?customer_id=3 200 in 416ms (next.js: 70ms, application-code: 346ms)
+ GET /customers 200 in 225ms (next.js: 17ms, application-code: 208ms)
+ GET /vehicles?customer_id=3 200 in 257ms (next.js: 21ms, application-code: 236ms)
+ GET /quotations?vehicle_id=4 200 in 532ms (next.js: 54ms, application-code: 478ms)
+✓ Compiled in 2.2s
+ GET /quotations?vehicle_id=4 200 in 967ms (next.js: 647ms, application-code: 319ms)
+ GET /customers 200 in 749ms (next.js: 350ms, application-code: 399ms)
+ GET /vehicles?customer_id=3 200 in 688ms (next.js: 383ms, application-code: 305ms)
+ GET /quotations?vehicle_id=4 200 in 164ms (next.js: 33ms, application-code: 131ms)
+✓ Compiled in 1699ms
+ GET /quotations?vehicle_id=4 500 in 1147ms (next.js: 1050ms, application-code: 97ms)
+ GET /quotations?vehicle_id=4 500 in 158ms (next.js: 94ms, application-code: 63ms)
+✓ Compiled in 849ms
+ GET /quotations?vehicle_id=4 200 in 1027ms (next.js: 507ms, application-code: 520ms)
+ GET /quotations?vehicle_id=4 200 in 154ms (next.js: 18ms, application-code: 136ms)
+ GET /quotations?vehicle_id=4 200 in 153ms (next.js: 18ms, application-code: 135ms)
+ GET /quotations?vehicle_id=4 200 in 2.1s (next.js: 36ms, application-code: 2.0s)
+ GET /task-cards?quotation_id=1 200 in 302ms (next.js: 180ms, application-code: 122ms)
+○ Compiling /companies ...
+ GET /companies 200 in 28.6s (next.js: 28.1s, application-code: 587ms)
+ GET /companies 200 in 5.4s (next.js: 5.2s, application-code: 201ms)
+✓ Finished writing to filesystem cache in 11.8s
+ GET /companies 200 in 120ms (next.js: 16ms, application-code: 104ms)
+ GET /companies 200 in 1034ms (next.js: 46ms, application-code: 988ms)
+○ Compiling /admin ...
+ GET /admin 200 in 4.9s (next.js: 4.3s, application-code: 572ms)
+ GET /admin 200 in 214ms (next.js: 35ms, application-code: 179ms)
+ GET /admin 200 in 5.3s (next.js: 1747ms, application-code: 3.6s)
+✓ Finished filesystem cache database compaction in 23.5s
+ GET /customers 200 in 601ms (next.js: 386ms, application-code: 215ms)
+ GET /vehicles?customer_id=3 200 in 364ms (next.js: 226ms, application-code: 138ms)
+ GET /quotations?vehicle_id=4 200 in 386ms (next.js: 34ms, application-code: 352ms)
+ GET /task-cards?quotation_id=1 200 in 241ms (next.js: 58ms, application-code: 183ms)
+ GET /task-cards?quotation_id=1 200 in 563ms (next.js: 77ms, application-code: 486ms)
+ GET /task-cards?quotation_id=1 200 in 523ms (next.js: 20ms, application-code: 503ms)
+ GET /task-cards?quotation_id=1 200 in 503ms (next.js: 22ms, application-code: 481ms)
+✓ Compiled in 1382ms
+ GET /task-cards?quotation_id=1 200 in 1533ms (next.js: 825ms, application-code: 708ms)
+ GET /companies 200 in 311ms (next.js: 122ms, application-code: 189ms)
+ GET /customers 200 in 131ms (next.js: 34ms, application-code: 97ms)
+ GET /vehicles?customer_id=3 200 in 268ms (next.js: 50ms, application-code: 218ms)
+ GET /quotations?vehicle_id=4 200 in 198ms (next.js: 128ms, application-code: 70ms)
+ GET /task-cards?quotation_id=1 200 in 262ms (next.js: 42ms, application-code: 220ms)
+○ Compiling /task-cards/edit/[id] ...
+ GET /task-cards/edit/1?quotation_id=1 200 in 16.9s (next.js: 16.3s, application-code: 648ms)
+ GET /task-cards/create?quotation_id=1 200 in 349ms (next.js: 162ms, application-code: 187ms)
+✓ Compiled in 1331ms
+ GET /task-cards?quotation_id=1 200 in 726ms (next.js: 285ms, application-code: 441ms)
+ GET /task-cards?quotation_id=1 200 in 1735ms (next.js: 37ms, application-code: 1698ms)
+ GET /task-cards/edit/1?quotation_id=1 200 in 780ms (next.js: 365ms, application-code: 415ms)
+○ Compiling /invoices ...
+ GET /invoices 200 in 7.0s (next.js: 6.9s, application-code: 126ms)
+✓ Compiled in 1298ms
+ GET /task-cards?quotation_id=1 200 in 1233ms (next.js: 678ms, application-code: 555ms)
+✓ Compiled in 1286ms
+ GET /task-cards?quotation_id=1 500 in 156ms (next.js: 96ms, application-code: 60ms)
+ GET /task-cards?quotation_id=1 500 in 82ms (next.js: 40ms, application-code: 42ms)
+ GET /task-cards?quotation_id=1 500 in 197ms (next.js: 92ms, application-code: 105ms)
+✓ Compiled in 990ms
+ GET /task-cards?quotation_id=1 200 in 10.2s (next.js: 1089ms, application-code: 9.1s)
+ GET /task-cards?quotation_id=1 200 in 1149ms (next.js: 449ms, application-code: 700ms)
+ GET /task-cards?quotation_id=1 200 in 1827ms (next.js: 20ms, application-code: 1807ms)
+ GET /invoices?task_id=1 200 in 1852ms (next.js: 1644ms, application-code: 209ms)
+○ Compiling /invoices/create ...
+ GET /invoices/create?task_id=1 200 in 18.6s (next.js: 18.2s, application-code: 341ms)
+✓ Finished writing to filesystem cache in 19.2s
+✓ Finished filesystem cache database compaction in 17.9s
+✓ Compiled in 999ms
+ GET /invoices/create?task_id=1 200 in 1404ms (next.js: 1029ms, application-code: 374ms)
+✓ Compiled in 1115ms
+ GET /invoices/create?task_id=1 200 in 2.0s (next.js: 1549ms, application-code: 486ms)
+✓ Compiled in 1091ms
+ GET /invoices/create?task_id=1 200 in 764ms (next.js: 492ms, application-code: 272ms)
+ GET /invoices?task_id=1 200 in 670ms (next.js: 447ms, application-code: 222ms)
+ GET /invoices?task_id=1 200 in 3.1s (next.js: 27ms, application-code: 3.1s)
+ GET /invoices/create?task_id=1 200 in 92ms (next.js: 19ms, application-code: 73ms)
+✓ Compiled in 1346ms
+ GET /invoices/create?task_id=1 200 in 788ms (next.js: 406ms, application-code: 382ms)
+ GET /companies 200 in 386ms (next.js: 286ms, application-code: 100ms)
+ GET /companies 200 in 2.1s (next.js: 21ms, application-code: 2.1s)
+ GET /customers 200 in 1156ms (next.js: 937ms, application-code: 219ms)
+ GET /vehicles?customer_id=3 200 in 1036ms (next.js: 621ms, application-code: 415ms)
+ GET /quotations?vehicle_id=4 200 in 629ms (next.js: 366ms, application-code: 263ms)
+ GET /task-cards?quotation_id=1 200 in 864ms (next.js: 620ms, application-code: 244ms)
+ GET /invoices?task_id=1 200 in 290ms (next.js: 62ms, application-code: 228ms)
+ GET /invoices/create?task_id=1 200 in 210ms (next.js: 21ms, application-code: 189ms)
+ GET /invoices?task_id=1 200 in 171ms (next.js: 16ms, application-code: 155ms)
+○ Compiling /invoices/edit/[id] ...
+ GET /invoices/edit/1?task_id=1 200 in 48s (next.js: 48s, application-code: 919ms)
+✓ Finished filesystem cache database compaction in 30.5s
+✓ Compiled in 686ms
+ GET /invoices/edit/1?task_id=1 200 in 836ms (next.js: 398ms, application-code: 438ms)
+ GET /invoices/edit/1?task_id=1 200 in 343ms (next.js: 21ms, application-code: 322ms)
+ GET /invoices/edit/1?task_id=1 200 in 3.0s (next.js: 53ms, application-code: 3.0s)
+ GET /invoices?task_id=1 200 in 848ms (next.js: 456ms, application-code: 392ms)
+ GET /invoices/edit/1?task_id=1 200 in 164ms (next.js: 36ms, application-code: 128ms)
+ GET /dashboard 200 in 1336ms (next.js: 917ms, application-code: 420ms)
+✓ Compiled in 7s
+ GET /dashboard 200 in 6.5s (next.js: 4.1s, application-code: 2.4s)
+ GET /dashboard 200 in 15.4s (next.js: 202ms, application-code: 15.2s)
+ GET /customers 200 in 4.3s (next.js: 3.2s, application-code: 1112ms)
+ GET /customers 200 in 326ms (next.js: 87ms, application-code: 239ms)
+ GET /vehicles?customer_id=3 200 in 1648ms (next.js: 1061ms, application-code: 587ms)
+ GET /quotations?vehicle_id=4 200 in 2.1s (next.js: 1096ms, application-code: 959ms)
+ GET /task-cards?quotation_id=1 200 in 1719ms (next.js: 1408ms, application-code: 311ms)
+ GET /invoices?task_id=1 200 in 816ms (next.js: 556ms, application-code: 260ms)
+ GET /invoices/edit/1?task_id=1 200 in 1187ms (next.js: 839ms, application-code: 348ms)
+✓ Compiled in 8.7s
+ GET /invoices/edit/1?task_id=1 200 in 5.9s (next.js: 5.1s, application-code: 761ms)
+ GET /invoices?task_id=1 200 in 966ms (next.js: 417ms, application-code: 549ms)
+ GET /invoices/edit/1?task_id=1 200 in 483ms (next.js: 101ms, application-code: 382ms)
+ GET /customers 200 in 2.2s (next.js: 526ms, application-code: 1707ms)
+ GET /customers 200 in 38.7s (next.js: 26ms, application-code: 38.7s)
+ GET /vehicles?customer_id=3 200 in 1131ms (next.js: 211ms, application-code: 920ms)
+ GET /vehicles?customer_id=3 200 in 415ms (next.js: 25ms, application-code: 390ms)
+ GET /quotations?vehicle_id=4 200 in 711ms (next.js: 279ms, application-code: 432ms)
+ GET /quotations/create?vehicle_id=4 200 in 2.1s (next.js: 1766ms, application-code: 321ms)
+ GET /quotations/create?vehicle_id=4 200 in 8.0s (next.js: 388ms, application-code: 7.6s)
+ GET /quotations/create?vehicle_id=4 200 in 456ms (next.js: 34ms, application-code: 422ms)
+ GET /quotations?vehicle_id=4 200 in 519ms (next.js: 316ms, application-code: 203ms)
+ GET /quotations/create?vehicle_id=4 200 in 474ms (next.js: 42ms, application-code: 431ms)
+ GET /quotations?vehicle_id=4 200 in 763ms (next.js: 16ms, application-code: 747ms)
+✓ Compiled in 9.9s
+ GET /quotations?vehicle_id=4 200 in 9.0s (next.js: 7.3s, application-code: 1683ms)
+✓ Compiled in 1529ms
+ GET /quotations?vehicle_id=4 200 in 1168ms (next.js: 565ms, application-code: 604ms)
+✓ Compiled in 1615ms
+ GET /quotations?vehicle_id=4 200 in 1374ms (next.js: 742ms, application-code: 633ms)
+ GET /quotations/create?vehicle_id=4 200 in 4.0s (next.js: 3.0s, application-code: 949ms)
+ GET /quotations/create?vehicle_id=4 200 in 24.3s (next.js: 27ms, application-code: 24.3s)
+ GET /quotations?vehicle_id=4 200 in 173ms (next.js: 18ms, application-code: 154ms)
+ GET /quotations/edit/4?vehicle_id=4 200 in 2.1s (next.js: 1488ms, application-code: 634ms)
+ GET /quotations?vehicle_id=4 200 in 3.3s (next.js: 345ms, application-code: 2.9s)
+ GET /quotations?vehicle_id=4 200 in 765ms (next.js: 431ms, application-code: 333ms)
+ GET /quotations?vehicle_id=4 200 in 269ms (next.js: 57ms, application-code: 212ms)
+ GET /quotations?vehicle_id=4 200 in 419ms (next.js: 20ms, application-code: 399ms)
+ GET /quotations?vehicle_id=4 200 in 260ms (next.js: 19ms, application-code: 241ms)
+ GET /quotations?vehicle_id=4 200 in 1648ms (next.js: 976ms, application-code: 672ms)
+✓ Finished filesystem cache database compaction in 25.1s
+ GET /quotations?vehicle_id=4 200 in 2.4s (next.js: 69ms, application-code: 2.3s)
+ GET /quotations/create?vehicle_id=4 200 in 7.1s (next.js: 5.1s, application-code: 1989ms)
+✓ Compiled in 4.3s
+ GET /quotations/create?vehicle_id=4 200 in 2.9s (next.js: 1249ms, application-code: 1695ms)
+ GET /quotations/create?vehicle_id=4 200 in 1184ms (next.js: 146ms, application-code: 1037ms)
+ GET /quotations?vehicle_id=4 200 in 5.4s (next.js: 4.7s, application-code: 677ms)
+✓ Compiled in 4.9s
+ GET /quotations?vehicle_id=4 200 in 6.0s (next.js: 4.1s, application-code: 1883ms)
+ GET /quotations?vehicle_id=4 200 in 1018ms (next.js: 512ms, application-code: 506ms)
+✓ Compiled in 3.1s
+ GET /quotations?vehicle_id=4 200 in 2.1s (next.js: 1036ms, application-code: 1047ms)
+✓ Compiled in 4.5s
+ GET /quotations?vehicle_id=4 200 in 7.4s (next.js: 6.2s, application-code: 1216ms)
+ GET /customers 200 in 1610ms (next.js: 1171ms, application-code: 439ms)
+ GET /customers 200 in 2.2s (next.js: 25ms, application-code: 2.2s)
+ GET /vehicles?customer_id=3 200 in 2.9s (next.js: 2.4s, application-code: 523ms)
+ GET /quotations?vehicle_id=4 200 in 119ms (next.js: 25ms, application-code: 94ms)
+ GET /quotations/create?vehicle_id=4 200 in 7.9s (next.js: 6.2s, application-code: 1626ms)
+ GET /quotations?vehicle_id=4 200 in 181ms (next.js: 19ms, application-code: 162ms)
+ GET /quotations/create?vehicle_id=4 200 in 218ms (next.js: 20ms, application-code: 198ms)
+✓ Compiled in 6.3s
+ GET /quotations/create?vehicle_id=4 200 in 2.9s (next.js: 1638ms, application-code: 1280ms)
+ GET /quotations/create?vehicle_id=4 200 in 1136ms (next.js: 130ms, application-code: 1006ms)
+ GET /quotations/create?vehicle_id=4 200 in 1148ms (next.js: 420ms, application-code: 728ms)
+ GET /quotations/create?vehicle_id=4 200 in 1392ms (next.js: 671ms, application-code: 721ms)
+✓ Compiled in 2.9s
+ GET /quotations/create?vehicle_id=4 200 in 5.1s (next.js: 4.1s, application-code: 1063ms)
+✓ Compiled in 4.3s
+✓ Finished writing to filesystem cache in 25.8s
+ GET /quotations?vehicle_id=4 200 in 16.6s (next.js: 9.6s, application-code: 7.1s)
+ GET /quotations/create?vehicle_id=4 200 in 36.8s (next.js: 9.0s, application-code: 27.8s)
+ GET /quotations/create?vehicle_id=4 200 in 181ms (next.js: 23ms, application-code: 158ms)
+ GET /quotations?vehicle_id=4 200 in 241ms (next.js: 33ms, application-code: 208ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 2.8s (next.js: 1933ms, application-code: 903ms)
+✓ Compiled in 3s
+ GET /quotations/edit/6?vehicle_id=4 200 in 941ms (next.js: 533ms, application-code: 408ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 174ms (next.js: 40ms, application-code: 134ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 250ms (next.js: 19ms, application-code: 231ms)
+ GET /quotations?vehicle_id=4 200 in 254ms (next.js: 43ms, application-code: 211ms)
+ GET /quotations/create?vehicle_id=4 200 in 1123ms (next.js: 869ms, application-code: 254ms)
+✓ Compiled in 1498ms
+ GET /quotations/create?vehicle_id=4 200 in 684ms (next.js: 402ms, application-code: 283ms)
+ GET /quotations?vehicle_id=4 200 in 155ms (next.js: 36ms, application-code: 120ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 1132ms (next.js: 698ms, application-code: 434ms)
+ GET /quotations?vehicle_id=4 200 in 187ms (next.js: 24ms, application-code: 163ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 713ms (next.js: 183ms, application-code: 529ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 4.2s (next.js: 33ms, application-code: 4.2s)
+ GET /quotations?vehicle_id=4 200 in 108ms (next.js: 17ms, application-code: 90ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 422ms (next.js: 60ms, application-code: 362ms)
+ GET /quotations?vehicle_id=4 200 in 188ms (next.js: 25ms, application-code: 163ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 336ms (next.js: 53ms, application-code: 284ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 334ms (next.js: 46ms, application-code: 288ms)
+ GET /quotations?vehicle_id=4 200 in 874ms (next.js: 30ms, application-code: 843ms)
+ GET /quotations/edit/5?vehicle_id=4 200 in 303ms (next.js: 36ms, application-code: 267ms)
+ GET /quotations?vehicle_id=4 200 in 247ms (next.js: 16ms, application-code: 231ms)
+ GET /quotations/edit/5?vehicle_id=4 200 in 11.4s (next.js: 35ms, application-code: 11.3s)
+ GET /quotations?vehicle_id=4 200 in 116ms (next.js: 15ms, application-code: 101ms)
+ GET /quotations/edit/5?vehicle_id=4 200 in 963ms (next.js: 44ms, application-code: 919ms)
+✓ Compiled in 16s
+✓ Finished writing to filesystem cache in 16.5s
+ GET /quotations?vehicle_id=4 200 in 11.5s (next.js: 9.5s, application-code: 2.0s)
+ GET /quotations?vehicle_id=4 200 in 15.1s (next.js: 13.7s, application-code: 1369ms)
+ GET /quotations/edit/6?vehicle_id=4 200 in 21.1s (next.js: 14.9s, application-code: 6.2s)
+ GET /quotations/edit/6?vehicle_id=4 200 in 917ms (next.js: 581ms, application-code: 336ms)
+ GET /quotations?vehicle_id=4 200 in 6.4s (next.js: 34ms, application-code: 6.4s)
+ GET /quotations?vehicle_id=4 200 in 1311ms (next.js: 49ms, application-code: 1262ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 257ms (next.js: 37ms, application-code: 220ms)
+✓ Compiled in 1351ms
+ GET /quotations/edit/6?vehicle_id=4 500 in 265ms (next.js: 182ms, application-code: 83ms)
+ GET /quotations/edit/6?vehicle_id=4 500 in 93ms (next.js: 60ms, application-code: 33ms)
+ GET /quotations?vehicle_id=4 500 in 221ms (next.js: 171ms, application-code: 50ms)
+ GET /quotations?vehicle_id=4 500 in 86ms (next.js: 49ms, application-code: 37ms)
+ GET /quotations/edit/6?vehicle_id=4 500 in 95ms (next.js: 43ms, application-code: 52ms)
+ GET /quotations?vehicle_id=4 500 in 100ms (next.js: 50ms, application-code: 50ms)
+ GET /quotations/edit/5?vehicle_id=4 500 in 250ms (next.js: 59ms, application-code: 190ms)
+○ Compiling /quotations ...
+✓ Finished writing to filesystem cache in 24.8s
+ GET /quotations?vehicle_id=4 200 in 44s (next.js: 34.1s, application-code: 9.7s)
+ GET /customers 200 in 33.8s (next.js: 2.3s, application-code: 31.5s)
+ GET /quotations?vehicle_id=4 200 in 4.2s (next.js: 2.4s, application-code: 1774ms)
+✓ Finished filesystem cache database compaction in 44s
+ GET /vehicles?customer_id=3 200 in 685ms (next.js: 252ms, application-code: 433ms)
+ GET /quotations?vehicle_id=4 200 in 281ms (next.js: 59ms, application-code: 222ms)
+ GET /quotations/edit/2?vehicle_id=4 200 in 658ms (next.js: 401ms, application-code: 257ms)
+✓ Compiled in 6.2s
+ GET /quotations?vehicle_id=4 200 in 3.3s (next.js: 1998ms, application-code: 1327ms)
+✓ Compiled in 3.9s
+ GET /quotations/edit/2?vehicle_id=4 200 in 11.4s (next.js: 4.8s, application-code: 6.6s)
+ GET /quotations?vehicle_id=4 500 in 11.2s (next.js: 9.5s, application-code: 1732ms)
+ GET /quotations?vehicle_id=4 500 in 11.3s (next.js: 10.1s, application-code: 1267ms)
+ GET /quotations?vehicle_id=4 500 in 11.3s (next.js: 10.7s, application-code: 659ms)
+ GET /quotations?vehicle_id=4 500 in 11.2s (next.js: 11.1s, application-code: 141ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 2.5s (next.js: 2.4s, application-code: 97ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 83ms (next.js: 37ms, application-code: 46ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 95ms (next.js: 50ms, application-code: 46ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 208ms (next.js: 135ms, application-code: 73ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 303ms (next.js: 94ms, application-code: 209ms)
+ GET /quotations/edit/2?vehicle_id=4 500 in 1203ms
+ GET /quotations?vehicle_id=4 500 in 222ms (next.js: 77ms, application-code: 144ms)
+ GET /quotations?vehicle_id=4 500 in 312ms (next.js: 180ms, application-code: 132ms)

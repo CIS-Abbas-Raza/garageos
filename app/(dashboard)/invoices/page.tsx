@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CarFront, Calendar, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -18,15 +18,36 @@ import { cn } from '@/lib/utils'
 
 export default function InvoicesPage() {
   const router = useRouter()
-  const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+  const { customers, vehicles } = useGarageStore()
+  const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+  const [taskId, setTaskId] = useState<string | undefined>()
+
+  useEffect(() => {
+    setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
+  }, [])
+
+  useEffect(() => {
+    const loadInvoices = async () => {
+      try {
+        const query = taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''
+        const response = await fetch(`/backend-api/invoices${query}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
+        setInvoices(Array.isArray(result.data) ? result.data : [])
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
+      }
+    }
+    void loadInvoices()
+  }, [taskId])
 
   const rows = useMemo(
     () =>
       invoices
         .slice()
         .sort((a, b) => {
-          const left = new Date(b.createdAt).getTime()
-          const right = new Date(a.createdAt).getTime()
+          const left = new Date(b.createdAt ?? b.creation_date).getTime()
+          const right = new Date(a.createdAt ?? a.creation_date).getTime()
           return left - right
         }),
     [invoices],
@@ -53,7 +74,7 @@ export default function InvoicesPage() {
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
-        <Button onClick={() => router.push('/invoices/create')} className="w-full gap-2 sm:w-auto">
+        <Button onClick={() => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Invoice
         </Button>
@@ -65,7 +86,7 @@ export default function InvoicesPage() {
           description="Create your first invoice to start tracking billing and payments."
           action={{
             label: 'Add Invoice',
-            onClick: () => router.push('/invoices/create'),
+            onClick: () => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`),
           }}
         />
       ) : (
@@ -90,43 +111,42 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <FileText className="size-4 text-primary" />
-                        <span>{invoice.invoiceNumber ?? invoice.id}</span>
+                        <span>{invoice.invoice_number ?? invoice.invoiceNumber ?? invoice.id}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <User className="size-4 text-muted-foreground" />
-                        <span>{getCustomerName(invoice.customerId)}</span>
+                        <span>{invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
-                        <span>{getVehicleName(invoice.vehicleId)}</span>
+                        <span>{invoice.taskCard?.quotation?.vehicle?.name ?? getVehicleName(invoice.vehicleId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <span
                         className={cn(
                           'inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize',
-                          invoice.status === 'approved' && 'bg-emerald-500/10 text-emerald-700',
-                          invoice.status === 'pending' && 'bg-amber-500/10 text-amber-700',
-                          invoice.status === 'draft' && 'bg-slate-500/10 text-slate-700',
-                          invoice.status === 'paid' && 'bg-blue-500/10 text-blue-700',
+                          (invoice.invoice_status ?? invoice.status) === 'approved' && 'bg-emerald-500/10 text-emerald-700',
+                          (invoice.invoice_status ?? invoice.status) === 'pending' && 'bg-amber-500/10 text-amber-700',
+                          (invoice.invoice_status ?? invoice.status) === 'draft' && 'bg-slate-500/10 text-slate-700',
                         )}
                       >
-                        {invoice.status ?? 'draft'}
+                        {invoice.invoice_status ?? invoice.status ?? 'draft'}
                       </span>
                     </td>
                     <td className="px-5 py-4">
                       <span
                         className={cn(
                           'inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize',
-                          invoice.paymentStatus === 'completed' && 'bg-emerald-500/10 text-emerald-700',
-                          invoice.paymentStatus === 'pending' && 'bg-amber-500/10 text-amber-700',
+                          (invoice.payment_status ?? invoice.paymentStatus) === 'completed' && 'bg-emerald-500/10 text-emerald-700',
+                          (invoice.payment_status ?? invoice.paymentStatus) === 'pending' && 'bg-amber-500/10 text-amber-700',
                         )}
                       >
-                        {invoice.paymentStatus ?? 'pending'}
+                        {invoice.payment_status ?? invoice.paymentStatus ?? 'pending'}
                       </span>
                     </td>
                     <td className="px-5 py-4 font-semibold text-foreground">
@@ -135,7 +155,7 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-muted-foreground" />
-                        <span>{new Date(invoice.createdAt).toLocaleDateString()}</span>
+                        <span>{new Date(invoice.createdAt ?? invoice.creation_date).toLocaleDateString()}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -149,17 +169,24 @@ export default function InvoicesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+                              onClick={() => router.push(`/invoices/edit/${invoice.id}${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={async () => {
                                 if (confirm('Are you sure you want to delete this invoice?')) {
-                                  deleteCrudRecord('invoices', invoice.id)
-                                  toast.success('Invoice deleted successfully')
+                                  try {
+                                    const response = await fetch(`/backend-api/invoices/${invoice.id}`, { method: 'DELETE' })
+                                    const result = await response.json().catch(() => ({}))
+                                    if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete invoice.')
+                                    setInvoices((current) => current.filter((item) => item.id !== invoice.id))
+                                    toast.success('Invoice deleted successfully')
+                                  } catch (error) {
+                                    toast.error(error instanceof Error ? error.message : 'Unable to delete invoice.')
+                                  }
                                 }
                               }}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"

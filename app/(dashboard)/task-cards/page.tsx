@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt } from 'lucide-react'
 import { toast } from 'sonner'
@@ -18,19 +18,33 @@ import { cn } from '@/lib/utils'
 
 export default function TaskCardsListingPage() {
   const router = useRouter()
-  const { jobCards, customers, vehicles, deleteJobCard } = useGarageStore()
+  const { customers, vehicles } = useGarageStore()
+  const [rows, setRows] = useState<Record<string, any>[]>([])
+  const [quotationId, setQuotationId] = useState<string | undefined>()
 
-  const rows = useMemo(
-    () =>
-      jobCards
-        .slice()
-        .sort((a, b) => {
-          const left = new Date(b.createdAt).getTime()
-          const right = new Date(a.createdAt).getTime()
-          return left - right
-        }),
-    [jobCards],
-  )
+  useEffect(() => {
+    setQuotationId(new URLSearchParams(window.location.search).get('quotation_id') ?? undefined)
+  }, [])
+
+  useEffect(() => {
+    const loadTaskCards = async () => {
+      try {
+        const query = quotationId ? `?quotation_id=${encodeURIComponent(quotationId)}` : ''
+        const response = await fetch(`/backend-api/task-cards${query}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load task cards.')
+        setRows(Array.isArray(result.data) ? result.data : [])
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load task cards.')
+      }
+    }
+    void loadTaskCards()
+  }, [quotationId])
+
+  const taskCardPath = (path: 'create' | 'edit', id?: number | string) => {
+    const base = path === 'create' ? '/task-cards/create' : `/task-cards/edit/${id}`
+    return quotationId ? `${base}?quotation_id=${encodeURIComponent(quotationId)}` : base
+  }
 
   const getCustomerName = (customerId: string) => {
     const customer = customers.find((item) => item.id === customerId)
@@ -42,9 +56,16 @@ export default function TaskCardsListingPage() {
     return vehicle ? `${vehicle.make} ${vehicle.model}` : '—'
   }
 
-  const handleDelete = (id: string, title?: string) => {
-    deleteJobCard(id)
-    toast.success(`Task card ${title || id} deleted.`)
+  const handleDelete = async (id: number, title?: string) => {
+    try {
+      const response = await fetch(`/backend-api/task-cards/${id}`, { method: 'DELETE' })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete task card.')
+      setRows((current) => current.filter((card) => card.id !== id))
+      toast.success(`Task card ${title || id} deleted.`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to delete task card.')
+    }
   }
 
   return (
@@ -57,7 +78,7 @@ export default function TaskCardsListingPage() {
             Track and assign work orders from start through completion.
           </p>
         </div>
-        <Button onClick={() => router.push('/task-cards/create')} className="w-full gap-2 sm:w-auto">
+        <Button onClick={() => router.push(taskCardPath('create'))} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Task Card
         </Button>
@@ -69,7 +90,7 @@ export default function TaskCardsListingPage() {
           description="Create your first task card to start assigning service and parts tasks."
           action={{
             label: 'Add Task Card',
-            onClick: () => router.push('/task-cards/create'),
+            onClick: () => router.push(taskCardPath('create')),
           }}
         />
       ) : (
@@ -82,7 +103,6 @@ export default function TaskCardsListingPage() {
                   <th className="px-5 py-4 font-semibold">Customer</th>
                   <th className="px-5 py-4 font-semibold">Vehicle</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
-                  <th className="px-5 py-4 font-semibold">Priority</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
                   <th className="px-5 py-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -99,30 +119,29 @@ export default function TaskCardsListingPage() {
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <User className="size-4 text-muted-foreground" />
-                        <span>{getCustomerName(card.customerId)}</span>
+                        <span>{card.quotation?.vehicle?.customer?.name ?? getCustomerName(card.customerId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
-                        <span>{getVehicleName(card.vehicleId)}</span>
+                        <span>
+                          {card.quotation?.vehicle?.name ??
+                            ([card.quotation?.vehicle?.make, card.quotation?.vehicle?.model].filter(Boolean).join(' ') ||
+                              getVehicleName(card.vehicleId))}
+                        </span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <span
                         className={cn(
                           'inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize',
-                          card.status === 'completed' && 'bg-emerald-500/10 text-emerald-700',
-                          card.status === 'pending' && 'bg-amber-500/10 text-amber-700',
-                          card.status === 'in-progress' && 'bg-blue-500/10 text-blue-700',
-                          card.status === 'on-hold' && 'bg-slate-500/10 text-slate-700',
+                          (card.status === 1 || card.status === '1') && 'bg-emerald-500/10 text-emerald-700',
+                          (card.status === 0 || card.status === '0') && 'bg-destructive/10 text-destructive',
                         )}
                       >
-                        {card.status}
+                        {card.status === 1 || card.status === '1' ? 'Active' : 'Inactive'}
                       </span>
-                    </td>
-                    <td className="px-5 py-4 capitalize text-foreground font-medium">
-                      {card.priority}
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
                       {new Date(card.createdAt).toLocaleDateString()}
@@ -138,14 +157,14 @@ export default function TaskCardsListingPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/task-cards/edit/${card.id}`)}
+                              onClick={() => router.push(taskCardPath('edit', card.id))}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => router.push('/invoices')}
+                              onClick={() => router.push(`/invoices?task_id=${encodeURIComponent(String(card.id))}`)}
                               className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
                             >
                               <Receipt className="size-4 text-emerald-600" />

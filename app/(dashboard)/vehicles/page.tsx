@@ -9,6 +9,9 @@ export default function VehiclesPage() {
     <EntityCrudPage
       config={{
         resource: 'vehicles',
+        apiEndpoint: '/backend-api/vehicles',
+        customerScoped: true,
+        assignCurrentUserId: true,
         title: 'Vehicles',
         description: 'Track customer vehicles, maintenance history, and service records.',
         fields: [],

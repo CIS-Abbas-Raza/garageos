@@ -68,6 +68,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGarageStore } from "@/lib/store/garage-store";
 import { useBranch } from "@/lib/branch-context";
+import { useAuth } from "@/lib/auth-context";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -105,6 +106,10 @@ type Config = {
   apiEndpoint?: string;
   /** Loads and saves records for the active company only. */
   companyScoped?: boolean;
+  /** Sends the logged-in user's ID as `created_by` for newly created records. */
+  assignCurrentUserId?: boolean;
+  /** Loads and saves records for the customer identified by `customer_id` in the URL. */
+  customerScoped?: boolean;
   title: string;
   description: string;
   icon?: React.ComponentType<{ className?: string }>;
@@ -978,6 +983,13 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const router = useRouter();
   const store = useGarageStore();
   const { selectedCompany } = useBranch();
+  const { user } = useAuth();
+  const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
+
+  useEffect(() => {
+    const customerId = new URLSearchParams(window.location.search).get("customer_id");
+    setSelectedCustomer(customerId ?? undefined);
+  }, []);
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
   const schemaKey =
@@ -1034,10 +1046,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
       setApiRows([]);
       return;
     }
+    if (config.customerScoped && !selectedCustomer) {
+      setApiRows([]);
+      return;
+    }
     try {
-      const query = config.companyScoped
-        ? `?company_id=${encodeURIComponent(selectedCompany!)}`
-        : "";
+      const queryParams = new URLSearchParams();
+      if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
+      if (config.customerScoped) queryParams.set("customer_id", selectedCustomer!);
+      const query = queryParams.size ? `?${queryParams.toString()}` : "";
       const data = await requestApi(query);
       const records = Array.isArray(data) ? data : [];
       setApiRows(
@@ -1062,7 +1079,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
-  }, [apiEnabled, config.companyScoped, config.resource, requestApi, selectedCompany]);
+  }, [apiEnabled, config.companyScoped, config.customerScoped, config.resource, requestApi, selectedCompany, selectedCustomer]);
 
   /* ── State ── */
   const [open, setOpen] = useState(false);
@@ -1277,6 +1294,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
         }
         payload.company_id = selectedCompany;
       }
+      if (config.customerScoped) {
+        if (!selectedCustomer) {
+          throw new Error("Open Vehicles from a customer before managing vehicles.");
+        }
+        payload.customer_id = selectedCustomer;
+      }
+      if (config.assignCurrentUserId && !editing) {
+        if (!user) {
+          throw new Error("You must be logged in to create this record.");
+        }
+        payload.created_by = user.id;
+      }
       if (apiEnabled) {
         const { id, createdAt, updatedAt, is_deleted, packageInfos, ...apiPayload } = payload;
         if (!apiPayload.password) delete apiPayload.password;
@@ -1321,7 +1350,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const getBadgeColor = (column: string, value: string) => {
     const v = String(value).toLowerCase();
-    if (column === "status" || column === "active") {
+    if (column === "status" || column === "active" || column === "insured") {
       return v === "1" || v === "active" || v === "true" || v === "yes"
         ? "bg-green-100 text-green-800 border-green-200"
         : "bg-red-100 text-red-800 border-red-200";
@@ -1461,7 +1490,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             <span
                               className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase border ${getBadgeColor(column, row[column])}`}
                             >
-                              {column === "status" || column === "active"
+                              {column === "insured"
+                                ? row[column] === 1 || row[column] === "1" || row[column] === true
+                                  ? "Yes"
+                                  : "No"
+                                : column === "status" || column === "active"
                                 ? row[column] === "0" || row[column] === false
                                   ? "Inactive"
                                   : "Active"
@@ -1528,9 +1561,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>
+                            {config.resource === "customers" && (
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.id))}`)}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <Truck className="size-4 text-blue-600" />
+                                Vehicles
+                              </DropdownMenuItem>
+                            )}
                             {(config.resource === "vehicles" || schemaKey === "vehicles") && (
                               <DropdownMenuItem
-                                onClick={() => router.push("/quotations")}
+                                onClick={() => router.push(`/quotations?vehicle_id=${encodeURIComponent(String(row.id))}`)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
                               >
                                 <ClipboardList className="size-4 text-blue-600" />

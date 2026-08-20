@@ -9,6 +9,9 @@ export default function CustomersPage() {
     <EntityCrudPage
       config={{
         resource: 'customers',
+        apiEndpoint: '/backend-api/customers',
+        companyScoped: true,
+        assignCurrentUserId: true,
         title: 'Customers',
         description: 'Manage customer contact records and service history.',
         fields: [],
