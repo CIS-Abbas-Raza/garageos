@@ -485,14 +485,18 @@ export const useGarageStore = create<GarageStore>()(
         const invoice = store.invoices.find((i) => i.id === payment.invoiceId)
 
         if (invoice) {
-          const newAmountPaid = invoice.amountPaid + payment.amount
+          const newAmountPaid = invoice.amountPaid + (payment.paidAmount ?? payment.amount)
           const newStatus =
             newAmountPaid >= invoice.total
               ? 'paid'
               : newAmountPaid > 0
                 ? 'partially-paid'
                 : 'unpaid'
-          store.updateInvoice(invoice.id, { amountPaid: newAmountPaid, status: newStatus as any })
+          store.updateInvoice(invoice.id, {
+            amountPaid: newAmountPaid,
+            status: newStatus as any,
+            paymentStatus: payment.paymentStatus === 'verified' ? 'completed' : 'pending',
+          })
         }
 
         set((state) => ({

@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CarFront, Calendar, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
+import { CarFront, Calendar, FileText, Pencil, Plus, User, MoreHorizontal, Trash2, WalletCards } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ import { cn } from '@/lib/utils'
 export default function InvoicesPage() {
   const router = useRouter()
   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+  const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
 
   const rows = useMemo(
     () =>
@@ -80,6 +82,7 @@ export default function InvoicesPage() {
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Payment</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
+                  <th className="px-5 py-4 font-semibold">Balance</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
                   <th className="px-5 py-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -132,6 +135,9 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 font-semibold text-foreground">
                       ${Number(invoice.total ?? 0).toLocaleString()}
                     </td>
+                    <td className="px-5 py-4 font-semibold text-foreground">
+                      ${Math.max(0, Number(invoice.total ?? 0) - Number(invoice.amountPaid ?? 0)).toLocaleString()}
+                    </td>
                     <td className="px-5 py-4 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-muted-foreground" />
@@ -148,6 +154,13 @@ export default function InvoicesPage() {
                             <MoreHorizontal className="size-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={() => setPayingInvoice(invoice)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <WalletCards className="size-4" />
+                              Pay
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
                               className="gap-2 cursor-pointer text-xs"
@@ -178,6 +191,13 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+      <InvoicePaymentDialog
+        invoice={payingInvoice}
+        open={Boolean(payingInvoice)}
+        onOpenChange={(open) => {
+          if (!open) setPayingInvoice(null)
+        }}
+      />
     </div>
   )
 }
