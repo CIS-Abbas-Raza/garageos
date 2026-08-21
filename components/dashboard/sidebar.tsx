@@ -62,6 +62,7 @@ const menuSections = [
       // { href: '/vehicles', label: 'Vehicles', icon: Truck },
       // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
       // { href: '/task-cards', label: 'Task Cards', icon: FileText },
+      { href: '/assigned-tasks', label: 'Assigned Tasks', icon: ClipboardList },
       { href: '/appointments', label: 'Appointments', icon: Calendar },
       { href: '/reviews', label: 'Customer Review', icon: FileText },
     ],

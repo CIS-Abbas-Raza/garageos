@@ -113,7 +113,7 @@ export default function TaskCardsListingPage() {
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <FileText className="size-4 text-primary" />
-                        <span>{(card as any).taskCardNumber || card.title || card.id}</span>
+                        <span>{(card as any).task_cards_number || (card as any).taskCardNumber || card.title || card.id}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground">
@@ -178,7 +178,7 @@ export default function TaskCardsListingPage() {
                               Vehicle Pictures
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDelete(card.id, (card as any).taskCardNumber || card.title)}
+                              onClick={() => handleDelete(card.id, (card as any).task_cards_number || (card as any).taskCardNumber || card.title)}
                               className="gap-2 cursor-pointer text-xs text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="size-4" />

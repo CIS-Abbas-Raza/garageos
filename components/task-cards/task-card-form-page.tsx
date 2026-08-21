@@ -235,7 +235,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     const defaultCreationDate = formatDateInput((TaskCard as any)?.creationDate ?? TaskCard?.createdAt)
 
     return {
-      taskCardNumber: (TaskCard as any)?.taskCardNumber ?? TaskCard?.title ?? (TaskCard?.id ? `TC-${TaskCard.id}` : `TC-${Date.now()}`),
+      taskCardNumber: (TaskCard as any)?.task_cards_number ?? (TaskCard as any)?.taskCardNumber ?? TaskCard?.title ?? (TaskCard?.id ? `TC-${TaskCard.id}` : `TC-${Date.now()}`),
       customerId: defaultCustomerId,
       vehicleId: defaultVehicle,
       mileage: (TaskCard as any)?.mileage ?? 0,
@@ -446,6 +446,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     const apiPayload = {
       company_id: apiCompany?.id ?? selectedCompany ?? currentCompany.id,
       quotation_id: resolvedQuotationId,
+      task_cards_number: values.taskCardNumber,
       status: values.status === 'cancelled' ? 0 : 1,
       created_by: user?.id,
       updated_by: user?.id,
@@ -456,6 +457,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
         qty: Number(item.qty),
         task_status: item.status,
         status: item.status === 'cancelled' ? 0 : 1,
+        assignedTo: item.assignedTo || undefined,
         created_by: user?.id,
         updated_by: user?.id,
       })),
@@ -710,6 +712,8 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                     </tr>
                   ) : (
                     fields.map((field, index) => {
+                      const assignedUserId = watch(`lineItems.${index}.assignedTo`) ?? ''
+                      const assignedUserName = companyUsers.find((companyUser) => companyUser.id === String(assignedUserId))?.name
                       return (
                         <tr key={field.id} data-line-item-row={index} className="align-top">
                           {/* Type */}
@@ -789,7 +793,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                           {/* Assigned To */}
                           <td className="px-4 py-4">
                             <Select
-                              value={watch(`lineItems.${index}.assignedTo`) || undefined}
+                              value={assignedUserId}
                               onValueChange={(value) =>
                                 setValue(`lineItems.${index}.assignedTo`, value ?? '', {
                                   shouldDirty: true,
@@ -798,7 +802,9 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                               }
                             >
                               <SelectTrigger className="w-full" disabled={companyUsers.length === 0}>
-                                <SelectValue placeholder={companyUsers.length ? 'Select company user' : 'No company users'} />
+                                <span className="flex flex-1 truncate text-left">
+                                  {assignedUserName ?? (companyUsers.length ? 'Select company user' : 'No company users')}
+                                </span>
                               </SelectTrigger>
                               <SelectContent>
                                 {companyUsers.map((companyUser) => (

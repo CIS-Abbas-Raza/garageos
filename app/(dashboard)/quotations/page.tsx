@@ -111,7 +111,7 @@ export default function QuotationsPage() {
         subtotal: Number(quotation.subtotal ?? 0),
         taxPercentage: Number(quotation.tax_percentage ?? 0),
         taxAmount: Number(quotation.tax_amount ?? 0),
-        discountPercentage: 0,
+        discountPercentage: Number(quotation.discount_percentage ?? 0),
         discountAmount: Number(quotation.discount ?? 0),
         total: Number(quotation.total ?? 0),
       }

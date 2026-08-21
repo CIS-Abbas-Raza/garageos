@@ -183,7 +183,7 @@ export const generateQuotationPdf = async (payload: QuotationPdfPayload) => {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   const companyLines = [
-    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}  |  Country: ${safePdfText(payload.companyCountry)}`,
+    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}`,
     `Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`,
   ]
   companyLines.forEach((line, index) => {
@@ -599,6 +599,8 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
           note: record.note,
           quotationStatus: record.quotation_status,
           creationDate: record.creation_date,
+          taxPercentage: Number(record.tax_percentage ?? 0),
+          discountPercentage: Number(record.discount_percentage ?? 0),
           documentNames: (record.documents ?? []).map((document: any) => document.document),
           lineItems: (record.details ?? []).map((detail: any) => ({
             id: String(detail.id),
@@ -716,8 +718,8 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       status: quotation?.quotationStatus ?? quotation?.status ?? 'draft',
       creationDate: formatDateInput(quotation?.creationDate ?? quotation?.createdAt),
       documentName: quotation?.documentName ?? '',
-      taxPercentage: quotation?.taxPercentage ?? 0,
-      discountPercentage: quotation?.discountPercentage ?? 0,
+      taxPercentage: quotation?.taxPercentage ?? quotation?.tax_percentage ?? 0,
+      discountPercentage: quotation?.discountPercentage ?? quotation?.discount_percentage ?? 0,
       subtotal: quotation?.subtotal ?? 0,
       taxAmount: quotation?.taxAmount ?? quotation?.tax ?? 0,
       discountAmount: quotation?.discountAmount ?? quotation?.discount ?? 0,
@@ -1038,6 +1040,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       quotation_status: values.status,
       subtotal: includeLineItems ? subtotal : 0,
       discount: includeLineItems ? discountAmount : 0,
+      discount_percentage: includeLineItems ? values.discountPercentage : 0,
       tax_amount: includeLineItems ? taxAmount : 0,
       tax_percentage: includeLineItems ? values.taxPercentage : 0,
       total: includeLineItems ? total : 0,

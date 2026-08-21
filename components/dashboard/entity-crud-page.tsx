@@ -268,6 +268,7 @@ const exactFields: Record<string, Field[]> = {
   // ⚠️ SPEC FLAG: registration_no is 'number' on Create but 'text' on Update per spec.
   // This is implemented as specified via updateType — flag as unusual inconsistency.
   companies: [
+    { key: "name", label: "Company Name", required: true },
     {
       key: "owner_id",
       label: "Owner",

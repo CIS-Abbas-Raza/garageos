@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CarFront, Calendar, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -62,6 +63,74 @@ export default function InvoicesPage() {
     if (!vehicleId) return '—'
     const vehicle = vehicles.find((item) => item.id === vehicleId)
     return vehicle ? [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(' ') || '—' : '—'
+  }
+
+  const downloadInvoice = async (invoiceId: string | number) => {
+    try {
+      const invoiceResponse = await fetch(`/backend-api/invoices/${invoiceId}`)
+      const invoiceResult = await invoiceResponse.json()
+      if (!invoiceResponse.ok || invoiceResult.success === false || !invoiceResult.data) {
+        throw new Error(invoiceResult.message || 'Unable to load invoice for download.')
+      }
+
+      const invoice = invoiceResult.data
+      const companyResponse = await fetch(`/backend-api/companies/${invoice.company_id}`)
+      const companyResult = await companyResponse.json()
+      if (!companyResponse.ok || companyResult.success === false || !companyResult.data) {
+        throw new Error(companyResult.message || 'Unable to load invoice company.')
+      }
+
+      const company = companyResult.data
+      const vehicle = invoice.taskCard?.quotation?.vehicle ?? {}
+      const customer = vehicle.customer ?? {}
+      const customerName = customer.name ?? ([customer.first_name ?? customer.firstName, customer.last_name ?? customer.lastName].filter(Boolean).join(' ') || '—')
+      const companyAddress = [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(', ') || '—'
+      const subtotal = Number(invoice.subtotal ?? 0)
+      const discountAmount = Number(invoice.discount ?? 0)
+      const payload: InvoicePdfPayload = {
+        companyName: company.name ?? 'Company',
+        companyEmail: company.email ?? '—',
+        companyCountry: company.country ?? '—',
+        companyPhone: company.phone ?? '—',
+        companyAddress,
+        companyRegNo: company.registration_no ?? company.registrationNo ?? '—',
+        companyLogoUrl: company.logo_url ?? company.logoUrl ?? company.logo,
+        invoiceNumber: invoice.invoice_number ?? `INV-${invoice.id}`,
+        creationDate: invoice.creation_date ?? '',
+        dueDate: invoice.due_date ?? invoice.dueDate ?? invoice.creation_date ?? '',
+        paymentStatus: invoice.payment_status ?? 'pending',
+        customerName,
+        customerEmail: customer.email ?? '—',
+        customerPhone: customer.phone ?? '—',
+        customerAddress: customer.address ?? '—',
+        vehicleName: vehicle.name ?? ([vehicle.make, vehicle.model].filter(Boolean).join(' ') || '—'),
+        vehicleMake: vehicle.make ?? '—',
+        vehicleModel: vehicle.model ?? '—',
+        vehicleVariant: vehicle.variant ?? '—',
+        vehicleYear: vehicle.year ? String(vehicle.year) : '—',
+        vin: vehicle.vin ?? vehicle.VIN ?? '—',
+        licensePlate: vehicle.license_plate ?? vehicle.licensePlate ?? '—',
+        notes: invoice.notes ?? '',
+        includeLineItems: (invoice.details ?? []).length > 0,
+        lineItems: (invoice.details ?? []).map((detail: any) => ({
+          type: detail.type,
+          description: detail.description ?? '',
+          qty: Number(detail.qty ?? 0),
+          unitPrice: Number(detail.unit_price ?? 0),
+        })),
+        subtotal,
+        taxPercentage: Number(invoice.tax_percentage ?? 0),
+        taxAmount: Number(invoice.tax_amount ?? 0),
+        discountPercentage: subtotal > 0 ? Number(((discountAmount / subtotal) * 100).toFixed(2)) : 0,
+        discountAmount,
+        total: Number(invoice.total ?? 0),
+      }
+
+      await generateInvoicePdf(payload)
+      toast.success('Invoice PDF downloaded.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to download invoice.')
+    }
   }
 
   return (
@@ -174,6 +243,13 @@ export default function InvoicesPage() {
                             >
                               <Pencil className="size-4" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => void downloadInvoice(invoice.id)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Download className="size-4" />
+                              Download PDF
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={async () => {

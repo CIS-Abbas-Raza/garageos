@@ -124,7 +124,7 @@ type PdfInvoiceLineItem = {
   unitPrice: number
 }
 
-type InvoicePdfPayload = {
+export type InvoicePdfPayload = {
   companyName: string
   companyEmail: string
   companyCountry: string
@@ -158,7 +158,7 @@ type InvoicePdfPayload = {
   total: number
 }
 
-const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
+export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -190,11 +190,11 @@ const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   doc.text(companyName, textStartX, y + 20)
 
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
-  const companyLines = [
-    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}  |  Country: ${safePdfText(payload.companyCountry)}`,
-    `Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`,
-  ]
+    doc.setFontSize(9)
+    const companyLines = [
+    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}`,
+      `Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`,
+    ]
   companyLines.forEach((line, index) => {
     doc.text(line, textStartX, y + 38 + index * 13)
   })
@@ -659,7 +659,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
       documentName: Invoice?.documentName ?? '',
-      taxPercentage: Invoice?.taxPercentage ?? 10,
+      taxPercentage: Invoice?.taxPercentage ?? 0,
       discountPercentage: Invoice?.discountPercentage ?? 0,
       subtotal: Invoice?.subtotal ?? 0,
       taxAmount: Invoice?.taxAmount ?? Invoice?.tax ?? 0,
@@ -941,6 +941,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     const apiPayload = {
       company_id: companyId,
       task_id: resolvedTaskId,
+      invoice_number: values.invoiceNumber,
       invoice_status: values.status,
       payment_status: values.paymentStatus,
       subtotal: includeLineItems ? subtotal : 0,

@@ -155459,3 +155459,73 @@ Import traces:
   32 | ...
   33 | ...
   34 | ... {
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
+⚠ Slow filesystem detected. The benchmark took 1517ms. If E:\NextJs\Frontend-grageOs\garageos\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+Failed to proxy http://localhost:5000/api/companies AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] Base UI: A component is changing the uncontrolled value state of Select to be controlled.
+Elements should not switch from uncontrolled to controlled (or vice versa).
+Decide between using a controlled or uncontrolled Select element for the lifetime of the component.
+The nature of the state is determined during the first render. It's considered controlled if the value is not `undefined`.
+More info: https://fb.me/react-controlled-components 
+[browser] Base UI: A component is changing the uncontrolled value state of Select to be controlled.
+Elements should not switch from uncontrolled to controlled (or vice versa).
+Decide between using a controlled or uncontrolled Select element for the lifetime of the component.
+The nature of the state is determined during the first render. It's considered controlled if the value is not `undefined`.
+More info: https://fb.me/react-controlled-components 
+⚠ Fast Refresh had to perform a full reload when ./components/invoices/invoice-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/invoices/invoice-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
