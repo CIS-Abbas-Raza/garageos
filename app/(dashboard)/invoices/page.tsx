@@ -121,7 +121,7 @@ export default function InvoicesPage() {
         subtotal,
         taxPercentage: Number(invoice.tax_percentage ?? 0),
         taxAmount: Number(invoice.tax_amount ?? 0),
-        discountPercentage: subtotal > 0 ? Number(((discountAmount / subtotal) * 100).toFixed(2)) : 0,
+        discountPercentage: Number(invoice.discount_percentage ?? 0),
         discountAmount,
         total: Number(invoice.total ?? 0),
       }

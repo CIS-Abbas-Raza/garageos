@@ -925,3 +925,18 @@ Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', test
  GET /quotations/edit/1?vehicle_id=4 200 in 838ms (next.js: 110ms, application-code: 728ms)
  GET /quotations?vehicle_id=4 200 in 202ms (next.js: 55ms, application-code: 147ms)
  GET /quotations/edit/1?vehicle_id=4 200 in 256ms (next.js: 36ms, application-code: 220ms)
+✓ Compiled in 4.5s
+ GET /quotations/edit/1?vehicle_id=4 200 in 6.6s (next.js: 1493ms, application-code: 5.1s)
+ GET /quotations/edit/1?vehicle_id=4 200 in 4.5s (next.js: 16ms, application-code: 4.5s)
+ GET /quotations/edit/1?vehicle_id=4 200 in 853ms (next.js: 499ms, application-code: 354ms)
+ GET /quotations?vehicle_id=4 200 in 2.7s (next.js: 1641ms, application-code: 1019ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 173ms (next.js: 51ms, application-code: 122ms)
+ GET /task-cards?quotation_id=1 200 in 237ms (next.js: 119ms, application-code: 118ms)
+ GET /invoices?task_id=4 200 in 283ms (next.js: 146ms, application-code: 137ms)
+ GET /invoices/edit/3?task_id=4 200 in 914ms (next.js: 500ms, application-code: 415ms)
+ GET /invoices/edit/3?task_id=4 200 in 5.5s (next.js: 351ms, application-code: 5.1s)
+ GET /invoices?task_id=4 200 in 765ms (next.js: 290ms, application-code: 475ms)
+✓ Compiled in 3.9s
+ GET /invoices?task_id=4 200 in 1810ms (next.js: 1386ms, application-code: 424ms)
+ GET /invoices?task_id=4 200 in 1040ms (next.js: 602ms, application-code: 438ms)
+ GET /invoices?task_id=4 200 in 6.1s (next.js: 214ms, application-code: 5.9s)
