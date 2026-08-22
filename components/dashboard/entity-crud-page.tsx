@@ -108,6 +108,14 @@ type Config = {
   companyScoped?: boolean;
   /** Sends the logged-in user's ID as `created_by` for newly created records. */
   assignCurrentUserId?: boolean;
+  /** Hides the header action for resources created through another workflow. */
+  hideCreateButton?: boolean;
+  /** Hides edit, view, and delete actions for read-only listings. */
+  hideRowActions?: boolean;
+  /** Limits edit submissions to these fields. */
+  updateFields?: string[];
+  /** URL prefix for the record's `picture` file, shown in the edit dialog. */
+  fileUrlPrefix?: string;
   /** Loads and saves records for the customer identified by `customer_id` in the URL. */
   customerScoped?: boolean;
   title: string;
@@ -185,6 +193,7 @@ const exactFields: Record<string, Field[]> = {
       type: "dynamic-list",
       required: true,
     },
+    statusField,
   ],
   admin: [
     { key: "name", label: "Name", required: true },
@@ -196,9 +205,6 @@ const exactFields: Record<string, Field[]> = {
   customers: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
-    // ⚠️ SPEC FLAG: Customers have a password field — this implies a customer-facing portal login.
-    // Confirm with team whether this is intentional for a garage internal admin tool.
-    { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
   ],
@@ -219,13 +225,6 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
     { key: "email", label: "Email", type: "email", required: true },
-    {
-      key: "password",
-      label: "Password",
-      type: "password",
-      required: true,
-      optionalOnUpdate: true,
-    },
     { key: "phone", label: "Phone", required: true },
     { key: "address", label: "Address", required: true },
   ],
@@ -454,39 +453,6 @@ const exactFields: Record<string, Field[]> = {
   ],
   invoicePayments: [
     {
-      key: "invoice_id",
-      label: "Invoice ID",
-      type: "number",
-      required: true,
-      readOnly: true,
-    },
-    {
-      key: "total_amount",
-      label: "Total amount",
-      type: "number",
-      required: true,
-    },
-    {
-      key: "balance_amount",
-      label: "Balance amount",
-      type: "number",
-      required: true,
-    },
-    {
-      key: "paid_amount",
-      label: "Paid amount",
-      type: "number",
-      required: true,
-    },
-    { key: "picture", label: "Picture", type: "file" },
-    {
-      key: "payment_method",
-      label: "Payment method",
-      type: "select",
-      required: true,
-      options: options(["cash", "card", "bank_transfer", "online"]),
-    },
-    {
       key: "payment_status",
       label: "Payment status",
       type: "select",
@@ -522,6 +488,13 @@ const exactFields: Record<string, Field[]> = {
     },
   ],
   smsSettings: [
+    {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
     { key: "sms_account_sid", label: "SMS Account SID", required: true },
     {
       key: "sms_auth_token",
@@ -533,6 +506,13 @@ const exactFields: Record<string, Field[]> = {
     statusField,
   ],
   whatsappSettings: [
+    {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
     {
       key: "whatsapp_account_sid",
       label: "WhatsApp Account SID",
@@ -553,9 +533,22 @@ const exactFields: Record<string, Field[]> = {
   ],
   emailSettings: [
     {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
+    {
       key: "sendgrid_api_key",
       label: "SendGrid API Key",
       type: "password",
+      required: true,
+    },
+    {
+      key: "email",
+      label: "Sender Email",
+      type: "email",
       required: true,
     },
     statusField,
@@ -1006,7 +999,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ? "taskCards"
               : config.resource;
   const fields = exactFields[schemaKey] ?? config.fields;
-  const isExcluded = ["taskCards", "estimations", "invoices"].includes(config.resource);
+  const isExcluded = ["taskCards", "estimations", "invoices", "invoicePayments"].includes(config.resource);
   const singular = singularize(config.resource);
   const rows = (apiEnabled
     ? apiRows
@@ -1036,9 +1029,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body.success === false) {
-      throw new Error(body.message || "Unable to complete the request.");
+      throw new Error(body.message || body.error || "Unable to complete the request.");
     }
-    return body.data;
+    return body.data ?? body;
   }, [config.apiEndpoint]);
 
   const loadApiRows = useCallback(async () => {
@@ -1059,7 +1052,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
       const data = await requestApi(query);
       const records = Array.isArray(data) ? data : [];
       setApiRows(
-        config.resource === "companyUsers"
+        ["smsSettings", "whatsappSettings", "emailSettings"].includes(config.resource)
+          ? records.map((record) => ({
+              ...record,
+              company_name: record.company?.name ?? `Company #${record.company_id}`,
+            }))
+          : config.resource === "companies"
+          ? records.map((record) => ({
+              ...record,
+              owner_name: record.owner?.name ?? `User #${record.owner_id}`,
+            }))
+          : config.resource === "companyUsers"
           ? records.map((record) => ({
               ...record,
               ...record.user,
@@ -1075,6 +1078,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 record.packageInfos?.map((item: { information?: string }) => item.information) ??
                 [],
             }))
+          : config.resource === "invoicePayments"
+          ? records.map((record) => ({
+              ...record,
+              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+              amount: record.paid_amount,
+              date: record.createdAt ? new Date(record.createdAt).toLocaleDateString() : "—",
+            }))
+          : config.resource === "sales"
+          ? records.map((record) => ({
+              ...record,
+              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+            }))
           : records,
       );
     } catch (error) {
@@ -1085,6 +1100,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
   /* ── State ── */
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
+  const editingFileUrl = editing?.picture && config.fileUrlPrefix
+    ? `${config.fileUrlPrefix}${encodeURIComponent(String(editing.picture))}`
+    : undefined;
   const formFields =
     !fields.some((field) => field.key === "status") &&
     ![
@@ -1271,6 +1289,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
     }
     form.reset({
       ...row,
+      ...(schemaKey === "companies" && { owner_id: String(row.owner_id ?? "") }),
+      ...(schemaKey === "vehicles" && {
+        insured:
+          String(row.insured) === "1" || row.insured === true || row.insured === "Yes"
+            ? "1"
+            : "0",
+      }),
+      status: String(row.status ?? "1"),
       information: formattedInfo || [{ value: "" }],
       ...(schemaKey === "packageSubscriptions" && {
         start_date: row.start_date ? String(row.start_date).slice(0, 16) : "",
@@ -1284,6 +1310,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const submit = async (data: Record<string, any>) => {
     // Flatten information array of objects into simple array of strings before saving to store
     let payload = { ...data };
+    if (editing && config.updateFields) {
+      payload = Object.fromEntries(
+        config.updateFields.map((field) => [field, data[field]]),
+      );
+    }
     if (data.information && Array.isArray(data.information)) {
       payload.information = data.information.map((item: any) => item.value);
     }
@@ -1393,13 +1424,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
               </p>
             </div>
           </div>
-          <Button
-            onClick={openCreate}
-            className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
-          >
-            <Plus className="size-4" />
-            Add {singularize(config.title)}
-          </Button>
+          {!config.hideCreateButton && (
+            <Button
+              onClick={openCreate}
+              className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
+            >
+              <Plus className="size-4" />
+              Add {singularize(config.title)}
+            </Button>
+          )}
         </div>
 
         {/* ═══ FILTER BAR ═══ */}
@@ -1464,16 +1497,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       </button>
                     </th>
                   ))}
-                  <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Actions
-                  </th>
+                  {!config.hideRowActions && (
+                    <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-white">
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={config.columns.length + 2}
+                      colSpan={config.columns.length + (config.hideRowActions ? 1 : 2)}
                       className="px-5 py-12 text-center text-sm text-muted-foreground"
                     >
                       {config.empty}
@@ -1496,7 +1531,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                   ? "Yes"
                                   : "No"
                                 : column === "status" || column === "active"
-                                ? row[column] === "0" || row[column] === false
+                                ? String(row[column]) === "0" || row[column] === false
                                   ? "Inactive"
                                   : "Active"
                                 : labelize(String(row[column] ?? "—"))}
@@ -1539,7 +1574,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                         </td>
                       ))}
                       {/* Actions column */}
-                      <td className="px-5 py-4 text-right">
+                      {!config.hideRowActions && <td className="px-5 py-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
@@ -1600,7 +1635,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             )}
                             <DropdownMenuItem
                               onClick={async () => {
-                                const updated = { ...row, status: row.status === "0" ? "1" : "0" };
+                                const updated = { ...row, status: String(row.status) === "0" ? "1" : "0" };
                                 try {
                                   if (apiEnabled) {
                                     await requestApi(`/${row.id}`, {
@@ -1644,7 +1679,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </td>
+                      </td>}
                     </tr>
                   ))
                 )}
@@ -1658,7 +1693,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       {/*                   ADD / EDIT MODAL                         */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={isExcluded ? "flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
+        <DialogContent className={config.resource === "invoicePayments" ? "flex max-h-[90vh] sm:max-w-lg flex-col gap-0 overflow-hidden p-0 bg-background border-border" : isExcluded ? "flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
           <DialogHeader className={isExcluded ? "shrink-0 border-b border-border px-6 py-5 pr-14" : "shrink-0 px-6 pt-6 pb-4 space-y-1 pr-14"}>
             <DialogTitle className={isExcluded ? "text-lg font-bold text-foreground" : "text-xl font-bold text-slate-900"}>
               {editing
@@ -1676,21 +1711,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className={isExcluded ? "min-h-0 flex-1 overflow-y-auto px-6 py-5" : "min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-2"}>
-              {/* Edit mode: identity block */}
-              {editing && identityFields.length > 0 && (
-                <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
-                  <p className="font-semibold text-foreground">
-                    {formatValue(editing[identityFields[0].key])}
-                  </p>
-                  {identityFields[1] && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatValue(editing[identityFields[1].key])}
-                    </p>
-                  )}
-                </div>
-              )}
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className={config.resource === "invoicePayments" ? "grid gap-4" : "grid gap-4 md:grid-cols-2"}>
                 {formFields
+                  .filter(
+                    (field) =>
+                      !(["admin", "customers", "employees", "packages", "roles", "companies", "companyUsers", "vehicles"].includes(schemaKey) && field.key === "status"),
+                  )
                   .filter(
                     (field) =>
                       !(
@@ -1741,6 +1767,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       isEditing={Boolean(editing)}
                     />
                   ))}
+                {editing && editingFileUrl && (
+                  <div className="space-y-2">
+                    <Label>Payment proof</Label>
+                    <Button asChild type="button" variant="outline" className="w-fit">
+                      <a href={editingFileUrl} target="_blank" rel="noreferrer">
+                        <Eye className="size-4" />
+                        View file
+                      </a>
+                    </Button>
+                  </div>
+                )}
                 {isLineItemModule && (
                   <LineItems
                     resource={config.resource}

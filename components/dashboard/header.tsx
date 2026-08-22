@@ -28,7 +28,7 @@ interface CompanyOption {
 export function DashboardHeader({ title }: DashboardHeaderProps) {
   const [companies, setCompanies] = useState<CompanyOption[]>([])
   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBranch()
-  const { user, logout } = useAuth()
+  const { user, logout, isSuperAdmin } = useAuth()
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageStore()
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     toast.success('You have been signed out.')
   }
 
-  const currentCompany = companies.find(c => c.id === selectedCompany) || companies[0]
+  const currentCompany = companies.find(c => c.id === selectedCompany)
   const currentCompanyName = currentCompany?.name || 'Select Company'
 
   const branches = [
@@ -68,7 +68,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     { id: 'b2', name: 'Iqbal Branch' },
   ]
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
-  const companyId = user?.roles.find((role) => role.scopeId)?.scopeId
+  const companyId = selectedCompany ?? user?.roles.find((role) => role.scopeId)?.scopeId
   const relevantNotifications = notifications
     .filter((notification) => notification.status !== 0 && (!notification.recipientType || notification.recipientType === 'all' || (notification.recipientType === 'company' && notification.recipientId === companyId) || (notification.recipientType === 'user' && notification.recipientId === user?.id)))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -99,6 +99,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
           <DropdownMenu>
             <DropdownMenuTrigger
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground outline-none hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-primary/30"
+              aria-label={isSuperAdmin ? 'Select the active company for the dashboard' : 'Current company'}
             >
               <Building2 className="size-3.5 text-muted-foreground shrink-0" />
               <span className="max-w-[130px] truncate">{currentCompanyName}</span>
@@ -111,7 +112,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
                   onClick={() => setSelectedCompany(company.id)}
                   className="text-xs cursor-pointer"
                 >
-                  {company.name}
+                  {company.name}{selectedCompany === company.id ? ' (Selected)' : ''}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

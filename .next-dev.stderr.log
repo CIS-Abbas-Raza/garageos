@@ -155533,3 +155533,939 @@ More info: https://fb.me/react-controlled-components
 ⚠ Fast Refresh had to perform a full reload when ./components/quotations/quotation-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
 ⚠ Fast Refresh had to perform a full reload when ./components/invoices/invoice-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
 ⚠ Fast Refresh had to perform a full reload when ./components/invoices/invoice-form-page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] Uncaught Error: ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/invoices/page.tsx:271:1)
+    at <unknown> (Error: (./app/(dashboard)/invoices/page.tsx:271:1)
+[browser] ./app/(dashboard)/invoices/page.tsx:271:1
+Merge conflict marker encountered.
+  269 |                             <DropdownMenuItem
+  270 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 271 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  272 |                               className="gap-2 cursor-pointer text-xs"
+  273 |                             >
+  274 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:261:1
+Merge conflict marker encountered.
+  259 |                             <DropdownMenuItem
+  260 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 261 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  262 |                               className="gap-2 cursor-pointer text-xs"
+  263 |                             >
+  264 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:259:1
+Merge conflict marker encountered.
+  257 |                             <DropdownMenuItem
+  258 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 259 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  260 |                               className="gap-2 cursor-pointer text-xs"
+  261 |                             >
+  262 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:259:1
+Merge conflict marker encountered.
+  257 |                             <DropdownMenuItem
+  258 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 259 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  260 |                               className="gap-2 cursor-pointer text-xs"
+  261 |                             >
+  262 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] Uncaught Error: ./app/(dashboard)/invoices/page.tsx:259:1
+Merge conflict marker encountered.
+  257 |                             <DropdownMenuItem
+  258 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 259 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  260 |                               className="gap-2 cursor-pointer text-xs"
+  261 |                             >
+  262 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/invoices/page.tsx:259:1)
+    at <unknown> (Error: (./app/(dashboard)/invoices/page.tsx:259:1)
+[browser] Uncaught Error: ./app/(dashboard)/invoices/page.tsx:259:1
+Merge conflict marker encountered.
+  257 |                             <DropdownMenuItem
+  258 |                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+> 259 | >>>>>>> ee48b93942433f7465e78f13b4f94e531393add3
+      | ^^^^^^^
+  260 |                               className="gap-2 cursor-pointer text-xs"
+  261 |                             >
+  262 |                               <Pencil className="size-4" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/invoices/page.tsx:259:1)
+    at <unknown> (Error: (./app/(dashboard)/invoices/page.tsx:259:1)
+[browser] ./app/(dashboard)/invoices/page.tsx:24:21
+the name `customers` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                     ^^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:11
+the name `invoices` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |           ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:32
+the name `vehicles` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                                ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:21
+the name `customers` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                     ^^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:11
+the name `invoices` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |           ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:32
+the name `vehicles` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                                ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] Uncaught Error: ./app/(dashboard)/invoices/page.tsx:24:21
+the name `customers` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                     ^^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/invoices/page.tsx:24:21)
+    at <unknown> (Error: (./app/(dashboard)/invoices/page.tsx:24:21)
+[browser] ./app/(dashboard)/invoices/page.tsx:24:21
+the name `customers` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                     ^^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:11
+the name `invoices` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |           ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:32
+the name `vehicles` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                                ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:21
+the name `customers` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                     ^^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:11
+the name `invoices` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |           ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/invoices/page.tsx:24:32
+the name `vehicles` is defined multiple times
+  22 |   const { customers, vehicles } = useGarageStore()
+  23 |   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+> 24 |   const { invoices, customers, vehicles, deleteCrudRecord } = useGarageStore()
+     |                                ^^^^^^^^
+  25 |   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  26 |
+  27 |   const [taskId, setTaskId] = useState<string | undefined>()
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/invoices/page.tsx [Client Component Browser]
+    ./app/(dashboard)/invoices/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/invoices/page.tsx [Client Component SSR]
+    ./app/(dashboard)/invoices/page.tsx [Server Component] 
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
+⚠ Slow filesystem detected. The benchmark took 1383ms. If E:\NextJs\Frontend-grageOs\garageos\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '128006481'
+}
+[browser] Uncaught Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>:1:18)
+    at stringify (<anonymous>:1:18)
+[browser] Uncaught Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  {resource: ..., apiEndpoint: ..., title: ..., description: ..., hideCreateButton: ..., updateFields: ..., fileUrl: function fileUrl, fields: ..., columns: ..., empty: ...}
+                                                                                                                     ^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>:1:18)
+    at stringify (<anonymous>:1:18)
+[browser] React does not recognize the `asChild` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `aschild` instead. If you accidentally passed it from a parent component, remove it from the DOM element. 
+Failed to proxy http://localhost:5000/api/sendgrid-settings?company_id=1 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/twilio-sms-settings?company_id=1 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/twilio-sms-settings?company_id=1 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/quotations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/quotations?vehicle_id=4 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/quotations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}

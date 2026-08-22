@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2, WalletCards } from 'lucide-react'
+import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -21,27 +21,30 @@ export default function InvoicesPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
+  const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+
   const [taskId, setTaskId] = useState<string | undefined>()
 
   useEffect(() => {
     setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
   }, [])
 
-  useEffect(() => {
-    const loadInvoices = async () => {
-      try {
-        const query = taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''
-        const response = await fetch(`/backend-api/invoices${query}`)
-        const result = await response.json()
-        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
-        setInvoices(Array.isArray(result.data) ? result.data : [])
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
-      }
+  const loadInvoices = useCallback(async () => {
+    try {
+      const query = taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''
+      const response = await fetch(`/backend-api/invoices${query}`)
+      const result = await response.json()
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
+      setInvoices(Array.isArray(result.data) ? result.data : [])
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
     }
-    void loadInvoices()
   }, [taskId])
 
+  useEffect(() => {
+    void loadInvoices()
+  }, [loadInvoices])
+  
   const rows = useMemo(
     () =>
       invoices
@@ -170,6 +173,7 @@ export default function InvoicesPage() {
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Payment</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
+                  <th className="px-5 py-4 font-semibold">Balance</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
                   <th className="px-5 py-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -221,6 +225,9 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 font-semibold text-foreground">
                       ${Number(invoice.total ?? 0).toLocaleString()}
                     </td>
+                    <td className="px-5 py-4 font-semibold text-foreground">
+                      ${Number(invoice.balance_amount ?? invoice.balanceAmount ?? Math.max(0, Number(invoice.total ?? 0) - Number(invoice.amountPaid ?? 0))).toLocaleString()}
+                    </td>
                     <td className="px-5 py-4 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-muted-foreground" />
@@ -238,7 +245,18 @@ export default function InvoicesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/invoices/edit/${invoice.id}${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)}
+                              onClick={() => setPayingInvoice(invoice)}
+                              disabled={(invoice.payment_status ?? invoice.paymentStatus) === 'completed'}
+                              className={cn(
+                                'gap-2 cursor-pointer text-xs',
+                                (invoice.payment_status ?? invoice.paymentStatus) === 'completed' && 'cursor-not-allowed opacity-50',
+                              )}
+                            >
+                              <WalletCards className="size-4" />
+                              Pay
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
@@ -281,6 +299,14 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+      <InvoicePaymentDialog
+        invoice={payingInvoice}
+        open={Boolean(payingInvoice)}
+        onOpenChange={(open) => {
+          if (!open) setPayingInvoice(null)
+        }}
+        onPaymentCreated={loadInvoices}
+      />
     </div>
   )
 }

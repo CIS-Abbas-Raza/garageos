@@ -940,3 +940,400 @@ Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', test
  GET /invoices?task_id=4 200 in 1810ms (next.js: 1386ms, application-code: 424ms)
  GET /invoices?task_id=4 200 in 1040ms (next.js: 602ms, application-code: 438ms)
  GET /invoices?task_id=4 200 in 6.1s (next.js: 214ms, application-code: 5.9s)
+ GET /invoices?task_id=4 200 in 9.3s (next.js: 1895ms, application-code: 7.4s)
+ GET /invoices/edit/3?task_id=4 200 in 1368ms (next.js: 1036ms, application-code: 332ms)
+ GET /login 200 in 5.3s (next.js: 202ms, application-code: 5.1s)
+ GET /login 200 in 4.9s (next.js: 712ms, application-code: 4.2s)
+ GET /dashboard 200 in 416ms (next.js: 146ms, application-code: 271ms)
+ GET /dashboard 200 in 153ms (next.js: 53ms, application-code: 100ms)
+ GET /customers 200 in 386ms (next.js: 249ms, application-code: 137ms)
+ GET /vehicles?customer_id=3 200 in 374ms (next.js: 182ms, application-code: 193ms)
+ GET /quotations?vehicle_id=4 200 in 403ms (next.js: 250ms, application-code: 154ms)
+ GET /task-cards?quotation_id=1 200 in 282ms (next.js: 147ms, application-code: 135ms)
+○ Compiling /task-cards/[id]/vehicle-pictures ...
+ GET /task-cards/4/vehicle-pictures 200 in 110s (next.js: 109s, application-code: 475ms)
+✓ Finished writing to filesystem cache in 14.2s
+ GET /customers 200 in 539ms (next.js: 321ms, application-code: 218ms)
+ GET /vehicles?customer_id=3 200 in 228ms (next.js: 97ms, application-code: 130ms)
+ GET /quotations?vehicle_id=4 200 in 374ms (next.js: 89ms, application-code: 285ms)
+ GET /task-cards?quotation_id=1 200 in 287ms (next.js: 96ms, application-code: 191ms)
+ GET /invoices?task_id=4 200 in 182ms (next.js: 76ms, application-code: 107ms)
+ GET /invoices/edit/3?task_id=4 200 in 569ms (next.js: 117ms, application-code: 452ms)
+ GET /task-cards/4/vehicle-pictures 200 in 600ms (next.js: 352ms, application-code: 248ms)
+ GET /task-cards/4/vehicle-pictures 200 in 1085ms (next.js: 60ms, application-code: 1025ms)
+○ Compiling /_not-found/page ...
+ GET /vehicle-pictures 404 in 2.5s (next.js: 1956ms, application-code: 512ms)
+✓ Finished filesystem cache database compaction in 11.9s
+ GET /task-cards?quotation_id=1 200 in 512ms (next.js: 354ms, application-code: 158ms)
+ GET /task-cards/4/vehicle-pictures 200 in 221ms (next.js: 85ms, application-code: 136ms)
+ GET /task-cards/vehicle-pictures 404 in 586ms (next.js: 336ms, application-code: 250ms)
+ GET /task-cards/vehicle-pictures 404 in 247ms (next.js: 35ms, application-code: 212ms)
+ GET / 200 in 1262ms (next.js: 451ms, application-code: 811ms)
+○ Compiling /vehicle-maintenance-pictures ...
+ GET /vehicle-maintenance-pictures 200 in 34.0s (next.js: 33.4s, application-code: 546ms)
+ GET /task-cards/vehicle-pictures 404 in 314ms (next.js: 39ms, application-code: 276ms)
+○ Compiling /reviews ...
+ GET /reviews 200 in 9.5s (next.js: 9.0s, application-code: 565ms)
+ GET /reviews 200 in 259ms (next.js: 55ms, application-code: 203ms)
+✓ Finished filesystem cache database compaction in 13.5s
+✓ Compiled in 20.8s
+✓ Finished writing to filesystem cache in 17.0s
+ GET /reviews 500 in 30.6s (next.js: 22.1s, application-code: 8.5s)
+ GET /reviews 500 in 1392ms (next.js: 699ms, application-code: 694ms)
+ GET /reviews 500 in 1387ms (next.js: 805ms, application-code: 582ms)
+ GET /reviews 500 in 1393ms (next.js: 974ms, application-code: 419ms)
+ GET /reviews 500 in 1317ms (next.js: 961ms, application-code: 356ms)
+ GET /reviews 500 in 1401ms (next.js: 1224ms, application-code: 177ms)
+✓ Finished filesystem cache database compaction in 13.1s
+ GET /reviews 500 in 705ms (next.js: 377ms, application-code: 328ms)
+ GET /task-cards?quotation_id=1 500 in 3.6s (next.js: 3.5s, application-code: 91ms)
+ GET /task-cards?quotation_id=1 500 in 2.8s (next.js: 2.6s, application-code: 191ms)
+✓ Compiled in 3.7s
+ GET /task-cards?quotation_id=1 200 in 18.1s (next.js: 2.4s, application-code: 15.8s)
+ GET /invoices?task_id=4 200 in 6.5s (next.js: 5.3s, application-code: 1235ms)
+✓ Compiled in 20.1s
+ GET /invoices?task_id=4 200 in 6.1s (next.js: 3.8s, application-code: 2.3s)
+✓ Compiled in 1ms
+ GET /invoices?task_id=4 200 in 2.9s (next.js: 2.6s, application-code: 299ms)
+ GET /invoices?task_id=4 200 in 44s (next.js: 49ms, application-code: 44s)
+✓ Compiled in 1365ms
+ GET /invoices?task_id=4 200 in 3.1s (next.js: 2.3s, application-code: 789ms)
+ GET /invoices?task_id=4 200 in 3.1s (next.js: 35ms, application-code: 3.0s)
+ GET /invoices?task_id=4 200 in 429ms (next.js: 48ms, application-code: 381ms)
+ GET /invoices?task_id=4 200 in 588ms (next.js: 61ms, application-code: 527ms)
+✓ Compiled in 1511ms
+ GET /invoices?task_id=4 200 in 2.3s (next.js: 829ms, application-code: 1467ms)
+ GET /invoices?task_id=4 200 in 2.0s (next.js: 31ms, application-code: 2000ms)
+✓ Compiled in 1223ms
+ GET /invoices?task_id=4 200 in 983ms (next.js: 513ms, application-code: 470ms)
+ GET /invoices?task_id=4 200 in 1642ms (next.js: 27ms, application-code: 1615ms)
+ GET /invoices?task_id=4 200 in 518ms (next.js: 29ms, application-code: 489ms)
+ GET /invoices/create?task_id=4 200 in 576ms (next.js: 334ms, application-code: 242ms)
+ GET /invoices?task_id=4 200 in 411ms (next.js: 39ms, application-code: 372ms)
+✓ Compiled in 1686ms
+ GET /invoices?task_id=4 200 in 3.2s (next.js: 2.1s, application-code: 1057ms)
+ GET /invoices?task_id=4 200 in 7.2s (next.js: 21ms, application-code: 7.1s)
+ GET /invoices?task_id=4 200 in 586ms (next.js: 46ms, application-code: 540ms)
+ GET /invoices?task_id=4 200 in 301ms (next.js: 20ms, application-code: 281ms)
+ GET /invoices?task_id=4 200 in 390ms (next.js: 24ms, application-code: 367ms)
+ GET /invoices?task_id=4 200 in 350ms (next.js: 36ms, application-code: 314ms)
+ GET /invoices?task_id=4 200 in 500ms (next.js: 33ms, application-code: 467ms)
+✓ Compiled in 34.1s
+✓ Finished writing to filesystem cache in 14.0s
+ GET /invoices?task_id=4 200 in 5.6s (next.js: 5.0s, application-code: 592ms)
+ GET /invoices?task_id=4 200 in 67s (next.js: 31.7s, application-code: 35.5s)
+✓ Finished filesystem cache database compaction in 36.1s
+○ Compiling /settings/profile ...
+ GET /settings/profile 200 in 2.2min (next.js: 2.1min, application-code: 464ms)
+✓ Finished writing to filesystem cache in 43s
+ GET /invoices?task_id=4 200 in 22.1s (next.js: 2.1s, application-code: 20.0s)
+✓ Finished filesystem cache database compaction in 14.6s
+ GET /invoices?task_id=4 200 in 1031ms (next.js: 165ms, application-code: 866ms)
+ GET /invoices?task_id=4 200 in 581ms (next.js: 20ms, application-code: 561ms)
+ GET /dashboard 200 in 8.1s (next.js: 7.6s, application-code: 541ms)
+○ Compiling /invoice-payments ...
+✓ Finished writing to filesystem cache in 48s
+✓ Finished filesystem cache database compaction in 45s
+✓ Finished writing to filesystem cache in 14.3s
+ GET /invoice-payments 200 in 3.9min (next.js: 3.3min, application-code: 32.4s)
+ GET /invoice-payments 200 in 3.3min (next.js: 2.8min, application-code: 29.2s)
+ GET /invoice-payments 200 in 3.3min (next.js: 2.8min, application-code: 26.8s)
+ GET /invoice-payments 200 in 2.9min (next.js: 2.5min, application-code: 26.0s)
+ GET /invoice-payments 200 in 99s (next.js: 75s, application-code: 24.0s)
+ GET /invoice-payments 200 in 116s (next.js: 91s, application-code: 24.9s)
+✓ Finished filesystem cache database compaction in 38.3s
+✓ Finished filesystem cache database compaction in 47s
+✓ Compiled in 9.3s
+✓ Finished writing to filesystem cache in 13.4s
+ GET /invoice-payments 200 in 34.0s (next.js: 21.0s, application-code: 13.1s)
+ GET /invoice-payments 200 in 9.3s (next.js: 163ms, application-code: 9.1s)
+ GET /invoice-payments 200 in 9.3s (next.js: 1318ms, application-code: 8.0s)
+ GET /invoice-payments 200 in 9.3s (next.js: 2.4s, application-code: 7.0s)
+ GET /invoice-payments 200 in 4.7s (next.js: 468ms, application-code: 4.3s)
+ GET /invoice-payments 200 in 580ms (next.js: 23ms, application-code: 558ms)
+✓ Compiled in 2.2s
+✓ Compiled in 4.2s
+✓ Finished filesystem cache database compaction in 33.9s
+ GET /invoice-payments 200 in 2.1s (next.js: 1398ms, application-code: 672ms)
+ GET /invoice-payments 200 in 239ms (next.js: 41ms, application-code: 198ms)
+ GET /invoice-payments 200 in 323ms (next.js: 56ms, application-code: 267ms)
+ GET /invoice-payments 200 in 156ms (next.js: 18ms, application-code: 138ms)
+ GET /invoice-payments 200 in 205ms (next.js: 19ms, application-code: 186ms)
+ GET /invoice-payments 200 in 237ms (next.js: 39ms, application-code: 198ms)
+✓ Finished filesystem cache database compaction in 23.5s
+ GET /invoice-payments 200 in 13.5s (next.js: 248ms, application-code: 13.3s)
+✓ Compiled in 4.8s
+ GET /invoice-payments 200 in 8.4s (next.js: 6.9s, application-code: 1566ms)
+✓ Compiled in 1819ms
+ GET /invoice-payments 200 in 10.0s (next.js: 1584ms, application-code: 8.4s)
+ GET /invoice-payments 200 in 6.3s (next.js: 198ms, application-code: 6.1s)
+ GET /invoice-payments 200 in 6.7s (next.js: 148ms, application-code: 6.6s)
+ GET /invoice-payments 200 in 4.2s (next.js: 90ms, application-code: 4.1s)
+ GET /invoice-payments 200 in 2.9s (next.js: 18ms, application-code: 2.9s)
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.6:3000
+✓ Ready in 50s
+Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', testMode: true }
+
+○ Compiling /dashboard ...
+ GET /invoice-payments 200 in 2.5min (next.js: 2.2min, application-code: 20.3s)
+ GET / 200 in 49s (next.js: 27.3s, application-code: 21.5s)
+○ Compiling /login ...
+ GET /login 200 in 83s (next.js: 82s, application-code: 504ms)
+ GET /login 200 in 48s (next.js: 48s, application-code: 372ms)
+ GET /login 200 in 45s (next.js: 44s, application-code: 256ms)
+ GET /login 200 in 39.1s (next.js: 38.9s, application-code: 148ms)
+ GET /dashboard 200 in 247ms (next.js: 114ms, application-code: 133ms)
+ GET /dashboard 200 in 174ms (next.js: 41ms, application-code: 133ms)
+ GET /invoice-payments 200 in 21.6s (next.js: 19.0s, application-code: 2.6s)
+ GET /admin 200 in 483ms (next.js: 333ms, application-code: 150ms)
+○ Compiling /users ...
+ GET /invoice-payments 200 in 597ms (next.js: 157ms, application-code: 440ms)
+ GET /users 200 in 59s (next.js: 59s, application-code: 146ms)
+✓ Compiled in 3.4s
+ GET /invoice-payments 200 in 11.2s (next.js: 10.3s, application-code: 888ms)
+✓ Compiled in 3.1s
+ GET /invoice-payments 200 in 3.0s (next.js: 1916ms, application-code: 1068ms)
+✓ Compiled in 6s
+ GET /invoice-payments 200 in 396ms (next.js: 196ms, application-code: 200ms)
+✓ Compiled in 5.7s
+ GET /invoice-payments 200 in 2.6s (next.js: 1920ms, application-code: 642ms)
+✓ Finished filesystem cache database compaction in 46s
+✓ Finished filesystem cache database compaction in 104s
+✓ Finished filesystem cache database compaction in 42s
+✓ Compiled in 333s
+ GET /invoice-payments 200 in 4.9min (next.js: 4.7min, application-code: 15.0s)
+ GET /invoice-payments 200 in 4.6min (next.js: 4.4min, application-code: 14.6s)
+ GET /invoice-payments 200 in 4.6min (next.js: 4.4min, application-code: 13.7s)
+ GET /invoice-payments 200 in 4.6min (next.js: 4.4min, application-code: 12.5s)
+ GET /invoice-payments 200 in 4.6min (next.js: 4.4min, application-code: 12.1s)
+ GET /invoice-payments 200 in 4.6min (next.js: 4.4min, application-code: 11.8s)
+ GET /invoice-payments 200 in 8.2s (next.js: 5.5s, application-code: 2.7s)
+ GET /invoice-payments 200 in 8.2s (next.js: 6.6s, application-code: 1514ms)
+ GET /invoice-payments 200 in 8.2s (next.js: 7.0s, application-code: 1232ms)
+ GET /invoice-payments 200 in 8.2s (next.js: 6.0s, application-code: 2.2s)
+ GET /invoice-payments 200 in 8.2s (next.js: 6.4s, application-code: 1805ms)
+ GET /invoice-payments 200 in 8.3s (next.js: 215ms, application-code: 8.1s)
+✓ Finished filesystem cache database compaction in 19.0s
+○ Compiling /sales ...
+ GET /sales 200 in 32.2s (next.js: 32.1s, application-code: 126ms)
+✓ Finished filesystem cache database compaction in 23.9s
+ GET /dashboard 200 in 1556ms (next.js: 946ms, application-code: 609ms)
+○ Compiling /notifications ...
+ GET /notifications 200 in 43s (next.js: 41s, application-code: 1958ms)
+✓ Finished writing to filesystem cache in 12.0s
+ GET /dashboard 200 in 2.1s (next.js: 505ms, application-code: 1612ms)
+ GET /customers 200 in 1368ms (next.js: 1151ms, application-code: 217ms)
+ GET /vehicles?customer_id=3 200 in 1638ms (next.js: 1468ms, application-code: 170ms)
+ GET /quotations?vehicle_id=4 200 in 1104ms (next.js: 874ms, application-code: 231ms)
+ GET /task-cards?quotation_id=1 200 in 756ms (next.js: 473ms, application-code: 283ms)
+ GET /invoices?task_id=4 200 in 717ms (next.js: 433ms, application-code: 283ms)
+ GET /sales 200 in 388ms (next.js: 312ms, application-code: 76ms)
+✓ Compiled in 7.7s
+ GET /sales 200 in 2.5s (next.js: 1540ms, application-code: 923ms)
+✓ Compiled in 1096ms
+ GET /sales 200 in 3.2s (next.js: 2.5s, application-code: 688ms)
+✓ Finished filesystem cache database compaction in 25.1s
+ GET /sales 200 in 662ms (next.js: 37ms, application-code: 626ms)
+ GET /sales 200 in 1957ms (next.js: 19ms, application-code: 1938ms)
+ GET /assigned-tasks 200 in 1295ms (next.js: 787ms, application-code: 508ms)
+ GET /assigned-tasks 200 in 183ms (next.js: 77ms, application-code: 106ms)
+ GET /assigned-tasks/edit/1 200 in 10.1s (next.js: 9.9s, application-code: 234ms)
+ GET /sms-settings 200 in 1365ms (next.js: 1175ms, application-code: 190ms)
+○ Compiling /whatsapp-settings ...
+ GET /whatsapp-settings 200 in 45s (next.js: 42s, application-code: 3.1s)
+ GET /whatsapp-settings 200 in 20.4s (next.js: 18.1s, application-code: 2.2s)
+ GET /whatsapp-settings 200 in 20.2s (next.js: 18.4s, application-code: 1777ms)
+ GET /whatsapp-settings 200 in 15.9s (next.js: 14.3s, application-code: 1554ms)
+ GET /whatsapp-settings 200 in 15.9s (next.js: 14.5s, application-code: 1355ms)
+ GET /whatsapp-settings 200 in 11.2s (next.js: 10.1s, application-code: 1051ms)
+ GET /whatsapp-settings 200 in 6.5s (next.js: 6.2s, application-code: 277ms)
+✓ Finished writing to filesystem cache in 12.2s
+○ Compiling /email-settings ...
+ GET /email-settings 200 in 16.4s (next.js: 15.8s, application-code: 538ms)
+ GET /email-settings 200 in 299ms (next.js: 127ms, application-code: 173ms)
+ GET /email-settings 200 in 328ms (next.js: 98ms, application-code: 230ms)
+✓ Finished filesystem cache database compaction in 12.5s
+✓ Compiled in 5.1s
+ GET /email-settings 200 in 700ms (next.js: 413ms, application-code: 288ms)
+✓ Compiled in 3.2s
+ GET /email-settings 200 in 6.0s (next.js: 5.0s, application-code: 979ms)
+✓ Compiled in 2.9s
+ GET /email-settings 200 in 4.0s (next.js: 1679ms, application-code: 2.3s)
+ GET /email-settings 200 in 3.2s (next.js: 563ms, application-code: 2.7s)
+ GET /email-settings 200 in 709ms (next.js: 60ms, application-code: 649ms)
+✓ Compiled in 12.5s
+ GET /email-settings 200 in 1562ms (next.js: 1079ms, application-code: 483ms)
+ GET /email-settings 200 in 838ms (next.js: 30ms, application-code: 808ms)
+✓ Compiled in 1148ms
+ GET /email-settings 200 in 1436ms (next.js: 1117ms, application-code: 319ms)
+ GET /email-settings 200 in 845ms (next.js: 118ms, application-code: 727ms)
+✓ Compiled in 4.4s
+ GET /email-settings 200 in 2.3s (next.js: 1585ms, application-code: 753ms)
+ GET /email-settings 200 in 676ms (next.js: 23ms, application-code: 653ms)
+✓ Compiled in 1219ms
+ GET /email-settings 200 in 990ms (next.js: 631ms, application-code: 359ms)
+ GET /email-settings 200 in 835ms (next.js: 103ms, application-code: 732ms)
+ GET /sms-settings 200 in 1741ms (next.js: 1501ms, application-code: 240ms)
+ GET /whatsapp-settings 200 in 920ms (next.js: 714ms, application-code: 207ms)
+ GET /email-settings 200 in 310ms (next.js: 87ms, application-code: 223ms)
+✓ Compiled in 3.3s
+✓ Compiled in 2.2s
+ GET /email-settings 200 in 3.1s (next.js: 1980ms, application-code: 1103ms)
+ GET /email-settings 200 in 429ms (next.js: 18ms, application-code: 412ms)
+ GET /email-settings 200 in 380ms (next.js: 54ms, application-code: 326ms)
+ GET /email-settings 200 in 320ms (next.js: 80ms, application-code: 240ms)
+✓ Compiled in 794ms
+ GET /email-settings 200 in 433ms (next.js: 239ms, application-code: 194ms)
+ GET /email-settings 200 in 199ms (next.js: 30ms, application-code: 168ms)
+ GET /email-settings 200 in 21.2s (next.js: 39ms, application-code: 21.2s)
+ GET /whatsapp-settings 200 in 1063ms (next.js: 956ms, application-code: 107ms)
+ GET /sms-settings 200 in 976ms (next.js: 834ms, application-code: 143ms)
+ GET /sms-settings 200 in 127ms (next.js: 23ms, application-code: 104ms)
+ GET /whatsapp-settings 200 in 604ms (next.js: 14ms, application-code: 589ms)
+ GET /email-settings 200 in 88ms (next.js: 12ms, application-code: 77ms)
+✓ Compiled in 7.9s
+○ Compiling /_error ...
+ GET /email-settings 200 in 10.9s (next.js: 9.8s, application-code: 1063ms)
+✓ Compiled in 1065ms
+ GET /email-settings 200 in 2.0s (next.js: 1174ms, application-code: 848ms)
+ GET /email-settings 200 in 853ms (next.js: 85ms, application-code: 767ms)
+ GET /notifications 200 in 4.3s (next.js: 2.5s, application-code: 1832ms)
+ GET /sms-settings 200 in 2.8s (next.js: 2.2s, application-code: 590ms)
+✓ Compiled in 1807ms
+ GET /sms-settings 200 in 11.0s (next.js: 9.4s, application-code: 1552ms)
+ GET /sms-settings 200 in 1504ms (next.js: 1031ms, application-code: 473ms)
+✓ Compiled in 1925ms
+ GET /sms-settings 200 in 2.2s (next.js: 747ms, application-code: 1404ms)
+ GET /sms-settings 200 in 1019ms (next.js: 27ms, application-code: 992ms)
+ GET /sms-settings 200 in 2.2s (next.js: 34ms, application-code: 2.1s)
+✓ Compiled in 4.3s
+ GET /sms-settings 200 in 2.9s (next.js: 2.5s, application-code: 384ms)
+✓ Compiled in 1930ms
+ GET /sms-settings 200 in 610ms (next.js: 252ms, application-code: 359ms)
+ GET /sms-settings 200 in 340ms (next.js: 24ms, application-code: 316ms)
+ GET /email-settings 200 in 603ms (next.js: 366ms, application-code: 237ms)
+ GET /admin 200 in 1868ms (next.js: 1415ms, application-code: 453ms)
+ GET /sms-settings 200 in 200ms (next.js: 56ms, application-code: 144ms)
+ GET /admin 200 in 273ms (next.js: 22ms, application-code: 251ms)
+✓ Compiled in 3s
+ GET /admin 200 in 380ms (next.js: 203ms, application-code: 177ms)
+ GET /admin 200 in 2.4s (next.js: 50ms, application-code: 2.4s)
+ GET /users 200 in 862ms (next.js: 595ms, application-code: 267ms)
+✓ Compiled in 4.5s
+ GET /users 200 in 3.7s (next.js: 3.0s, application-code: 762ms)
+✓ Finished filesystem cache database compaction in 25.5s
+ GET /users 200 in 3.5s (next.js: 84ms, application-code: 3.4s)
+✓ Compiled in 1952ms
+ GET /users 200 in 1158ms (next.js: 534ms, application-code: 624ms)
+ GET /admin 200 in 1277ms (next.js: 733ms, application-code: 544ms)
+✓ Compiled in 2.7s
+ GET /admin 200 in 1644ms (next.js: 1167ms, application-code: 477ms)
+ GET /users 200 in 963ms (next.js: 448ms, application-code: 516ms)
+✓ Compiled in 5.1s
+ GET /users 200 in 5.9s (next.js: 4.8s, application-code: 1087ms)
+ GET /users 200 in 964ms (next.js: 284ms, application-code: 680ms)
+ GET /users 200 in 2.1s (next.js: 27ms, application-code: 2.0s)
+✓ Compiled in 4s
+ GET /users 200 in 4.4s (next.js: 3.5s, application-code: 925ms)
+ GET /users 200 in 3.2s (next.js: 35ms, application-code: 3.1s)
+○ Compiling /roles ...
+ GET /roles 200 in 82s (next.js: 81s, application-code: 522ms)
+✓ Finished writing to filesystem cache in 12.3s
+ GET /packages 200 in 102s (next.js: 101s, application-code: 616ms)
+ GET /packages 200 in 74s (next.js: 74s, application-code: 304ms)
+✓ Finished filesystem cache database compaction in 16.1s
+✓ Finished filesystem cache database compaction in 17.2s
+✓ Finished filesystem cache database compaction in 13.1s
+✓ Compiled in 2.6s
+ GET /packages 200 in 4.8s (next.js: 3.6s, application-code: 1222ms)
+ GET /packages 200 in 556ms (next.js: 21ms, application-code: 534ms)
+ GET /packages 200 in 2.8s (next.js: 35ms, application-code: 2.8s)
+ GET /packages 200 in 648ms (next.js: 31ms, application-code: 617ms)
+✓ Compiled in 5.5s
+ GET /packages 200 in 1892ms (next.js: 1011ms, application-code: 881ms)
+ GET /roles 200 in 805ms (next.js: 450ms, application-code: 354ms)
+ GET /packages 200 in 147ms (next.js: 15ms, application-code: 132ms)
+ GET /roles 200 in 271ms (next.js: 16ms, application-code: 255ms)
+✓ Compiled in 3.8s
+ GET /roles 200 in 2.6s (next.js: 1415ms, application-code: 1203ms)
+ GET /companies 200 in 1567ms (next.js: 1262ms, application-code: 305ms)
+✓ Compiled in 4.1s
+ GET /companies 200 in 6.3s (next.js: 3.1s, application-code: 3.2s)
+✓ Compiled in 3.6s
+ GET /companies 200 in 11.5s (next.js: 2.8s, application-code: 8.7s)
+ GET /companies 200 in 6.4s (next.js: 4.0s, application-code: 2.5s)
+ GET /companies 200 in 1932ms (next.js: 1051ms, application-code: 881ms)
+○ Compiling /company-users ...
+ GET /company-users 200 in 60s (next.js: 60s, application-code: 516ms)
+ GET /company-users 200 in 5.7s (next.js: 5.4s, application-code: 289ms)
+ GET /company-users 200 in 162ms (next.js: 70ms, application-code: 92ms)
+✓ Finished filesystem cache database compaction in 11.8s
+✓ Finished filesystem cache database compaction in 14.1s
+✓ Compiled in 3.2s
+ GET /company-users 200 in 3.2s (next.js: 2.5s, application-code: 699ms)
+ GET /customers 200 in 1220ms (next.js: 837ms, application-code: 383ms)
+✓ Compiled in 2.6s
+ GET /customers 200 in 2.5s (next.js: 2.0s, application-code: 452ms)
+✓ Compiled in 2s
+ GET /customers 200 in 1609ms (next.js: 637ms, application-code: 972ms)
+ GET /customers 200 in 402ms (next.js: 15ms, application-code: 387ms)
+✓ Compiled in 2.1s
+ GET /customers 200 in 2.2s (next.js: 1056ms, application-code: 1102ms)
+ GET /customers 200 in 2.3s (next.js: 22ms, application-code: 2.3s)
+ GET /vehicles?customer_id=3 200 in 865ms (next.js: 581ms, application-code: 284ms)
+✓ Compiled in 2.9s
+ GET /vehicles?customer_id=3 200 in 1373ms (next.js: 947ms, application-code: 425ms)
+✓ Compiled in 2.3s
+ GET /vehicles?customer_id=3 200 in 2.3s (next.js: 1226ms, application-code: 1095ms)
+✓ Finished filesystem cache database compaction in 17.8s
+✓ Finished filesystem cache database compaction in 15.0s
+ GET /quotations?vehicle_id=4 200 in 1101ms (next.js: 772ms, application-code: 329ms)
+ GET /quotations/edit/1?vehicle_id=4 200 in 24.4s (next.js: 24.1s, application-code: 274ms)
+ GET /task-cards?quotation_id=1 200 in 887ms (next.js: 738ms, application-code: 149ms)
+ GET /task-cards/create?quotation_id=1 200 in 1141ms (next.js: 691ms, application-code: 450ms)
+ GET /task-cards/create?quotation_id=1 200 in 264ms (next.js: 113ms, application-code: 150ms)
+ GET /task-cards/create?quotation_id=1 200 in 156ms (next.js: 21ms, application-code: 134ms)
+✓ Compiled in 8.6s
+ GET /task-cards?quotation_id=1 200 in 3.0s (next.js: 1049ms, application-code: 1946ms)
+✓ Compiled in 4.2s
+ GET /task-cards?quotation_id=1 200 in 1013ms (next.js: 449ms, application-code: 564ms)
+ GET /invoices?task_id=4 200 in 1021ms (next.js: 716ms, application-code: 305ms)
+ GET /invoices?task_id=4 200 in 4.3s (next.js: 22ms, application-code: 4.2s)
+ GET /task-cards?quotation_id=1 200 in 354ms (next.js: 36ms, application-code: 318ms)
+ GET /task-cards?quotation_id=1 200 in 368ms (next.js: 19ms, application-code: 349ms)
+ GET /customers 200 in 399ms (next.js: 304ms, application-code: 95ms)
+ GET /vehicles?customer_id=3 200 in 235ms (next.js: 166ms, application-code: 69ms)
+ GET /quotations?vehicle_id=4 200 in 234ms (next.js: 42ms, application-code: 192ms)
+ GET /task-cards?quotation_id=1 200 in 147ms (next.js: 33ms, application-code: 114ms)
+ GET /task-cards?quotation_id=1 200 in 456ms (next.js: 19ms, application-code: 437ms)
+ GET /task-cards?quotation_id=1 200 in 1271ms (next.js: 722ms, application-code: 549ms)
+✓ Compiled in 1213ms
+ GET /task-cards?quotation_id=1 200 in 3.3s (next.js: 1704ms, application-code: 1548ms)
+ GET /quotations?vehicle_id=4 200 in 2.1s (next.js: 948ms, application-code: 1127ms)
+ GET /quotations?vehicle_id=4 200 in 15.0s (next.js: 248ms, application-code: 14.7s)
+ GET /task-cards?quotation_id=1 200 in 175ms (next.js: 38ms, application-code: 137ms)
+ GET /invoices?task_id=4 200 in 347ms (next.js: 211ms, application-code: 136ms)
+ GET /invoices/edit/3 200 in 8.6s (next.js: 8.3s, application-code: 307ms)
+ GET /assigned-tasks 200 in 717ms (next.js: 380ms, application-code: 336ms)
+ GET /assigned-tasks/edit/1 200 in 1032ms (next.js: 480ms, application-code: 552ms)
+ GET /assigned-tasks 200 in 120ms (next.js: 17ms, application-code: 102ms)
+ GET /assigned-tasks 200 in 274ms (next.js: 25ms, application-code: 250ms)
+✓ Compiled in 66s
+ GET /assigned-tasks 200 in 949ms (next.js: 713ms, application-code: 236ms)
+ GET /assigned-tasks 200 in 139ms (next.js: 17ms, application-code: 122ms)
+ GET / 200 in 2.4s (next.js: 576ms, application-code: 1852ms)
+ GET /task-cards/create?quotation_id=1 200 in 1533ms (next.js: 189ms, application-code: 1344ms)
+✓ Compiled in 1094ms
+ GET /assigned-tasks 200 in 483ms (next.js: 252ms, application-code: 231ms)
+✓ Compiled in 1569ms
+ GET /assigned-tasks 200 in 267ms (next.js: 171ms, application-code: 97ms)
+ GET /assigned-tasks 200 in 1256ms (next.js: 22ms, application-code: 1235ms)
+ GET /dashboard 200 in 1598ms (next.js: 810ms, application-code: 788ms)
+ GET /admin 200 in 1402ms (next.js: 1104ms, application-code: 298ms)
+ GET /login 200 in 8.2s (next.js: 891ms, application-code: 7.3s)
+ GET /login 200 in 8.1s (next.js: 1116ms, application-code: 7.0s)
+ GET /login-admin 200 in 4.5s (next.js: 3.8s, application-code: 733ms)
+ GET /dashboard 200 in 781ms (next.js: 515ms, application-code: 266ms)
+ GET /dashboard 200 in 4.7s (next.js: 4.5s, application-code: 122ms)

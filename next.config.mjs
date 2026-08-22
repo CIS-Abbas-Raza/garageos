@@ -6,6 +6,7 @@ const nextConfig = {
     return [
       { source: '/backend-api/:path*', destination: `${backendUrl}/:path*` },
       { source: '/company_logo/:path*', destination: `${backendOrigin}/company_logo/:path*` },
+      { source: '/payment_proof_images/:path*', destination: `${backendOrigin}/payment_proof_images/:path*` },
     ]
   },
   typescript: {

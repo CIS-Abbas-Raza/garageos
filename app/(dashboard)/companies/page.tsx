@@ -18,7 +18,7 @@ export default function CompaniesPage() {
         title: 'Companies',
         description: 'Manage garage companies, branches, and platform access.',
         fields: [],
-        columns: ['name', 'owner_id', 'country', 'phone', 'registration_no', 'status'],
+        columns: ['name', 'owner_name', 'country', 'phone', 'registration_no', 'status'],
         empty: 'No companies configured yet.'
       }}
     />

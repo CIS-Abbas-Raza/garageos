@@ -242,7 +242,12 @@ export interface Payment {
   id: string;
   invoiceId: string;
   amount: number;
-  paymentMethod: "cash" | "card" | "check" | "transfer";
+  paymentMethod: "cash" | "card" | "check" | "transfer" | "bank_transfer" | "online";
+  totalAmount?: number;
+  balanceAmount?: number;
+  paidAmount?: number;
+  picture?: string;
+  paymentStatus?: "pending" | "not_verified" | "verified" | "rejected";
   reference?: string;
   notes?: string;
   createdAt: Date;

@@ -18,6 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   requiresPasswordChange: boolean
+  isSuperAdmin: boolean
   roleScope: RoleScope | null
   login: (email: string, password: string) => Promise<void>
   loginAdmin: (email: string, password: string) => Promise<void>
@@ -172,8 +173,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const isSuperAdmin =
-    user?.roles?.some(
-      (r) => r.roleTypeName === "System" || r.roleName === "Super Admin"
+    user?.roles?.some((r) =>
+      r.roleTypeName === "System" ||
+      r.roleName?.replace(/[\s_-]/g, "").toLowerCase() === "superadmin",
     ) ?? false
 
   const requiresPasswordChange = !!user && !user.isPasswordChanged && !isSuperAdmin
@@ -188,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         requiresPasswordChange,
+        isSuperAdmin,
         roleScope,
         refreshUser,
         updateProfile,

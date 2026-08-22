@@ -14,7 +14,7 @@ export default function PackagesPage() {
           { key: 'yearly', label: 'Yearly Price', type: 'number', required: true },
           { key: 'information', label: 'Information', type: 'dynamic-list', required: true }
         ],
-        columns: ['name', 'monthly', 'yearly', 'information'],
+        columns: ['name', 'monthly', 'yearly', 'status'],
         empty: 'No packages configured.'
       }}
     />
