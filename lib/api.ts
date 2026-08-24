@@ -143,12 +143,38 @@ export async function updateProfile(
   userId: string,
   data: Pick<AuthUser, "userName" | "email" | "phoneNumber" | "address" | "country" | "profilePhoto">,
 ): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
-  await new Promise((resolve) => setTimeout(resolve, 250))
   const stored = localStorage.getItem("currentUser")
   if (!stored) return { success: false, message: "Your session has expired." }
-  const user = JSON.parse(stored) as AuthUser
-  if (user.id !== userId) return { success: false, message: "Unable to update this profile." }
-  const updated = { ...user, ...data }
+  const currentUser = JSON.parse(stored) as AuthUser
+  if (currentUser.id !== userId) return { success: false, message: "Unable to update this profile." }
+
+  const response = await fetch(`/backend-api/users/${encodeURIComponent(userId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: data.userName,
+      email: data.email,
+      phone: data.phoneNumber,
+      address: data.address,
+      country: data.country,
+      profile_photo: data.profilePhoto,
+    }),
+  })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok || body.success === false) {
+    return { success: false, message: body.message || body.error || "Unable to update this profile." }
+  }
+
+  const record = body.data ?? body
+  const updated: AuthUser = {
+    ...currentUser,
+    userName: record.name ?? data.userName,
+    email: record.email ?? data.email,
+    phoneNumber: record.phone ?? data.phoneNumber,
+    address: record.address ?? data.address,
+    country: record.country ?? data.country,
+    profilePhoto: record.profile_photo ?? data.profilePhoto,
+  }
   localStorage.setItem("currentUser", JSON.stringify(updated))
   return { success: true, user: updated }
 }

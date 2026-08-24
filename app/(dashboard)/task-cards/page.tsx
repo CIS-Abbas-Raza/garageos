@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Image } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Image, Star } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -15,12 +15,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
+import { useBranch } from '@/lib/branch-context'
+import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 
 export default function TaskCardsListingPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
+  const { selectedCompany } = useBranch()
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [quotationId, setQuotationId] = useState<string | undefined>()
+  const [reviewTarget, setReviewTarget] = useState<Record<string, any> | null>(null)
 
   useEffect(() => {
     setQuotationId(new URLSearchParams(window.location.search).get('quotation_id') ?? undefined)
@@ -178,6 +182,13 @@ export default function TaskCardsListingPage() {
                               Vehicle Pictures
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              onClick={() => setReviewTarget(card)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Star className="size-4 text-amber-500" />
+                              Customer Review
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => handleDelete(card.id, (card as any).task_cards_number || (card as any).taskCardNumber || card.title)}
                               className="gap-2 cursor-pointer text-xs text-destructive hover:bg-destructive/10"
                             >
@@ -195,6 +206,11 @@ export default function TaskCardsListingPage() {
           </div>
         </div>
       )}
+      <CustomerReviewDialog
+        taskCardId={reviewTarget?.id}
+        companyId={selectedCompany ?? reviewTarget?.company_id}
+        onOpenChange={(open) => !open && setReviewTarget(null)}
+      />
     </div>
   )
 }

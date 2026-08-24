@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/lib/auth-context'
+import { canAccessDashboardPath, getDashboardRole } from '@/lib/role-access'
 import {
   BarChart3,
   Bell,
@@ -59,9 +60,9 @@ const menuSections = [
     icon: Wrench,
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
-      // { href: '/vehicles', label: 'Vehicles', icon: Truck },
-      // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
-      // { href: '/task-cards', label: 'Task Cards', icon: FileText },
+      { href: '/vehicles', label: 'Vehicles', icon: Truck },
+      { href: '/quotations', label: 'Quotation', icon: ClipboardList },
+      { href: '/task-cards', label: 'Task Cards', icon: FileText },
       { href: '/assigned-tasks', label: 'Assigned Tasks', icon: ClipboardList },
       { href: '/appointments', label: 'Appointments', icon: Calendar },
       { href: '/reviews', label: 'Customer Review', icon: FileText },
@@ -72,7 +73,7 @@ const menuSections = [
     icon: CreditCard,
     items: [
       { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
-      // { href: '/invoices', label: 'Invoices', icon: FileText },
+      { href: '/invoices', label: 'Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
       { href: '/sales', label: 'Sales', icon: BarChart3 },
     ],
@@ -92,7 +93,7 @@ const menuSections = [
 export function DashboardSidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const { user, logout, isSuperAdmin } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -126,10 +127,12 @@ export function DashboardSidebar() {
   const displayName = user?.userName || 'Garage Admin'
   const initials = displayName.slice(0, 2).toUpperCase()
 
-  // Filter sections by search query
+  const role = getDashboardRole(user, isSuperAdmin)
+
+  // Filter sections by the active role, then by search query.
   const filteredSections = menuSections.map((section) => {
     const filteredItems = section.items.filter((item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      canAccessDashboardPath(role, item.href) && item.label.toLowerCase().includes(searchQuery.toLowerCase())
     )
     return { ...section, items: filteredItems }
   }).filter((section) => section.items.length > 0)

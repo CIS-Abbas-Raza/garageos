@@ -99,6 +99,7 @@ type Field = {
   required?: boolean;
   readOnly?: boolean;
   multiple?: boolean;
+  fullWidth?: boolean;
 };
 type Config = {
   resource: string;
@@ -112,6 +113,8 @@ type Config = {
   hideCreateButton?: boolean;
   /** Hides edit, view, and delete actions for read-only listings. */
   hideRowActions?: boolean;
+  /** Hides only the Edit action while retaining the other row actions. */
+  hideEditAction?: boolean;
   /** Limits edit submissions to these fields. */
   updateFields?: string[];
   /** URL prefix for the record's `picture` file, shown in the edit dialog. */
@@ -341,9 +344,8 @@ const exactFields: Record<string, Field[]> = {
       type: "datetime-local",
       required: true,
     },
-    { key: "note", label: "Note", type: "textarea" },
     {
-      key: "appointments",
+      key: "status",
       label: "Appointment status",
       type: "select",
       required: true,
@@ -355,6 +357,7 @@ const exactFields: Record<string, Field[]> = {
         "no_show",
       ]),
     },
+    { key: "note", label: "Note", type: "textarea", fullWidth: true },
   ],
   // Package Subscriptions: links Company + Package with date range
   packageSubscriptions: [
@@ -828,7 +831,7 @@ function FormFieldRenderer({
   );
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col gap-1.5${field.fullWidth ? " md:col-span-2" : ""}`}>
       <Label
         htmlFor={`${resourceKey}-${field.key}`}
         className="text-sm font-semibold text-foreground"
@@ -1090,6 +1093,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ...record,
               invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
             }))
+          : config.resource === "reviews"
+          ? records.map((record) => ({
+              ...record,
+              task_card_number: record.taskCard?.task_cards_number ?? `Task Card #${record.task_card_id}`,
+            }))
           : records,
       );
     } catch (error) {
@@ -1273,7 +1281,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const openCreate = () => {
     setEditing(null);
     form.reset({
-      status: "1",
+      status: schemaKey === "appointments" ? "pending" : "1",
       information: [{ value: "" }], // Pre-populate one row for repeatable package field
     });
     setLineItems([]);
@@ -1455,8 +1463,20 @@ export function EntityCrudPage({ config }: { config: Config }) {
               className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none cursor-pointer"
             >
               <option value="all">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              {schemaKey === "appointments" ? (
+                <>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="no_show">No Show</option>
+                </>
+              ) : (
+                <>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </>
+              )}
             </select>
           </div>
           {/* View mode toggle (visual only for now) */}
@@ -1530,7 +1550,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 ? row[column] === 1 || row[column] === "1" || row[column] === true
                                   ? "Yes"
                                   : "No"
-                                : column === "status" || column === "active"
+                                : column === "active" || (column === "status" && schemaKey !== "appointments")
                                 ? String(row[column]) === "0" || row[column] === false
                                   ? "Inactive"
                                   : "Active"
@@ -1590,13 +1610,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Eye className="size-4" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openEdit(row)}
-                              className="gap-2 cursor-pointer text-xs"
-                            >
-                              <Pencil className="size-4" />
-                              Edit
-                            </DropdownMenuItem>
+                            {!config.hideEditAction && (
+                              <DropdownMenuItem
+                                onClick={() => openEdit(row)}
+                                className="gap-2 cursor-pointer text-xs"
+                              >
+                                <Pencil className="size-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
                             {config.resource === "customers" && (
                               <DropdownMenuItem
                                 onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.id))}`)}
@@ -1715,7 +1737,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 {formFields
                   .filter(
                     (field) =>
-                      !(["admin", "customers", "employees", "packages", "roles", "companies", "companyUsers", "vehicles"].includes(schemaKey) && field.key === "status"),
+                      !(["admin", "customers", "employees", "packages", "roles", "companies", "companyUsers", "vehicles", "smsSettings", "whatsappSettings", "emailSettings"].includes(schemaKey) && field.key === "status"),
                   )
                   .filter(
                     (field) =>
@@ -1787,7 +1809,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 )}
               </div>
               {/* Active Toggle (Mockup Style) */}
-              {!isExcluded && (
+              {!isExcluded && schemaKey !== "appointments" && (
                 <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Active</p>

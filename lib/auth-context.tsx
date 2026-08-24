@@ -22,6 +22,7 @@ interface AuthContextType {
   roleScope: RoleScope | null
   login: (email: string, password: string) => Promise<void>
   loginAdmin: (email: string, password: string) => Promise<void>
+  loginCustomer: (email: string, password: string) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
   updateProfile: (data: Parameters<typeof apiUpdateProfile>[1]) => Promise<void>
@@ -88,6 +89,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: result.user.email,
       isPasswordChanged: true,
       phoneNumber: result.user.phone ?? null,
+      address: result.user.address ?? null,
+      country: result.user.country ?? null,
+      profilePhoto: result.user.profile_photo ?? null,
       permissions: [],
       roles: [{
         roleId: String(result.role || 'user'),
@@ -127,6 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: result.user.email,
       isPasswordChanged: true,
       phoneNumber: result.user.phone ?? null,
+      address: result.user.address ?? null,
+      country: result.user.country ?? null,
+      profilePhoto: result.user.profile_photo ?? null,
       permissions: ['all'],
       roles: [{
         roleId: 'super-admin',
@@ -141,6 +148,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('currentUser', JSON.stringify(adminUser))
     setUser(adminUser)
     setRoleScope(RoleScope.SYSTEM)
+  }
+
+  const loginCustomer = async (email: string, password: string) => {
+    const response = await fetch('/backend-api/auth/customer/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok || result.success === false || !result.token || !result.user) {
+      throw new Error(result.message || 'Customer login failed.')
+    }
+
+    const customerUser: AuthUser = {
+      id: String(result.user.id),
+      userName: result.user.name || result.user.email,
+      email: result.user.email,
+      isPasswordChanged: true,
+      phoneNumber: result.user.phone ?? null,
+      address: result.user.address ?? null,
+      country: result.user.country ?? null,
+      profilePhoto: null,
+      permissions: [],
+      roles: [{
+        roleId: 'customer',
+        roleName: result.role || 'Customer',
+        roleTypeName: null,
+        scopeType: RoleScope.COMPANY,
+        scopeId: result.company_id ? String(result.company_id) : null,
+      }],
+    }
+
+    setTokens(result.token, result.token)
+    localStorage.setItem('currentUser', JSON.stringify(customerUser))
+    if (result.company_id) {
+      localStorage.setItem('selectedCompany', String(result.company_id))
+    } else {
+      localStorage.removeItem('selectedCompany')
+    }
+    setUser(customerUser)
+    setRoleScope(RoleScope.COMPANY)
   }
 
   const logout = async () => {
@@ -186,6 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         login,
         loginAdmin,
+        loginCustomer,
         logout,
         isAuthenticated: !!user,
         isLoading,

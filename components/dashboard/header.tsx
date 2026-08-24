@@ -32,6 +32,11 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageStore()
 
   useEffect(() => {
+    if (!isSuperAdmin) {
+      setCompanies([])
+      return
+    }
+
     const loadCompanies = async () => {
       try {
         const response = await fetch('/backend-api/companies')
@@ -53,7 +58,14 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     }
 
     void loadCompanies()
-  }, [])
+  }, [isSuperAdmin])
+
+  useEffect(() => {
+    const loggedInCompanyId = user?.roles.find((role) => role.scopeId)?.scopeId
+    if (!isSuperAdmin && !selectedCompany && loggedInCompanyId) {
+      setSelectedCompany(loggedInCompanyId)
+    }
+  }, [isSuperAdmin, selectedCompany, setSelectedCompany, user?.roles])
 
   const handleSignOut = () => {
     logout()
@@ -95,8 +107,8 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
         {/* ── LEFT: Company + Branch selector pills ── */}
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Company selector */}
-          <DropdownMenu>
+          {/* SuperAdmin chooses the active company; all other roles use their login company_id. */}
+          {isSuperAdmin && <DropdownMenu>
             <DropdownMenuTrigger
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground outline-none hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-primary/30"
               aria-label={isSuperAdmin ? 'Select the active company for the dashboard' : 'Current company'}
@@ -116,7 +128,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu>}
 
           {/* Branch selector */}
           {/* <DropdownMenu>

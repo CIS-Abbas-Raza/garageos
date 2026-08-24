@@ -8,10 +8,14 @@ export default function ReviewsPage() {
     <EntityCrudPage
       config={{
         resource: 'reviews',
+        apiEndpoint: '/backend-api/customer-reviews',
+        companyScoped: true,
         title: 'Customer Reviews',
         description: 'Moderate customer feedback and highlight great service.',
+        hideCreateButton: true,
+        hideEditAction: true,
         fields: [],
-        columns: ['rating', 'review', 'status'],
+        columns: ['task_card_number', 'rating', 'review'],
         empty: 'No reviews to moderate.'
       }}
     />

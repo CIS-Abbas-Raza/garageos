@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Send } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
 import { generateQuotationPdf, type QuotationPdfPayload } from '@/components/quotations/quotation-form-page'
 import { Button } from '@/components/ui/button'
+import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +17,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
+import { useBranch } from '@/lib/branch-context'
 
 export default function QuotationsPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
+  const { selectedCompany } = useBranch()
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [vehicleId, setVehicleId] = useState<string | undefined>()
+  const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
+  const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
+  const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
 
   useEffect(() => {
     setVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
@@ -44,6 +50,23 @@ export default function QuotationsPage() {
 
     void loadQuotations()
   }, [vehicleId])
+
+  useEffect(() => {
+    if (!selectedCompany) return setActiveChannels([])
+    const loadChannels = async () => {
+      const checks: [CommunicationChannel, string][] = [['sms', 'twilio-sms-settings'], ['email', 'sendgrid-settings'], ['whatsapp', 'twilio-whatsapp-settings']]
+      const results = await Promise.all(checks.map(async ([channel, path]) => {
+        try {
+          const response = await fetch(`/backend-api/${path}?company_id=${encodeURIComponent(selectedCompany)}&status=1`)
+          const body = await response.json()
+          const settings = Array.isArray(body) ? body : body.data
+          return Array.isArray(settings) && settings.length ? channel : null
+        } catch { return null }
+      }))
+      setActiveChannels(results.filter((channel): channel is CommunicationChannel => Boolean(channel)))
+    }
+    void loadChannels()
+  }, [selectedCompany])
 
   const createQuotationPath = vehicleId
     ? `/quotations/create?vehicle_id=${encodeURIComponent(vehicleId)}`
@@ -120,6 +143,26 @@ export default function QuotationsPage() {
       toast.success('Quotation PDF downloaded.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to download quotation.')
+    }
+  }
+
+  const sendQuotationEmail = async (quotationId: string | number) => {
+    try {
+      setSendingEmailId(quotationId)
+      const response = await fetch('/backend-api/email/quotation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quotation_id: quotationId }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || result.error || 'Unable to send quotation email.')
+      }
+      toast.success(result.message || 'Quotation email sent successfully.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to send quotation email.')
+    } finally {
+      setSendingEmailId(null)
     }
   }
 
@@ -238,6 +281,9 @@ export default function QuotationsPage() {
                               <FileText className="size-4 text-blue-600" />
                               Task Card
                             </DropdownMenuItem>
+                            {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
+                            {activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             <DropdownMenuItem
                               onClick={async () => {
                                 if (confirm('Are you sure you want to delete this quotation?')) {
@@ -270,6 +316,7 @@ export default function QuotationsPage() {
           </div>
         </div>
       )}
+      <SendCustomerMessageDialog channel={messageTarget?.channel ?? null} companyId={messageTarget?.companyId} customerId={messageTarget?.customerId} documentLabel="this quotation" onOpenChange={(open) => !open && setMessageTarget(null)} />
     </div>
   )
 }

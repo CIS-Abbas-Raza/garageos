@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
-import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2, WalletCards } from 'lucide-react'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2, WalletCards, Mail, MessageCircle, Send } from 'lucide-react'
 import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
+import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +17,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
+import { useBranch } from '@/lib/branch-context'
 
 export default function InvoicesPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
+  const { selectedCompany } = useBranch()
   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
+  const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
+  const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
+  const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
 
   const [taskId, setTaskId] = useState<string | undefined>()
 
@@ -44,6 +50,23 @@ export default function InvoicesPage() {
   useEffect(() => {
     void loadInvoices()
   }, [loadInvoices])
+
+  useEffect(() => {
+    if (!selectedCompany) return setActiveChannels([])
+    const loadChannels = async () => {
+      const checks: [CommunicationChannel, string][] = [['sms', 'twilio-sms-settings'], ['email', 'sendgrid-settings'], ['whatsapp', 'twilio-whatsapp-settings']]
+      const results = await Promise.all(checks.map(async ([channel, path]) => {
+        try {
+          const response = await fetch(`/backend-api/${path}?company_id=${encodeURIComponent(selectedCompany)}&status=1`)
+          const body = await response.json()
+          const settings = Array.isArray(body) ? body : body.data
+          return Array.isArray(settings) && settings.length ? channel : null
+        } catch { return null }
+      }))
+      setActiveChannels(results.filter((channel): channel is CommunicationChannel => Boolean(channel)))
+    }
+    void loadChannels()
+  }, [selectedCompany])
   
   const rows = useMemo(
     () =>
@@ -133,6 +156,26 @@ export default function InvoicesPage() {
       toast.success('Invoice PDF downloaded.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to download invoice.')
+    }
+  }
+
+  const sendInvoiceEmail = async (invoiceId: string | number) => {
+    try {
+      setSendingEmailId(invoiceId)
+      const response = await fetch('/backend-api/email/invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice_id: invoiceId }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || result.error || 'Unable to send invoice email.')
+      }
+      toast.success(result.message || 'Invoice email sent successfully.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to send invoice email.')
+    } finally {
+      setSendingEmailId(null)
     }
   }
 
@@ -269,6 +312,9 @@ export default function InvoicesPage() {
                               <Download className="size-4" />
                               Download PDF
                             </DropdownMenuItem>
+                            {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
+                            {activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             <DropdownMenuItem
                               onClick={async () => {
                                 if (confirm('Are you sure you want to delete this invoice?')) {
@@ -307,6 +353,7 @@ export default function InvoicesPage() {
         }}
         onPaymentCreated={loadInvoices}
       />
+      <SendCustomerMessageDialog channel={messageTarget?.channel ?? null} companyId={messageTarget?.companyId} customerId={messageTarget?.customerId} documentLabel="this invoice" onOpenChange={(open) => !open && setMessageTarget(null)} />
     </div>
   )
 }
