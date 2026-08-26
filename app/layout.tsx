@@ -5,7 +5,7 @@ import { RootLayoutClient } from '@/components/root-layout-client'
 import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
-  title: 'GarageOS — Auto Repair Management',
+  title: 'GarageOS',
   description: 'The operating system for modern auto garages',
   generator: 'v0.app',
   icons: {

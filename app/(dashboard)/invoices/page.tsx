@@ -36,8 +36,15 @@ export default function InvoicesPage() {
   }, [])
 
   const loadInvoices = useCallback(async () => {
+    if (!selectedCompany) {
+      setInvoices([])
+      return
+    }
+
     try {
-      const query = taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''
+      const queryParams = new URLSearchParams({ company_id: String(selectedCompany) })
+      if (taskId) queryParams.set('task_id', taskId)
+      const query = `?${queryParams.toString()}`
       const response = await fetch(`/backend-api/invoices${query}`)
       const result = await response.json()
       if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
@@ -45,7 +52,7 @@ export default function InvoicesPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
     }
-  }, [taskId])
+  }, [selectedCompany, taskId])
 
   useEffect(() => {
     void loadInvoices()

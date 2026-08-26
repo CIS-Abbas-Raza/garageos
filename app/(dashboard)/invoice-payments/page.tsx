@@ -6,6 +6,7 @@ export default function InvoicePaymentsPage() {
       config={{
         resource: 'invoicePayments',
         apiEndpoint: '/backend-api/invoice-payments',
+        companyScoped: true,
         title: 'Invoice Payments',
         description: 'Record payments and keep balances visible for every invoice.',
         hideCreateButton: true,

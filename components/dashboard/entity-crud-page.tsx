@@ -248,13 +248,6 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
     { key: "email", label: "Email", type: "email", required: true },
-    {
-      key: "password",
-      label: "Password",
-      type: "password",
-      required: true,
-      optionalOnUpdate: true,
-    },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
     {
@@ -1093,6 +1086,22 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ...record,
               invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
             }))
+          : config.resource === "companyExpenses"
+          ? records.map((record) => ({
+              ...record,
+              created_by_name: record.creator?.name ?? `User #${record.created_by}`,
+            }))
+          : config.resource === "communicationLogs"
+          ? records.map((record) => ({
+              ...record,
+              user_name: record.user?.name ?? `User #${record.user_id}`,
+            }))
+          : config.resource === "notifications"
+          ? records.map((record) => ({
+              ...record,
+              user_name: record.user?.name ?? `User #${record.user_id}`,
+              read: String(record.read) === "1" || record.read === true ? "Read" : "Unread",
+            }))
           : config.resource === "reviews"
           ? records.map((record) => ({
               ...record,
@@ -1119,6 +1128,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       "smsSettings",
       "whatsappSettings",
       "emailSettings",
+      "companyExpenses",
     ].includes(schemaKey)
       ? [...fields, statusField]
       : fields;

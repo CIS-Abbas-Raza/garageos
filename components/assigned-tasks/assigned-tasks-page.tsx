@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { useBranch } from '@/lib/branch-context'
 
 type Assignment = Record<string, any>
 
@@ -28,6 +29,7 @@ const statusLabel: Record<string, string> = {
 }
 
 export function AssignedTasksPage() {
+  const { selectedCompany } = useBranch()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
@@ -36,8 +38,15 @@ export function AssignedTasksPage() {
 
   useEffect(() => {
     const loadAssignments = async () => {
+      if (!selectedCompany) {
+        setAssignments([])
+        setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
       try {
-        const response = await fetch('/backend-api/task-assignments')
+        const response = await fetch(`/backend-api/task-assignments?company_id=${encodeURIComponent(selectedCompany)}`)
         const result = await response.json()
         if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load assigned tasks.')
         setAssignments(Array.isArray(result.data) ? result.data : [])
@@ -49,7 +58,7 @@ export function AssignedTasksPage() {
     }
 
     void loadAssignments()
-  }, [])
+  }, [selectedCompany])
 
   const openStatusModal = (assignment: Assignment) => {
     setEditingAssignment(assignment)

@@ -4,10 +4,10 @@ export type DashboardRole = 'superadmin' | 'owner' | 'staff' | 'mechanic' | 'fin
 
 const ROLE_PATHS: Record<DashboardRole, string[]> = {
   superadmin: ['*'],
-  owner: ['/company-users', '/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoice-payments', '/sales', '/notifications'],
+  owner: ['/company-users', '/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/communication-logs', '/notifications'],
   staff: ['/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/notifications'],
   mechanic: ['/assigned-tasks', '/notifications'],
-  finance: ['/invoice-payments', '/sales', '/notifications'],
+  finance: ['/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/notifications'],
   customer: ['/customers', '/notifications'],
   unknown: [],
 }

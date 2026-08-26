@@ -60,9 +60,9 @@ const menuSections = [
     icon: Wrench,
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
-      { href: '/vehicles', label: 'Vehicles', icon: Truck },
-      { href: '/quotations', label: 'Quotation', icon: ClipboardList },
-      { href: '/task-cards', label: 'Task Cards', icon: FileText },
+      // { href: '/vehicles', label: 'Vehicles', icon: Truck },
+      // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
+      // { href: '/task-cards', label: 'Task Cards', icon: FileText },
       { href: '/assigned-tasks', label: 'Assigned Tasks', icon: ClipboardList },
       { href: '/appointments', label: 'Appointments', icon: Calendar },
       { href: '/reviews', label: 'Customer Review', icon: FileText },
@@ -76,6 +76,8 @@ const menuSections = [
       { href: '/invoices', label: 'Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
       { href: '/sales', label: 'Sales', icon: BarChart3 },
+      { href: '/company-accounts', label: 'Company Account', icon: CreditCard },
+      { href: '/account-ledger', label: 'Account Ledger', icon: FileText },
     ],
   },
   {
@@ -86,6 +88,7 @@ const menuSections = [
       { href: '/sms-settings', label: 'SMS Setting', icon: Bell },
       { href: '/whatsapp-settings', label: 'WhatsApp Setting', icon: Bell },
       { href: '/email-settings', label: 'Email Setting (SendGrid)', icon: Bell },
+      { href: '/communication-logs', label: 'Communication Logs', icon: FileText },
     ],
   },
 ]
