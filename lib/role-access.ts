@@ -4,11 +4,11 @@ export type DashboardRole = 'superadmin' | 'owner' | 'staff' | 'mechanic' | 'fin
 
 const ROLE_PATHS: Record<DashboardRole, string[]> = {
   superadmin: ['*'],
-  owner: ['/company-users', '/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/communication-logs', '/notifications'],
-  staff: ['/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/notifications'],
+  owner: ['/company-users', '/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoices', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/communication-logs', '/notifications'],
+  staff: ['/customers', '/vehicles', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoices', '/notifications'],
   mechanic: ['/assigned-tasks', '/notifications'],
-  finance: ['/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/notifications'],
-  customer: ['/customers', '/notifications'],
+  finance: ['/invoices', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/notifications'],
+  customer: ['/customers', '/vehicles', '/quotations', '/task-cards', '/invoices', '/notifications'],
   unknown: [],
 }
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CarFront, Pencil, UserRound } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { CarFront, Pencil, Search, UserRound } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -35,6 +35,8 @@ export function AssignedTasksPage() {
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
   const [taskStatus, setTaskStatus] = useState('pending')
   const [isSaving, setIsSaving] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     const loadAssignments = async () => {
@@ -59,6 +61,28 @@ export function AssignedTasksPage() {
 
     void loadAssignments()
   }, [selectedCompany])
+
+  const filteredAssignments = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    return assignments.filter((assignment) => {
+      const task = assignment.task ?? {}
+      const vehicle = task.taskCard?.quotation?.vehicle ?? {}
+      const assignee = assignment.user?.name ?? assignment.user?.email ?? `User #${assignment.user_id}`
+      const taskStatus = task.task_status ?? 'pending'
+      const searchableValues = [
+        vehicle.name,
+        vehicle.license_plate,
+        task.taskCard?.task_cards_number,
+        task.task_card_id,
+        task.description,
+        assignee,
+      ]
+      const matchesSearch = !normalizedQuery || searchableValues.some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
+
+      return matchesSearch && (statusFilter === 'all' || taskStatus === statusFilter)
+    })
+  }, [assignments, searchQuery, statusFilter])
 
   const openStatusModal = (assignment: Assignment) => {
     setEditingAssignment(assignment)
@@ -102,6 +126,26 @@ export function AssignedTasksPage() {
         <p className="mt-2 text-sm text-muted-foreground">Review tasks assigned to company users and update their progress.</p>
       </div>
 
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search assigned tasks..."
+            className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none"
+        >
+          <option value="all">All Status</option>
+          {Object.entries(statusLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+      </div>
+
       {assignments.length === 0 ? (
         <EmptyState title="No assigned tasks" description="Tasks assigned to company users will appear here." />
       ) : (
@@ -119,7 +163,7 @@ export function AssignedTasksPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {assignments.map((assignment) => {
+                {filteredAssignments.map((assignment) => {
                   const taskStatus = assignment.task?.task_status ?? 'pending'
                   return (
                     <tr key={assignment.id} className="bg-background transition-colors hover:bg-muted/20">
@@ -151,6 +195,9 @@ export function AssignedTasksPage() {
                     </tr>
                   )
                 })}
+                {assignments.length > 0 && filteredAssignments.length === 0 && (
+                  <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No assigned tasks match your filters.</td></tr>
+                )}
               </tbody>
             </table>
           </div>

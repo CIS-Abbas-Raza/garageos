@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Send } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -18,13 +18,19 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
+import { getDashboardRole } from '@/lib/role-access'
 
 export default function QuotationsPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
+  const { user, isSuperAdmin } = useAuth()
+  const canManageQuotations = getDashboardRole(user, isSuperAdmin) !== 'customer'
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [vehicleId, setVehicleId] = useState<string | undefined>()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
   const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
@@ -72,12 +78,32 @@ export default function QuotationsPage() {
     ? `/quotations/create?vehicle_id=${encodeURIComponent(vehicleId)}`
     : '/quotations/create'
 
-  const getCustomerName = (customerId: string) => {
+  const filteredRows = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    return rows.filter((quotation) => {
+      const status = String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase()
+      const customerName = quotation.vehicle?.customer?.name ?? getCustomerName(quotation.customer_id ?? quotation.customerId)
+      const vehicleName = quotation.vehicle?.name ||
+        [quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
+        getVehicleName(quotation.vehicle_id ?? quotation.vehicleId)
+      const matchesSearch = !normalizedQuery || [
+        quotation.quotation_number,
+        quotation.quotationNumber,
+        customerName,
+        vehicleName,
+      ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
+
+      return matchesSearch && (statusFilter === 'all' || status === statusFilter)
+    })
+  }, [rows, searchQuery, statusFilter, customers, vehicles])
+
+  function getCustomerName(customerId: string) {
     const customer = customers.find((item) => item.id === customerId)
     return customer ? `${customer.firstName} ${customer.lastName}` : '—'
   }
 
-  const getVehicleName = (vehicleId: string) => {
+  function getVehicleName(vehicleId: string) {
     const vehicle = vehicles.find((item) => item.id === vehicleId)
     return vehicle ? `${vehicle.make} ${vehicle.model}` : '—'
   }
@@ -176,20 +202,44 @@ export default function QuotationsPage() {
             Create, review, and edit quotations using the new full-page workflow.
           </p>
         </div>
-        <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
+        {canManageQuotations && <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Quotation
-        </Button>
+        </Button>}
+      </div>
+
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search quotations..."
+            className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none"
+        >
+          <option value="all">All Status</option>
+          <option value="draft">Draft</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
           title="No quotations yet"
           description="Create your first quotation to start tracking estimates and approvals."
-          action={{
+          action={canManageQuotations ? {
             label: 'Add Quotation',
             onClick: () => router.push(createQuotationPath),
-          }}
+          } : undefined}
         />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
@@ -207,7 +257,7 @@ export default function QuotationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((quotation) => (
+                {filteredRows.map((quotation) => (
                   <tr key={quotation.id} className="bg-background transition-colors hover:bg-muted/20">
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
@@ -267,13 +317,13 @@ export default function QuotationsPage() {
                               <Download className="size-4" />
                               Download Quotation
                             </DropdownMenuItem>
-                            <DropdownMenuItem
+                            {canManageQuotations && <DropdownMenuItem
                               onClick={() => router.push(`/quotations/edit/${quotation.id}${vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                             <DropdownMenuItem
                               onClick={() => router.push(`/task-cards?quotation_id=${encodeURIComponent(String(quotation.id))}`)}
                               className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
@@ -282,9 +332,9 @@ export default function QuotationsPage() {
                               Task Card
                             </DropdownMenuItem>
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
-                            {activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {canManageQuotations && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {canManageQuotations && <DropdownMenuItem
                               onClick={async () => {
                                 if (confirm('Are you sure you want to delete this quotation?')) {
                                   try {
@@ -304,13 +354,16 @@ export default function QuotationsPage() {
                             >
                               <Trash2 className="size-4" />
                               Delete
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
                     </td>
                   </tr>
                 ))}
+                {rows.length > 0 && filteredRows.length === 0 && (
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No quotations match your filters.</td></tr>
+                )}
               </tbody>
             </table>
           </div>

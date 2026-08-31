@@ -10,6 +10,8 @@ export default function InvoicePaymentsPage() {
         title: 'Invoice Payments',
         description: 'Record payments and keep balances visible for every invoice.',
         hideCreateButton: true,
+        hideStatusAction: true,
+        hideDeleteAction: true,
         updateFields: ['payment_status'],
         fileUrlPrefix: '/payment_proof_images/',
         fields: [

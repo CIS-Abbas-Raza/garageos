@@ -8,6 +8,7 @@ export default function CustomersPage() {
         apiEndpoint: '/backend-api/customers',
         companyScoped: true,
         assignCurrentUserId: true,
+        readOnlyForRoles: ['customer'],
         title: 'Customers',
         description: 'Manage customer contact records and service history.',
         fields: [],

@@ -12,6 +12,7 @@ export default function VehiclesPage() {
         apiEndpoint: '/backend-api/vehicles',
         customerScoped: true,
         assignCurrentUserId: true,
+        readOnlyForRoles: ['customer'],
         title: 'Vehicles',
         description: 'Track customer vehicles, maintenance history, and service records.',
         fields: [],

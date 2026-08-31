@@ -36,7 +36,9 @@ import {
   Boxes,
   Bell,
   CalendarCheck,
+  Download,
   Image as ImageIcon,
+  KeyRound,
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -69,6 +71,7 @@ import {
 import { useGarageStore } from "@/lib/store/garage-store";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth-context";
+import { getDashboardRole, type DashboardRole } from "@/lib/role-access";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -115,6 +118,18 @@ type Config = {
   hideRowActions?: boolean;
   /** Hides only the Edit action while retaining the other row actions. */
   hideEditAction?: boolean;
+  /** Hides the activate/deactivate action. */
+  hideStatusAction?: boolean;
+  /** Hides the delete action. */
+  hideDeleteAction?: boolean;
+  /** Makes row mutation actions unavailable for these roles. */
+  readOnlyForRoles?: DashboardRole[];
+  /** Enables a date range filter for a record date field. */
+  dateRangeField?: string;
+  /** Hides the generic active/inactive status filter. */
+  hideStatusFilter?: boolean;
+  /** Enables an Excel-compatible balance sheet export for ledger records. */
+  balanceSheetExport?: boolean;
   /** Limits edit submissions to these fields. */
   updateFields?: string[];
   /** URL prefix for the record's `picture` file, shown in the edit dialog. */
@@ -974,6 +989,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const store = useGarageStore();
   const { selectedCompany } = useBranch();
   const { user } = useAuth();
+  const dashboardRole = getDashboardRole(user);
   const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
 
   useEffect(() => {
@@ -1062,6 +1078,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
           ? records.map((record) => ({
               ...record,
               ...record.user,
+              company_user_id: record.id,
               company_id: record.company_id,
               role_id: String(record.role_id ?? record.role?.id ?? ""),
               role: record.role?.name ?? record.role_id,
@@ -1133,8 +1150,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
       ? [...fields, statusField]
       : fields;
   const [viewing, setViewing] = useState<Record<string, any> | null>(null);
+  const [resettingEmployee, setResettingEmployee] = useState<Record<string, any> | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
@@ -1277,15 +1298,35 @@ export function EntityCrudPage({ config }: { config: Config }) {
         .filter(
           (row) =>
             JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
-            (status === "all" || String(row.status ?? "1") === status),
+            (status === "all" || String(row.status ?? "1") === status) &&
+            (!config.dateRangeField || !dateFrom || new Date(row[config.dateRangeField]).getTime() >= new Date(`${dateFrom}T00:00:00`).getTime()) &&
+            (!config.dateRangeField || !dateTo || new Date(row[config.dateRangeField]).getTime() <= new Date(`${dateTo}T23:59:59.999`).getTime()),
         )
         .sort(
           (a, b) =>
             String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? "")) *
             (sortAsc ? 1 : -1),
         ),
-    [rows, query, status, sortKey, sortAsc],
+    [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField],
   );
+
+  const exportBalanceSheet = () => {
+    const xmlEntities: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" };
+    const escapeXml = (value: unknown) => String(value ?? "").replace(/[<>&'\"]/g, (character) => xmlEntities[character]);
+    const totalCredits = filtered.reduce((total, row) => total + (String(row.transaction_type).toLowerCase() === "credit" ? Number(row.amount) || 0 : 0), 0);
+    const totalDebits = filtered.reduce((total, row) => total + (String(row.transaction_type).toLowerCase() === "debit" ? Number(row.amount) || 0 : 0), 0);
+    const netBalance = totalCredits - totalDebits;
+    const dateRange = [dateFrom || "All dates", dateTo || "All dates"].join(" to ");
+    const cells = (values: unknown[]) => `<Row>${values.map((value) => `<Cell><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`).join("")}</Row>`;
+    const workbook = `<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Balance Sheet"><Table>${cells(["Balance Sheet"])}${cells(["Date range", dateRange])}${cells(["Total Credit", totalCredits.toFixed(2)])}${cells(["Total Debit", totalDebits.toFixed(2)])}${cells(["Net Balance", netBalance.toFixed(2)])}${cells([])}${cells(["Created At", "Transaction Type", "Reason", "Amount", "Balance", "Created By"])}${filtered.map((row) => cells([row.createdAt ? new Date(row.createdAt).toLocaleString() : "", row.transaction_type, row.reason, Number(row.amount ?? 0).toFixed(2), Number(row.balance ?? 0).toFixed(2), row.created_by_name])).join("")}</Table></Worksheet></Workbook>`;
+    const blob = new Blob([workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `balance-sheet-${dateFrom || "all"}-${dateTo || "dates"}.xls`;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+  };
 
   /* ── Handlers ── */
   const openCreate = () => {
@@ -1323,6 +1364,25 @@ export function EntityCrudPage({ config }: { config: Config }) {
     });
     setLineItems(row.lineItems ?? []);
     setOpen(true);
+  };
+
+  const resetEmployeePassword = async () => {
+    if (!resettingEmployee) return;
+    setIsResettingPassword(true);
+    try {
+      const targetId = config.resource === "companyUsers"
+        ? (resettingEmployee.company_user_id || resettingEmployee.id)
+        : resettingEmployee.id;
+      if (apiEnabled) {
+        await requestApi(`/${targetId}/reset-password`, { method: "POST" });
+      }
+      toast.success(`Password reset successfully.`);
+      setResettingEmployee(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to reset password.");
+    } finally {
+      setIsResettingPassword(false);
+    }
   };
 
   const submit = async (data: Record<string, any>) => {
@@ -1417,6 +1477,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   };
 
   const IconComponent = config.icon || iconMap[config.title] || ShieldCheck;
+  const isRoleReadOnly = config.readOnlyForRoles?.includes(dashboardRole) ?? false;
 
   /* ══════════════════════════════════════════════════════════════ */
   /*                           RENDER                              */
@@ -1442,15 +1503,23 @@ export function EntityCrudPage({ config }: { config: Config }) {
               </p>
             </div>
           </div>
-          {!config.hideCreateButton && (
-            <Button
-              onClick={openCreate}
-              className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
-            >
-              <Plus className="size-4" />
-              Add {singularize(config.title)}
-            </Button>
-          )}
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {!config.hideCreateButton && (
+              <Button
+                onClick={openCreate}
+                className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
+              >
+                <Plus className="size-4" />
+                Add {singularize(config.title)}
+              </Button>
+            )}
+            {config.balanceSheetExport && (
+              <Button onClick={exportBalanceSheet} variant="outline" className="gap-2 rounded-lg px-5 h-10 shrink-0" disabled={filtered.length === 0}>
+                <Download className="size-4" />
+                Export Balance Sheet
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* ═══ FILTER BAR ═══ */}
@@ -1466,7 +1535,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             />
           </div>
           {/* Status filter */}
-          <div className="flex items-center gap-2">
+          {!config.hideStatusFilter && <div className="flex items-center gap-2">
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -1488,7 +1557,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 </>
               )}
             </select>
-          </div>
+          </div>}
+          {config.dateRangeField && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} type="date" aria-label="Created from" className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none" />
+              <span className="text-sm text-muted-foreground">to</span>
+              <input value={dateTo} onChange={(event) => setDateTo(event.target.value)} type="date" aria-label="Created to" className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none" />
+            </div>
+          )}
           {/* View mode toggle (visual only for now) */}
           <div className="flex items-center gap-0.5 ml-auto border border-border rounded-lg p-0.5 bg-muted/40">
             <button type="button" className="p-1.5 rounded bg-background text-primary shadow-sm" aria-label="List view">
@@ -1620,7 +1696,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Eye className="size-4" />
                               View
                             </DropdownMenuItem>
-                            {!config.hideEditAction && (
+                            {!config.hideEditAction && !isRoleReadOnly && (
                               <DropdownMenuItem
                                 onClick={() => openEdit(row)}
                                 className="gap-2 cursor-pointer text-xs"
@@ -1665,7 +1741,16 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Invoice
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem
+                            {config.resource === "companyUsers" && (
+                              <DropdownMenuItem
+                                onClick={() => setResettingEmployee(row)}
+                                className="gap-2 cursor-pointer text-xs"
+                              >
+                                <KeyRound className="size-4" />
+                                Reset Password
+                              </DropdownMenuItem>
+                            )}
+                            {!config.hideStatusAction && !isRoleReadOnly && <DropdownMenuItem
                               onClick={async () => {
                                 const updated = { ...row, status: String(row.status) === "0" ? "1" : "0" };
                                 try {
@@ -1687,8 +1772,8 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             >
                               <CircleX className="size-4" />
                               Deactivate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
+                            </DropdownMenuItem>}
+                            {!config.hideDeleteAction && !isRoleReadOnly && <DropdownMenuItem
                               onClick={async () => {
                                 if (confirm("Are you sure you want to delete this record?")) {
                                   try {
@@ -1708,7 +1793,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             >
                               <Trash2 className="size-4" />
                               Delete
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>}
@@ -1802,11 +1887,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 {editing && editingFileUrl && (
                   <div className="space-y-2">
                     <Label>Payment proof</Label>
-                    <Button asChild type="button" variant="outline" className="w-fit">
-                      <a href={editingFileUrl} target="_blank" rel="noreferrer">
-                        <Eye className="size-4" />
-                        View file
-                      </a>
+                    <Button type="button" variant="outline" className="w-fit" onClick={() => window.open(editingFileUrl, "_blank", "noopener,noreferrer")}>
+                      <Eye className="size-4" />
+                      View file
                     </Button>
                   </div>
                 )}
@@ -1942,6 +2025,48 @@ export function EntityCrudPage({ config }: { config: Config }) {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*                RESET PASSWORD MODAL                         */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <Dialog
+        open={Boolean(resettingEmployee)}
+        onOpenChange={(value) => !value && setResettingEmployee(null)}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reset password?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-sm text-slate-600">
+              New password will be{" "}
+              <code className="rounded bg-slate-100 px-2 py-1 font-mono text-sm font-semibold text-slate-900 border border-slate-200">
+                garage@123
+              </code>
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setResettingEmployee(null)}
+              disabled={isResettingPassword}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={resetEmployeePassword}
+              disabled={isResettingPassword}
+            >
+              {isResettingPassword ? "Resetting..." : "Reset"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

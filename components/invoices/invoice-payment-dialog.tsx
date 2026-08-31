@@ -52,14 +52,15 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCre
   useEffect(() => {
     if (!open || !invoice) return
     setStep('method')
-    setMethodGroup('cash')
-    setPaymentMethod('cash')
+    setMethodGroup(isCustomer ? 'online' : 'cash')
+    setPaymentMethod(isCustomer ? 'online' : 'cash')
     setPaidAmount('0')
     setPicture(null)
     setPictureError('')
-  }, [open, invoice, balanceBeforePayment])
+  }, [open, invoice, balanceBeforePayment, isCustomer])
 
   const selectMethodGroup = (value: 'cash' | 'online') => {
+    if (isCustomer && value === 'cash') return
     setMethodGroup(value)
     setPaymentMethod(value === 'cash' ? 'cash' : 'online')
   }
@@ -143,7 +144,8 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCre
                   key={value}
                   type="button"
                   onClick={() => selectMethodGroup(value)}
-                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'}`}
+                  disabled={isCustomer && value === 'cash'}
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'} ${isCustomer && value === 'cash' ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   <Icon className="mt-0.5 size-5 text-primary" />
                   <span>

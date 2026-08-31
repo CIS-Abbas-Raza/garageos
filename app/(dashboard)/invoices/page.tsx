@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
-import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Trash2, WalletCards, Mail, MessageCircle, Send } from 'lucide-react'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Search, Trash2, WalletCards, Mail, MessageCircle, Send } from 'lucide-react'
 import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
 import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
@@ -18,16 +18,23 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
+import { getDashboardRole } from '@/lib/role-access'
 
 export default function InvoicesPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
+  const { user, isSuperAdmin } = useAuth()
+  const role = getDashboardRole(user, isSuperAdmin)
+  const canManageInvoices = !['finance', 'staff', 'customer'].includes(role)
   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
   const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   const [taskId, setTaskId] = useState<string | undefined>()
 
@@ -87,12 +94,30 @@ export default function InvoicesPage() {
     [invoices],
   )
 
-  const getCustomerName = (customerId: string) => {
+  const filteredRows = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    return rows.filter((invoice) => {
+      const status = String(invoice.invoice_status ?? invoice.status ?? 'draft').toLowerCase()
+      const customerName = invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)
+      const vehicleName = invoice.taskCard?.quotation?.vehicle?.name ?? getVehicleName(invoice.vehicleId)
+      const matchesSearch = !normalizedQuery || [
+        invoice.invoice_number,
+        invoice.invoiceNumber,
+        customerName,
+        vehicleName,
+      ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
+
+      return matchesSearch && (statusFilter === 'all' || status === statusFilter)
+    })
+  }, [rows, searchQuery, statusFilter, customers, vehicles])
+
+  function getCustomerName(customerId: string) {
     const customer = customers.find((item) => item.id === customerId)
     return customer ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`.trim() || '—' : '—'
   }
 
-  const getVehicleName = (vehicleId?: string) => {
+  function getVehicleName(vehicleId?: string) {
     if (!vehicleId) return '—'
     const vehicle = vehicles.find((item) => item.id === vehicleId)
     return vehicle ? [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(' ') || '—' : '—'
@@ -196,20 +221,44 @@ export default function InvoicesPage() {
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
-        <Button onClick={() => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
-          <Plus className="size-4" />
-          Add Invoice
-        </Button>
+        {canManageInvoices && (
+          <Button onClick={() => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
+            <Plus className="size-4" />
+            Add Invoice
+          </Button>
+        )}
+      </div>
+
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search invoices..."
+            className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none"
+        >
+          <option value="all">All Status</option>
+          <option value="draft">Draft</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+        </select>
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
           title="No invoices yet"
           description="Create your first invoice to start tracking billing and payments."
-          action={{
+          action={canManageInvoices ? {
             label: 'Add Invoice',
             onClick: () => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`),
-          }}
+          } : undefined}
         />
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
@@ -229,7 +278,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((invoice) => (
+                {filteredRows.map((invoice) => (
                   <tr key={invoice.id} className="bg-background transition-colors hover:bg-muted/20">
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
@@ -305,13 +354,13 @@ export default function InvoicesPage() {
                               <WalletCards className="size-4" />
                               Pay
                             </DropdownMenuItem>
-                            <DropdownMenuItem
+                            {canManageInvoices && <DropdownMenuItem
                               onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                             <DropdownMenuItem
                               onClick={() => void downloadInvoice(invoice.id)}
                               className="gap-2 cursor-pointer text-xs"
@@ -320,9 +369,9 @@ export default function InvoicesPage() {
                               Download PDF
                             </DropdownMenuItem>
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
-                            {activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {canManageInvoices && <DropdownMenuItem
                               onClick={async () => {
                                 if (confirm('Are you sure you want to delete this invoice?')) {
                                   try {
@@ -340,13 +389,16 @@ export default function InvoicesPage() {
                             >
                               <Trash2 className="size-4" />
                               Delete
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
                     </td>
                   </tr>
                 ))}
+                {rows.length > 0 && filteredRows.length === 0 && (
+                  <tr><td colSpan={9} className="px-5 py-10 text-center text-muted-foreground">No invoices match your filters.</td></tr>
+                )}
               </tbody>
             </table>
           </div>

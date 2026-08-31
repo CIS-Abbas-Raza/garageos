@@ -156599,3 +156599,4379 @@ AggregateError:
     }
   ]
 }
+Failed to proxy http://localhost:5000/api/communication-logs?company_id=1 Error: socket hang up
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  [90m1669 |[0m                               [33mView[0m
+  [90m1670 |[0m                             </[33mDropdownMenuItem[0m>
+[31m[1m>[0m [90m1671 |[0m                             {!config.hideEditAction && (
+  [90m     |[0m                             [31m[1m^[0m
+  [90m1672 |[0m                               <[33mDropdownMenuItem[0m
+  [90m1673 |[0m                                 onClick={() => openEdit(row)}
+  [90m1674 |[0m                                 className=[32m"gap-2 cursor-pointer text-xs"[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/admin/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sales/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/notifications/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/customers/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/vehicles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sms-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/whatsapp-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/email-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/roles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/packages/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/companies/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/appointments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/reviews/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/package-subscriptions/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-accounts/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/account-ledger/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/communication-logs/page.tsx 
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1671:29)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1671:29)
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1671:29)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1671:29)
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/admin/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sales/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/notifications/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/customers/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/vehicles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sms-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/whatsapp-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/email-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/roles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/packages/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/companies/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/appointments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/reviews/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/package-subscriptions/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-accounts/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/account-ledger/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/communication-logs/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1671:29
+Expected '</', got '{'
+  1669 |                               View
+  1670 |                             </DropdownMenuItem>
+> 1671 |                             {!config.hideEditAction && (
+       |                             ^
+  1672 |                               <DropdownMenuItem
+  1673 |                                 onClick={() => openEdit(row)}
+  1674 |                                 className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/quotations/page.tsx:328:31
+Expected '</', got 'ident'
+  326 |                             </DropdownMenuItem>
+  327 |                             <DropdownMenuItem
+> 328 |                               onClick={() => router.push(`/task-cards?quotation_id=${enco...
+      |                               ^^^^^^^
+  329 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  330 |                             >
+  331 |                               <FileText className="size-4 text-blue-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/quotations/page.tsx [Client Component Browser]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/quotations/page.tsx [Client Component SSR]
+    ./app/(dashboard)/quotations/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/quotations/page.tsx:328:31)
+    at <unknown> (Error: (./app/(dashboard)/quotations/page.tsx:328:31)
+[browser] Uncaught Error: ./app/(dashboard)/task-cards/page.tsx:219:31
+Expected '</', got 'ident'
+  217 |                             </DropdownMenuItem>
+  218 |                             <DropdownMenuItem
+> 219 |                               onClick={() => router.push(`/invoices?task_id=${encodeURICo...
+      |                               ^^^^^^^
+  220 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  221 |                             >
+  222 |                               <Receipt className="size-4 text-emerald-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/task-cards/page.tsx:219:31)
+    at <unknown> (Error: (./app/(dashboard)/task-cards/page.tsx:219:31)
+[browser] Uncaught Error: ./app/(dashboard)/task-cards/page.tsx:219:31
+Expected '</', got 'ident'
+  217 |                             </DropdownMenuItem>
+  218 |                             <DropdownMenuItem
+> 219 |                               onClick={() => router.push(`/invoices?task_id=${encodeURICo...
+      |                               ^^^^^^^
+  220 |                               className="gap-2 cursor-pointer text-xs font-medium text-sl...
+  221 |                             >
+  222 |                               <Receipt className="size-4 text-emerald-600" />
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/task-cards/page.tsx:219:31)
+    at <unknown> (Error: (./app/(dashboard)/task-cards/page.tsx:219:31)
+[browser] Uncaught Error: ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/task-cards/page.tsx:231:48)
+    at <unknown> (Error: (./app/(dashboard)/task-cards/page.tsx:231:48)
+[browser] Uncaught Error: ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./app/(dashboard)/task-cards/page.tsx:231:48)
+    at <unknown> (Error: (./app/(dashboard)/task-cards/page.tsx:231:48)
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] ./app/(dashboard)/task-cards/page.tsx:231:48
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  229 |                               <Image className="size-4 text-primary" />
+  230 |                               Vehicle Pictures
+> 231 |                             </DropdownMenuItem>}
+      |                                                ^
+  232 |                             <DropdownMenuItem
+  233 |                               onClick={() => setReviewTarget(card)}
+  234 |                               className="gap-2 cursor-pointer text-xs"
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component Browser]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(dashboard)/task-cards/page.tsx [Client Component SSR]
+    ./app/(dashboard)/task-cards/page.tsx [Server Component] 
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [false, , 0]
+Incoming: [false, , 0, true] 
+    at InvoicePaymentDialog (components/invoices/invoice-payment-dialog.tsx:52:12)
+    at Set.forEach (<anonymous>)
+  50 |   ) ?? false
+  51 |
+> 52 |   useEffect(() => {
+     |            ^
+  53 |     if (!open || !invoice) return
+  54 |     setStep('method')
+  55 |     setMethodGroup(isCustomer ? 'online' : 'cash') (components/invoices/invoice-payment-dialog.tsx:52:12)
+[browser] React does not recognize the `asChild` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `aschild` instead. If you accidentally passed it from a parent component, remove it from the DOM element. 
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1985:34
+Expected a semicolon
+  [90m1983 |[0m                     </p>
+  [90m1984 |[0m                     {field.[36mtype[0m === [32m"dynamic-list"[0m ? (
+[31m[1m>[0m [90m1985 |[0m                          {viewing.updatedAt
+  [90m     |[0m                                  [31m[1m^[0m
+  [90m1986 |[0m                         ? [36mnew[0m [33mDate[0m(viewing.updatedAt).toLocaleDateString()
+  [90m1987 |[0m                         : [32m"—"[0m}
+  [90m1988 |[0m                     </p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+⨯ ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  [90m1912 |[0m                   <label className=[32m"relative inline-flex items-center cursor-pointer sel...[0m
+  [90m1913 |[0m                     <input
+[31m[1m>[0m [90m1914 |[0m                 <div className=[32m"mt-5 flex items-center justify-between rounded-xl border...[0m
+  [90m     |[0m                 [31m[1m^[0m
+  [90m1915 |[0m                   <div>
+  [90m1916 |[0m                     <p className=[32m"text-sm font-semibold text-slate-800"[0m>[33mActive[0m</p>
+  [90m1917 |[0m                     <p className=[32m"text-xs text-slate-500"[0m>[33mEnable[0m or disable [36mthis[0m record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1914:17)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1914:17)
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/admin/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sales/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/notifications/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/customers/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/vehicles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sms-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/whatsapp-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/email-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/roles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/packages/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/companies/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/appointments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/reviews/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/package-subscriptions/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-accounts/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/account-ledger/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/communication-logs/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1914:17
+Expression expected
+  1912 |                   <label className="relative inline-flex items-center cursor-pointer sel...
+  1913 |                     <input
+> 1914 |                 <div className="mt-5 flex items-center justify-between rounded-xl border...
+       |                 ^
+  1915 |                   <div>
+  1916 |                     <p className="text-sm font-semibold text-slate-800">Active</p>
+  1917 |                     <p className="text-xs text-slate-500">Enable or disable this record</p>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+⨯ ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  [90m1887 |[0m                         ].includes(schemaKey)
+  [90m1888 |[0m                       ),
+[31m[1m>[0m [90m1889 |[0m                   )
+  [90m     |[0m                   [31m[1m^[0m
+  [90m1890 |[0m                   .filter((field) => {
+  [90m1891 |[0m                     [36mif[0m (schemaKey === [32m"vehicles"[0m) {
+  [90m1892 |[0m                       [36mconst[0m isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/admin/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sales/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/notifications/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/customers/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/vehicles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/sms-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/whatsapp-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/email-settings/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/roles/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/packages/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/companies/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/appointments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/reviews/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/package-subscriptions/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-accounts/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/account-ledger/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/communication-logs/page.tsx 
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1889:19)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1889:19)
+[browser] ./components/dashboard/entity-crud-page.tsx:1889:19
+Expected '</', got ')'
+  1887 |                         ].includes(schemaKey)
+  1888 |                       ),
+> 1889 |                   )
+       |                   ^
+  1890 |                   .filter((field) => {
+  1891 |                     if (schemaKey === "vehicles") {
+  1892 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+[browser] ./components/dashboard/entity-crud-page.tsx:1851:19
+Expected '</', got ')'
+  1849 |                   .filter(
+  1850 |                       ),
+> 1851 |                   )
+       |                   ^
+  1852 |                   .filter((field) => {
+  1853 |                     if (schemaKey === "vehicles") {
+  1854 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx 
+⨯ ./components/dashboard/entity-crud-page.tsx:1787:49
+Expected '</', got '=>'
+  [90m1785 |[0m ...                             }
+  [90m1786 |[0m ...                             toast.success([32m`[0m${singularize(config.title)[32m} deleted succ...[0m
+[31m[1m>[0m [90m1787 |[0m ...                       onClick={[36masync[0m () => {
+  [90m     |[0m                                             [31m[1m^^[0m
+  [90m1788 |[0m ...                         [36mif[0m (confirm([32m"Are you sure you want to delete this record?"[0m)) {
+  [90m1789 |[0m ...                           [36mtry[0m {
+  [90m1790 |[0m ...                             [36mif[0m (apiEnabled) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1787:49
+Expected '</', got '=>'
+  1785 | ...                             }
+  1786 | ...                             toast.success(`${singularize(config.title)} deleted succ...
+> 1787 | ...                       onClick={async () => {
+       |                                             ^^
+  1788 | ...                         if (confirm("Are you sure you want to delete this record?")) {
+  1789 | ...                           try {
+  1790 | ...                             if (apiEnabled) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1787:49)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1787:49)
+⨯ ./components/dashboard/entity-crud-page.tsx:1839:19
+Expected '</', got ')'
+  [90m1837 |[0m                   .filter(
+  [90m1838 |[0m                       ),
+[31m[1m>[0m [90m1839 |[0m                   )
+  [90m     |[0m                   [31m[1m^[0m
+  [90m1840 |[0m                   .filter((field) => {
+  [90m1841 |[0m                     [36mif[0m (schemaKey === [32m"vehicles"[0m) {
+  [90m1842 |[0m                       [36mconst[0m isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:1839:19
+Expected '</', got ')'
+  1837 |                   .filter(
+  1838 |                       ),
+> 1839 |                   )
+       |                   ^
+  1840 |                   .filter((field) => {
+  1841 |                     if (schemaKey === "vehicles") {
+  1842 |                       const isInsuranceField = [
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:1839:19)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:1839:19)
+⨯ ./components/dashboard/entity-crud-page.tsx:2027:7
+Expected '</', got '{'
+  [90m2025 |[0m               )}
+  [90m2026 |[0m             </div>
+[31m[1m>[0m [90m2027 |[0m       {[90m/* ═══════════════════════════════════════════════════════════ */[0m}
+  [90m     |[0m       [31m[1m^[0m
+  [90m2028 |[0m       {[90m/*                RESET PASSWORD MODAL                         */[0m}
+  [90m2029 |[0m       {[90m/* ═══════════════════════════════════════════════════════════ */[0m}
+  [90m2030 |[0m       <[33mDialog[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/company-users/page.tsx
+
+
+[browser] Uncaught Error: ./components/dashboard/entity-crud-page.tsx:2027:7
+Expected '</', got '{'
+  2025 |               )}
+  2026 |             </div>
+> 2027 |       {/* ═══════════════════════════════════════════════════════════ */}
+       |       ^
+  2028 |       {/*                RESET PASSWORD MODAL                         */}
+  2029 |       {/* ═══════════════════════════════════════════════════════════ */}
+  2030 |       <Dialog
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/dashboard/entity-crud-page.tsx
+    ./app/(dashboard)/invoice-payments/page.tsx
+
+
+    at <unknown> (Error: ./components/dashboard/entity-crud-page.tsx:2027:7)
+    at <unknown> (Error: (./components/dashboard/entity-crud-page.tsx:2027:7)
+Failed to proxy http://localhost:5000/api/customers?company_id=1 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+Failed to proxy http://localhost:5000/api/customers?company_id=1 AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5000
+        at <unknown> (Error: connect ECONNREFUSED ::1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5000
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:5000) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5000
+    }
+  ]
+}

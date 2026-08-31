@@ -11,12 +11,22 @@ import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/data-table/data-table"
 import { createCustomerColumns } from "./customer-columns"
 import { CustomerDialog } from "./customer-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export function CustomerList() {
   const { canCreate, canUpdate, canDelete } = useModulePermissions(MODULE_RESOURCE)
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useGarageStore()
   
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [resettingCustomer, setResettingCustomer] = useState<Customer | null>(null)
+  const [isResetting, setIsResetting] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
 
@@ -37,6 +47,26 @@ export function CustomerList() {
     }
   }
 
+  const handleResetPassword = async () => {
+    if (!resettingCustomer) return
+    setIsResetting(true)
+    try {
+      const response = await fetch(`/backend-api/customers/${resettingCustomer.id}/reset-password`, {
+        method: "POST",
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.message || "Failed to reset password")
+      }
+      toast.success("Password reset successfully. New password is garageCustomer@123")
+      setResettingCustomer(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to reset password.")
+    } finally {
+      setIsResetting(false)
+    }
+  }
+
   const handleAddSubmit = (data: any) => {
     addCustomer(data)
     toast.success("Customer created successfully.")
@@ -52,7 +82,8 @@ export function CustomerList() {
   const columns = createCustomerColumns(
     handleView, 
     canUpdate ? handleEdit : undefined, 
-    canDelete ? handleDelete : undefined
+    canDelete ? handleDelete : undefined,
+    canUpdate ? (customer) => setResettingCustomer(customer) : undefined
   )
 
   return (
@@ -105,6 +136,43 @@ export function CustomerList() {
           onSubmit={handleUpdateSubmit}
         />
       )}
+
+      <Dialog open={Boolean(resettingCustomer)} onOpenChange={(open) => !open && setResettingCustomer(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reset password?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-sm text-gray-600">
+              New password will be{" "}
+              <code className="rounded bg-slate-100 px-2 py-1 font-mono text-sm font-semibold text-slate-900 border border-slate-200">
+                garageCustomer@123
+              </code>
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setResettingCustomer(null)}
+              disabled={isResetting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleResetPassword}
+              disabled={isResetting}
+            >
+              {isResetting ? "Resetting..." : "Reset"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
