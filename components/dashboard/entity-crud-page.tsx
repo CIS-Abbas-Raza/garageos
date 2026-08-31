@@ -1741,7 +1741,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Invoice
                               </DropdownMenuItem>
                             )}
-                            {config.resource === "companyUsers" && (
+                            {(config.resource === "companyUsers" || config.resource === "customers" || schemaKey === "customers" || config.title === "Customers") && (
                               <DropdownMenuItem
                                 onClick={() => setResettingEmployee(row)}
                                 className="gap-2 cursor-pointer text-xs"
@@ -2045,7 +2045,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             <p className="text-sm text-slate-600">
               New password will be{" "}
               <code className="rounded bg-slate-100 px-2 py-1 font-mono text-sm font-semibold text-slate-900 border border-slate-200">
-                garage@123
+                {config.resource === "customers" || schemaKey === "customers" || config.title === "Customers" ? "garageCustomer@123" : "garage@123"}
               </code>
             </p>
           </div>
