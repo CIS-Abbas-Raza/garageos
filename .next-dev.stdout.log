@@ -2790,3 +2790,8 @@ Creating turbopack project { dir: 'E:\\NextJs\\Frontend-grageOs\\garageos', test
  GET /customers 200 in 845ms (next.js: 178ms, application-code: 666ms)
  GET /customers 200 in 1188ms (next.js: 17ms, application-code: 1171ms)
 ✓ Compiled in 5.5s
+✓ Compiled in 4.5s
+ GET /customers 200 in 2.8s (next.js: 2.1s, application-code: 761ms)
+ GET /customers 200 in 3.3s (next.js: 2.8s, application-code: 486ms)
+ GET /customers 200 in 140ms (next.js: 15ms, application-code: 125ms)
+ GET /customers 200 in 272ms (next.js: 16ms, application-code: 256ms)
