@@ -5,6 +5,7 @@ export default function RolesPage() {
     <EntityCrudPage
       config={{
         resource: 'roles',
+        apiEndpoint: '/backend-api/roles',
         title: 'Roles',
         description: 'Define permission sets for advisors, mechanics, and administrators.',
         fields: [],

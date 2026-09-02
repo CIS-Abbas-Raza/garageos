@@ -5,6 +5,7 @@ export default function PackagesPage() {
     <EntityCrudPage
       config={{
         resource: 'packages',
+        apiEndpoint: '/backend-api/packages',
         title: 'Packages',
         description: 'Create reusable service packages for estimates and job cards.',
         fields: [
@@ -13,7 +14,7 @@ export default function PackagesPage() {
           { key: 'yearly', label: 'Yearly Price', type: 'number', required: true },
           { key: 'information', label: 'Information', type: 'dynamic-list', required: true }
         ],
-        columns: ['name', 'monthly', 'yearly', 'information'],
+        columns: ['name', 'monthly', 'yearly', 'status'],
         empty: 'No packages configured.'
       }}
     />

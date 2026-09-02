@@ -21,9 +21,9 @@ const benefits = [
   { icon: Building2, value: '3', label: 'Workshop locations' },
 ]
 
-export default function LoginPage() {
+export function LoginPage({ customerLogin = false }: { customerLogin?: boolean }) {
   const router = useRouter()
-  const { isAuthenticated, login } = useAuth()
+  const { isAuthenticated, login, loginCustomer } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
@@ -42,7 +42,11 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormData) {
     try {
-      await login(data.email, data.password)
+      if (customerLogin) {
+        await loginCustomer(data.email, data.password)
+      } else {
+        await login(data.email, data.password)
+      }
       toast.success('Sign in successful! Welcome back to GarageOS.')
       router.push('/dashboard')
     } catch (error: any) {
@@ -70,7 +74,7 @@ export default function LoginPage() {
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Welcome back</h1>
-              <p className="mt-3 text-lg leading-7 text-muted-foreground">Sign in to access your workshop portal</p>
+              <p className="mt-3 text-lg leading-7 text-muted-foreground">Sign in to access your {customerLogin ? 'customer' : 'workshop'} portal</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -117,11 +121,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="mt-7 text-center text-sm text-muted-foreground">
-              Demo credentials:{' '}
-              <span className="font-semibold text-primary">admin@garageos.com</span> /{' '}
-              <span className="font-semibold text-primary">password</span>
-            </p>
           </div>
         </div>
 
@@ -157,3 +156,5 @@ export default function LoginPage() {
     </main>
   )
 }
+
+export default LoginPage

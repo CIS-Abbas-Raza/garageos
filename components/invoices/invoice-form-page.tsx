@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { useAuth } from '@/lib/auth-context'
 import { useBranch } from '@/lib/branch-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,7 +27,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { invoiceSchema, type InvoiceFormData } from '@/lib/schemas'
 import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
-import type { Invoice as StoreInvoice, LineItem as StoreLineItem } from '@/lib/types/store'
 import { cn } from '@/lib/utils'
 
 type InvoiceMode = 'create' | 'edit'
@@ -124,7 +124,7 @@ type PdfInvoiceLineItem = {
   unitPrice: number
 }
 
-type InvoicePdfPayload = {
+export type InvoicePdfPayload = {
   companyName: string
   companyEmail: string
   companyCountry: string
@@ -158,7 +158,7 @@ type InvoicePdfPayload = {
   total: number
 }
 
-const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
+export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -190,11 +190,11 @@ const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   doc.text(companyName, textStartX, y + 20)
 
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
-  const companyLines = [
-    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}  |  Country: ${safePdfText(payload.companyCountry)}`,
-    `Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`,
-  ]
+    doc.setFontSize(9)
+    const companyLines = [
+    `Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}`,
+      `Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`,
+    ]
   companyLines.forEach((line, index) => {
     doc.text(line, textStartX, y + 38 + index * 13)
   })
@@ -550,23 +550,76 @@ function InvoicePrintView({
 export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   const router = useRouter()
   const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const {
     companies,
     customers,
     vehicles,
     invoices,
     settings,
-    addInvoice,
-    updateInvoice,
   } = useGarageStore()
+  const [taskId, setTaskId] = useState<string | undefined>()
+  const [apiInvoice, setApiInvoice] = useState<any>()
+  const [apiCompany, setApiCompany] = useState<any>()
+  const [apiVehicle, setApiVehicle] = useState<any>()
+  const [apiCustomer, setApiCustomer] = useState<any>()
+  const [isInvoiceLoading, setIsInvoiceLoading] = useState(mode === 'edit')
+
+  useEffect(() => {
+    setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
+  }, [])
+
+  useEffect(() => {
+    if (mode !== 'edit' || !invoiceId) return
+
+    const loadInvoice = async () => {
+      try {
+        const response = await fetch(`/backend-api/invoices/${invoiceId}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load invoice.')
+        }
+        const record = result.data
+        const subtotal = Number(record.subtotal ?? 0)
+        const discount = Number(record.discount ?? 0)
+        setTaskId(String(record.task_card_id))
+        setApiInvoice({
+          ...record,
+          companyId: String(record.company_id),
+          invoiceNumber: record.invoice_number ?? `INV-${record.id}`,
+          status: record.invoice_status,
+          paymentStatus: record.payment_status,
+          creationDate: record.creation_date,
+          taxPercentage: Number(record.tax_percentage ?? 0),
+          taxAmount: Number(record.tax_amount ?? 0),
+          discountAmount: discount,
+          discountPercentage: Number(record.discount_percentage ?? 0),
+          lineItems: (record.details ?? []).map((detail: any) => ({
+            id: String(detail.id),
+            type: detail.type === 'service' ? 'service' : 'parts',
+            description: detail.description ?? '',
+            qty: Number(detail.qty ?? 0),
+            unitPrice: Number(detail.unit_price ?? 0),
+            amount: Number(detail.qty ?? 0) * Number(detail.unit_price ?? 0),
+          })),
+        })
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load invoice.')
+      } finally {
+        setIsInvoiceLoading(false)
+      }
+    }
+
+    void loadInvoice()
+  }, [mode, invoiceId])
 
   const Invoice = useMemo(
-    () => (mode === 'edit' && invoiceId ? invoices.find((item) => item.id === invoiceId) : undefined),
-    [mode, invoiceId, invoices],
+    () => (mode === 'edit' && invoiceId ? apiInvoice ?? invoices.find((item) => item.id === invoiceId) : undefined),
+    [mode, invoiceId, apiInvoice, invoices],
   )
 
   const activeCompanies = companies.length > 0 ? companies : defaultCompanies
-  const currentCompany = activeCompanies.find((company) => company.id === selectedCompany) ?? activeCompanies[0]
+  const currentCompany = apiCompany ?? activeCompanies.find((company) => company.id === selectedCompany) ?? activeCompanies[0]
   const currentSettings = currentCompany?.id ? settings[currentCompany.id] : undefined
   const rawCompanyLogo =
     currentSettings?.logoUrl ??
@@ -606,14 +659,14 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
       documentName: Invoice?.documentName ?? '',
-      taxPercentage: Invoice?.taxPercentage ?? 10,
-      discountPercentage: Invoice?.discountPercentage ?? 0,
+      taxPercentage: Invoice?.taxPercentage ?? 0,
+      discountPercentage: Invoice?.discountPercentage ?? (Invoice as any)?.discount_percentage ?? 0,
       subtotal: Invoice?.subtotal ?? 0,
       taxAmount: Invoice?.taxAmount ?? Invoice?.tax ?? 0,
       discountAmount: Invoice?.discountAmount ?? Invoice?.discount ?? 0,
       total: Invoice?.total ?? 0,
       lineItems: Invoice?.lineItems?.length
-        ? Invoice.lineItems.map((item) => normalizeLineItem(item as any))
+        ? Invoice.lineItems.map((item: any) => normalizeLineItem(item))
         : [initialLineItem()],
     }
   }, [Invoice, customers, vehicles])
@@ -622,6 +675,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     register,
     control,
     handleSubmit,
+    reset,
     setValue,
     getValues,
     watch,
@@ -631,6 +685,83 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     defaultValues,
     mode: 'onChange',
   })
+
+  useEffect(() => {
+    if (Invoice) reset(defaultValues)
+  }, [Invoice, defaultValues, reset])
+
+  useEffect(() => {
+    if (!taskId) return
+
+    let cancelled = false
+    const loadLinkedRecords = async () => {
+      try {
+        const taskCardResponse = await fetch(`/backend-api/task-cards/${taskId}`)
+        const taskCardResult = await taskCardResponse.json()
+        if (!taskCardResponse.ok || taskCardResult.success === false || !taskCardResult.data) {
+          throw new Error(taskCardResult.message || 'Unable to load task card details.')
+        }
+        if (cancelled) return
+
+        const taskCard = taskCardResult.data
+        if (mode === 'create') {
+          const taskLineItems = (Array.isArray(taskCard.tasks) ? taskCard.tasks : []).map((task: any) =>
+            normalizeLineItem({
+              type: task.type === 'parts' ? 'parts' : 'service',
+              description: task.description ?? '',
+              qty: Number(task.qty ?? 1) || 1,
+              unitPrice: 0,
+            }),
+          )
+          if (taskLineItems.length) {
+            setValue('lineItems', taskLineItems, { shouldDirty: false, shouldValidate: true })
+          }
+        }
+        const companyId = taskCard.company_id
+        if (companyId) {
+          const companyResponse = await fetch(`/backend-api/companies/${companyId}`)
+          const companyResult = await companyResponse.json()
+          if (!companyResponse.ok || companyResult.success === false || !companyResult.data) {
+            throw new Error(companyResult.message || 'Unable to load company details.')
+          }
+          if (!cancelled) setApiCompany(companyResult.data)
+        }
+
+        const vehicleId = taskCard.quotation?.vehicle_id
+        if (!vehicleId) return
+
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${vehicleId}`)
+        const vehicleResult = await vehicleResponse.json()
+        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+        }
+        if (cancelled) return
+
+        const vehicle = vehicleResult.data
+        setApiVehicle(vehicle)
+        const customerId = vehicle.customer_id ?? vehicle.customerId
+        if (customerId) {
+          const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
+          const customerResult = await customerResponse.json()
+          if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+            throw new Error(customerResult.message || 'Unable to load customer details.')
+          }
+          if (cancelled) return
+          setApiCustomer(customerResult.data)
+          setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
+        }
+        setValue('vehicleId', String(vehicleId), { shouldDirty: false, shouldValidate: true })
+        if (taskCard.quotation?.mileage !== undefined && taskCard.quotation?.mileage !== null) {
+          setValue('mileage', Number(taskCard.quotation.mileage), { shouldDirty: false, shouldValidate: true })
+        }
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load linked invoice records.')
+      }
+    }
+
+    void loadLinkedRecords()
+    return () => { cancelled = true }
+  }, [mode, taskId, setValue])
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -668,8 +799,10 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     }
   }, [customers, watchedCustomerId, setValue])
 
-  const selectedCustomer = customers.find((customer) => customer.id === watchedCustomerId)
-  const customerDisplayName = formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
+  const selectedCustomer = apiCustomer?.id && String(apiCustomer.id) === watchedCustomerId
+    ? apiCustomer
+    : customers.find((customer) => customer.id === watchedCustomerId)
+  const customerDisplayName = selectedCustomer?.name ?? formatPersonName(selectedCustomer?.firstName, selectedCustomer?.lastName)
   const customerEmail = selectedCustomer?.email ?? '—'
   const customerPhone = selectedCustomer?.phone ?? '—'
   const customerAddress = selectedCustomer?.address ?? '—'
@@ -683,14 +816,17 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   )
 
   useEffect(() => {
+    if (apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId) return
     if (filteredVehicles.length === 0) return
     const currentVehicle = filteredVehicles.find((vehicle) => vehicle.id === watchedVehicleId)
     if (!currentVehicle) {
       setValue('vehicleId', filteredVehicles[0].id, { shouldDirty: false, shouldValidate: true })
     }
-  }, [filteredVehicles, watchedVehicleId, setValue])
+  }, [apiVehicle, filteredVehicles, watchedVehicleId, setValue])
 
-  const selectedVehicle = vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
+  const selectedVehicle = apiVehicle?.id && String(apiVehicle.id) === watchedVehicleId
+    ? apiVehicle
+    : vehicles.find((vehicle) => vehicle.id === watchedVehicleId)
   const vehicleDisplayName = selectedVehicle
     ? selectedVehicle.name || [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' ') || '—'
     : '—'
@@ -700,6 +836,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   const vehicleYear = selectedVehicle?.year ? String(selectedVehicle.year) : '—'
   const vehicleVin = selectedVehicle?.vin ?? (selectedVehicle as any)?.VIN ?? '—'
   const vehicleLicensePlate = selectedVehicle?.licensePlate ?? (selectedVehicle as any)?.license_plate ?? '—'
+  const vehicleInsured = Number((selectedVehicle as any)?.insured) === 1 ? 'Yes' : 'No'
 
   useEffect(() => {
     watchedLineItems.forEach((item, index) => {
@@ -789,57 +926,62 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     })
   }
 
-  const onSubmit = (values: InvoiceFormData) => {
-    if (!currentCompany?.id) {
+  const onSubmit = async (values: InvoiceFormData) => {
+    const companyId = apiCompany?.id ?? Invoice?.companyId ?? selectedCompany ?? currentCompany?.id
+    const resolvedTaskId = taskId ?? (Invoice as any)?.task_card_id
+    if (!companyId) {
       toast.error('Please select a company before saving this Invoice.')
       return
     }
-
-    const normalizedItems: StoreLineItem[] = includeLineItems
-      ? (values.lineItems ?? []).map((item, index) => ({
-          id: `${Date.now()}-${index}`,
-          type: item.type === 'service' ? 'labour' : 'parts',
-          description: item.description,
-          quantity: Number(item.qty ?? 0),
-          unitPrice: Number(item.unitPrice ?? 0),
-          total: roundMoney(Number(item.qty ?? 0) * Number(item.unitPrice ?? 0)),
-        }))
-      : []
-
-    const payload: Omit<StoreInvoice, 'id' | 'createdAt'> = {
-      companyId: currentCompany.id,
-      customerId: values.customerId,
-      vehicleId: values.vehicleId,
-      invoiceNumber: values.invoiceNumber,
-      mileage: values.mileage,
-      notes: values.notes,
-      creationDate: values.creationDate,
-      issuedDate: new Date(values.creationDate),
-      dueDate: new Date(values.dueDate),
-      paymentStatus: values.paymentStatus,
-      amountPaid: 0,
-      includeLineItems,
-      taxPercentage: includeLineItems ? values.taxPercentage : 0,
-      discountPercentage: includeLineItems ? values.discountPercentage : 0,
-      taxAmount: includeLineItems ? taxAmount : 0,
-      discountAmount: includeLineItems ? discountAmount : 0,
-      status: values.status,
-      lineItems: normalizedItems,
-      subtotal: includeLineItems ? subtotal : 0,
-      tax: includeLineItems ? taxAmount : 0,
-      discount: includeLineItems ? discountAmount : 0,
-      total: includeLineItems ? total : 0,
-    } as any
-
-    if (mode === 'edit' && invoiceId) {
-      updateInvoice(invoiceId, payload)
-      toast.success('Invoice updated successfully.')
-    } else {
-      addInvoice(payload)
-      toast.success('Invoice created successfully.')
+    if (!resolvedTaskId) {
+      toast.error('Open invoices from a Task Card so its task ID can be assigned.')
+      return
     }
 
-    router.push('/invoices')
+    const apiPayload = {
+      company_id: companyId,
+      task_id: resolvedTaskId,
+      invoice_number: values.invoiceNumber,
+      invoice_status: values.status,
+      payment_status: values.paymentStatus,
+      subtotal: includeLineItems ? subtotal : 0,
+      discount: includeLineItems ? discountAmount : 0,
+      discount_percentage: includeLineItems ? values.discountPercentage : 0,
+      tax_amount: includeLineItems ? taxAmount : 0,
+      tax_percentage: includeLineItems ? values.taxPercentage : 0,
+      total: includeLineItems ? total : 0,
+      creation_date: values.creationDate,
+      created_by: user?.id,
+      details: includeLineItems ? (values.lineItems ?? []).map((item: any) => ({
+          ...(item.id ? { id: item.id } : {}),
+          type: item.type === 'service' ? 'service' : 'parts',
+          description: item.description,
+          qty: Number(item.qty ?? 0),
+          unit_price: Number(item.unitPrice ?? 0),
+          discount: 0,
+          tax: 0,
+          status: 1,
+          is_deleted: 0,
+        })) : [],
+    }
+
+    try {
+      const response = await fetch(`/backend-api/invoices${mode === 'edit' && invoiceId ? `/${invoiceId}` : ''}`, {
+        method: mode === 'edit' && invoiceId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiPayload),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to save invoice.')
+      toast.success(`Invoice ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
+      router.push(`/invoices?task_id=${encodeURIComponent(String(resolvedTaskId))}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to save invoice.')
+    }
+  }
+
+  if (mode === 'edit' && isInvoiceLoading) {
+    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">Loading invoice...</div>
   }
 
   if (mode === 'edit' && invoiceId && !Invoice) {
@@ -978,6 +1120,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                   <p><span className="text-muted-foreground">Year: </span><span>{vehicleYear}</span></p>
                   <p><span className="text-muted-foreground">VIN: </span><span>{vehicleVin}</span></p>
                   <p><span className="text-muted-foreground">License Plate: </span><span>{vehicleLicensePlate}</span></p>
+                  <p><span className="text-muted-foreground">Insured: </span><span>{vehicleInsured}</span></p>
                 </div>
               </section>
             </div>

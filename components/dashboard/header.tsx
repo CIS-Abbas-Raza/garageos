@@ -1,12 +1,13 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin, UserRound, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
+import { useGarageStore } from '@/lib/store/garage-store'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -19,19 +20,59 @@ interface DashboardHeaderProps {
   title: string
 }
 
+interface CompanyOption {
+  id: string
+  name: string
+}
+
 export function DashboardHeader({ title }: DashboardHeaderProps) {
-  const { companies } = useGarageStore()
+  const [companies, setCompanies] = useState<CompanyOption[]>([])
   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBranch()
-  const { user, logout } = useAuth()
+  const { user, logout, isSuperAdmin } = useAuth()
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageStore()
+
+  useEffect(() => {
+    if (!isSuperAdmin) {
+      setCompanies([])
+      return
+    }
+
+    const loadCompanies = async () => {
+      try {
+        const response = await fetch('/backend-api/companies')
+        const body = await response.json()
+        const records = Array.isArray(body?.data) ? body.data : []
+
+        if (!response.ok || body?.success === false) {
+          throw new Error(body?.message || 'Unable to load companies.')
+        }
+
+        setCompanies(records.map((company: Record<string, unknown>) => ({
+          id: String(company.id),
+          name: String(company.name ?? company.company_name ?? company.email ?? `Company ${company.id}`),
+        })))
+      } catch (error) {
+        setCompanies([])
+        toast.error(error instanceof Error ? error.message : 'Unable to load companies.')
+      }
+    }
+
+    void loadCompanies()
+  }, [isSuperAdmin])
+
+  useEffect(() => {
+    const loggedInCompanyId = user?.roles.find((role) => role.scopeId)?.scopeId
+    if (!isSuperAdmin && !selectedCompany && loggedInCompanyId) {
+      setSelectedCompany(loggedInCompanyId)
+    }
+  }, [isSuperAdmin, selectedCompany, setSelectedCompany, user?.roles])
 
   const handleSignOut = () => {
     logout()
     toast.success('You have been signed out.')
   }
 
-  const activeCompanies = companies.length > 0 ? companies : defaultCompanies
-  const currentCompany = activeCompanies.find(c => c.id === selectedCompany) || activeCompanies[0]
+  const currentCompany = companies.find(c => c.id === selectedCompany)
   const currentCompanyName = currentCompany?.name || 'Select Company'
 
   const branches = [
@@ -39,7 +80,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     { id: 'b2', name: 'Iqbal Branch' },
   ]
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
-  const companyId = user?.roles.find((role) => role.scopeId)?.scopeId
+  const companyId = selectedCompany ?? user?.roles.find((role) => role.scopeId)?.scopeId
   const relevantNotifications = notifications
     .filter((notification) => notification.status !== 0 && (!notification.recipientType || notification.recipientType === 'all' || (notification.recipientType === 'company' && notification.recipientId === companyId) || (notification.recipientType === 'user' && notification.recipientId === user?.id)))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -66,27 +107,28 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
         {/* ── LEFT: Company + Branch selector pills ── */}
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Company selector */}
-          <DropdownMenu>
+          {/* SuperAdmin chooses the active company; all other roles use their login company_id. */}
+          {isSuperAdmin && <DropdownMenu>
             <DropdownMenuTrigger
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground outline-none hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-primary/30"
+              aria-label={isSuperAdmin ? 'Select the active company for the dashboard' : 'Current company'}
             >
               <Building2 className="size-3.5 text-muted-foreground shrink-0" />
               <span className="max-w-[130px] truncate">{currentCompanyName}</span>
               <ChevronDown className="size-3 text-muted-foreground shrink-0" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              {activeCompanies.map((company) => (
+              {companies.map((company) => (
                 <DropdownMenuItem
                   key={company.id}
                   onClick={() => setSelectedCompany(company.id)}
                   className="text-xs cursor-pointer"
                 >
-                  {company.name}
+                  {company.name}{selectedCompany === company.id ? ' (Selected)' : ''}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu>}
 
           {/* Branch selector */}
           {/* <DropdownMenu>

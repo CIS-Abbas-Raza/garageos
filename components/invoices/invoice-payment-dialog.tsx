@@ -15,56 +15,52 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useGarageStore } from '@/lib/store/garage-store'
-import type { Invoice, Payment } from '@/lib/types/store'
+import { useAuth } from '@/lib/auth-context'
+import type { Invoice } from '@/lib/types/store'
 
 type PaymentMethod = 'cash' | 'card' | 'bank_transfer' | 'online'
-type PaymentStatus = 'pending' | 'not_verified' | 'verified' | 'rejected'
-
 type InvoicePaymentDialogProps = {
   invoice: Invoice | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onPaymentCreated?: () => void | Promise<void>
 }
 
-const readFileAsDataUrl = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('Unable to read the payment slip.'))
-    reader.readAsDataURL(file)
-  })
-
-export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePaymentDialogProps) {
-  const addPayment = useGarageStore((store) => store.addPayment)
+export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCreated }: InvoicePaymentDialogProps) {
+  const { user } = useAuth()
   const [step, setStep] = useState<'method' | 'form'>('method')
   const [methodGroup, setMethodGroup] = useState<'cash' | 'online'>('cash')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending')
   const [paidAmount, setPaidAmount] = useState('')
-  const [picture, setPicture] = useState('')
+  const [picture, setPicture] = useState<File | null>(null)
+
+  const invoiceNumber = invoice?.invoiceNumber ?? (invoice as Invoice & { invoice_number?: string } | null)?.invoice_number ?? invoice?.id ?? ''
   const [pictureError, setPictureError] = useState('')
 
+  const listedBalance = (invoice as Invoice & { balance_amount?: string | number; balanceAmount?: string | number } | null)?.balance_amount
+    ?? (invoice as Invoice & { balanceAmount?: string | number } | null)?.balanceAmount
   const totalAmount = Number(invoice?.total ?? 0)
   const currentPaid = Number(invoice?.amountPaid ?? 0)
-  const balanceBeforePayment = Math.max(0, totalAmount - currentPaid)
+  const balanceBeforePayment = Math.max(0, Number(listedBalance ?? totalAmount - currentPaid))
   const paidValue = Number(paidAmount || 0)
   const balanceAmount = Math.max(0, balanceBeforePayment - paidValue)
   const isOnline = paymentMethod !== 'cash'
+  const isCustomer = user?.roles.some((role) =>
+    [role.roleName, role.roleTypeName].some((value) => value?.trim().toLowerCase() === 'customer'),
+  ) ?? false
 
   useEffect(() => {
     if (!open || !invoice) return
     setStep('method')
-    setMethodGroup('cash')
-    setPaymentMethod('cash')
-    setPaymentStatus('pending')
-    setPaidAmount(String(balanceBeforePayment))
-    setPicture('')
+    setMethodGroup(isCustomer ? 'online' : 'cash')
+    setPaymentMethod(isCustomer ? 'online' : 'cash')
+    setPaidAmount('0')
+    setPicture(null)
     setPictureError('')
-  }, [open, invoice, balanceBeforePayment])
+  }, [open, invoice, balanceBeforePayment, isCustomer])
 
   const selectMethodGroup = (value: 'cash' | 'online') => {
+    if (isCustomer && value === 'cash') return
     setMethodGroup(value)
     setPaymentMethod(value === 'cash' ? 'cash' : 'online')
   }
@@ -77,14 +73,12 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
       return
     }
     try {
-      setPicture(await readFileAsDataUrl(file))
+      setPicture(file)
       setPictureError('')
-    } catch {
-      setPictureError('Unable to read the payment slip.')
-    }
+    } catch { setPictureError('Unable to attach the payment slip.') }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!invoice) return
     if (!paidValue || paidValue <= 0) {
       toast.error('Paid amount must be greater than 0.')
@@ -99,19 +93,37 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
       return
     }
 
-    const payment: Omit<Payment, 'id' | 'createdAt'> = {
-      invoiceId: invoice.id,
-      amount: paidValue,
-      totalAmount,
-      balanceAmount,
-      paidAmount: paidValue,
-      paymentMethod,
-      paymentStatus,
-      picture: picture || undefined,
+    const companyId = invoice.companyId ?? (invoice as Invoice & { company_id?: string | number }).company_id
+    if (!companyId || !user?.id) {
+      toast.error('Company and signed-in user are required to create a payment.')
+      return
     }
-    addPayment(payment)
-    toast.success('Invoice payment created successfully.')
-    onOpenChange(false)
+    const paymentDoneBy = isCustomer ? 'customer' : 'company'
+    const paymentStatus = isCustomer && isOnline ? 'pending' : 'verified'
+
+    try {
+      const formData = new FormData()
+      formData.set('company_id', String(companyId))
+      formData.set('invoice_id', String(invoice.id))
+      formData.set('total_amount', String(totalAmount))
+      formData.set('balance_amount', String(balanceAmount))
+      formData.set('paid_amount', String(paidValue))
+      formData.set('payment_method', paymentMethod)
+      formData.set('payment_status', paymentStatus)
+      formData.set('payment_done_by', paymentDoneBy)
+      formData.set('created_by', String(user.id))
+      if (picture) formData.set('picture', picture)
+
+      const response = await fetch('/backend-api/invoice-payments', { method: 'POST', body: formData })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || result.error || 'Unable to create invoice payment.')
+
+      await onPaymentCreated?.()
+      toast.success('Invoice payment created successfully.')
+      onOpenChange(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to create invoice payment.')
+    }
   }
 
   return (
@@ -132,7 +144,8 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
                   key={value}
                   type="button"
                   onClick={() => selectMethodGroup(value)}
-                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'}`}
+                  disabled={isCustomer && value === 'cash'}
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'} ${isCustomer && value === 'cash' ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   <Icon className="mt-0.5 size-5 text-primary" />
                   <span>
@@ -151,12 +164,12 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
           <>
             <DialogHeader>
               <DialogTitle>Create Invoice Payment</DialogTitle>
-              <DialogDescription>Record a payment for invoice {invoice?.invoiceNumber ?? invoice?.id}.</DialogDescription>
+              <DialogDescription>Record a payment for invoice {invoiceNumber}.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="payment-invoice-id">Invoice ID</Label>
-                <Input id="payment-invoice-id" value={invoice?.id ?? ''} readOnly />
+                <Label htmlFor="payment-invoice-id">Invoice number</Label>
+                <Input id="payment-invoice-id" value={invoiceNumber} disabled />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="payment-total">Total amount</Label>
@@ -172,27 +185,7 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
               </div>
               <div className="space-y-2">
                 <Label>Payment method <span className="text-destructive">*</span></Label>
-                <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="card">Card</SelectItem>
-                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Payment status <span className="text-destructive">*</span></Label>
-                <Select value={paymentStatus} onValueChange={(value) => setPaymentStatus(value as PaymentStatus)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="not_verified">Not Verified</SelectItem>
-                    <SelectItem value="verified">Verified</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input value={paymentMethod === 'cash' ? 'Cash' : 'Online'} disabled />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="payment-picture">
@@ -203,7 +196,7 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange }: InvoicePay
                     <ImagePlus className="size-4" /> Attach image
                   </label>
                   <input id="payment-picture" className="sr-only" type="file" accept="image/*" onChange={handlePictureChange} />
-                  <span className="truncate text-xs text-muted-foreground">{picture ? 'Slip attached' : 'JPEG, PNG, or WebP'}</span>
+                  <span className="truncate text-xs text-muted-foreground">{picture ? picture.name : 'JPEG, PNG, or WebP'}</span>
                 </div>
                 {pictureError && <p className="text-xs font-medium text-destructive">{pictureError}</p>}
               </div>

@@ -140,35 +140,69 @@ export async function me(): Promise<{
 }
 
 export async function updateProfile(
-  userId: string,
   data: Pick<AuthUser, "userName" | "email" | "phoneNumber" | "address" | "country" | "profilePhoto">,
 ): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
-  await new Promise((resolve) => setTimeout(resolve, 250))
+  const token = getAccessToken()
   const stored = localStorage.getItem("currentUser")
-  if (!stored) return { success: false, message: "Your session has expired." }
-  const user = JSON.parse(stored) as AuthUser
-  if (user.id !== userId) return { success: false, message: "Unable to update this profile." }
-  const updated = { ...user, ...data }
+  if (!token || !stored) return { success: false, message: "Your session has expired." }
+  const currentUser = JSON.parse(stored) as AuthUser
+
+  const response = await fetch('/backend-api/auth/profile', {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      name: data.userName,
+      email: data.email,
+      phone: data.phoneNumber,
+      address: data.address,
+      country: data.country,
+      profile_photo: data.profilePhoto,
+    }),
+  })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok || body.success === false) {
+    return { success: false, message: body.message || body.error || "Unable to update this profile." }
+  }
+
+  const record = body.data ?? body
+  const updated: AuthUser = {
+    ...currentUser,
+    userName: record.name ?? data.userName,
+    email: record.email ?? data.email,
+    phoneNumber: record.phone ?? data.phoneNumber,
+    address: record.address ?? data.address,
+    country: record.country ?? data.country,
+    profilePhoto: record.profile_photo ?? data.profilePhoto,
+  }
   localStorage.setItem("currentUser", JSON.stringify(updated))
   return { success: true, user: updated }
 }
 
 export async function changePassword(
-  userId: string,
-  currentPassword: string,
   newPassword: string,
 ): Promise<{ success: boolean; message?: string }> {
-  await new Promise((resolve) => setTimeout(resolve, 350))
-  const stored = localStorage.getItem("currentUser")
-  if (!stored) return { success: false, message: "Your session has expired." }
-  const user = JSON.parse(stored) as AuthUser
-  if (user.id !== userId) return { success: false, message: "Unable to update this password." }
+  const token = getAccessToken()
+  if (!token) return { success: false, message: "Your session has expired." }
 
-  const storedPassword = localStorage.getItem(`mockPassword:${userId}`) ?? (user.email === "admin@garageos.com" ? "password" : "password")
-  if (currentPassword !== storedPassword) return { success: false, message: "Current password is incorrect." }
-  localStorage.setItem(`mockPassword:${userId}`, newPassword)
-  localStorage.setItem("currentUser", JSON.stringify({ ...user, isPasswordChanged: true }))
-  return { success: true }
+  const response = await fetch('/backend-api/auth/password', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok || body.success === false) {
+    return { success: false, message: body.message || 'Unable to update this password.' }
+  }
+
+  const stored = localStorage.getItem('currentUser')
+  if (stored) {
+    const user = JSON.parse(stored) as AuthUser
+    localStorage.setItem('currentUser', JSON.stringify({ ...user, isPasswordChanged: true }))
+  }
+  return { success: true, message: body.message }
 }
 
 // ---------------------------------------------------------------------------

@@ -1,2 +1,31 @@
 import { EntityCrudPage } from '@/components/dashboard/entity-crud-page'
-export default function InvoicePaymentsPage() { return <EntityCrudPage config={{ resource: 'payments', title: 'Invoice Payments', description: 'Record payments and keep balances visible for every invoice.', fields: [{ key: 'invoiceId', label: 'Invoice ID', required: true }, { key: 'amount', label: 'Amount', type: 'number', required: true }, { key: 'paymentMethod', label: 'Payment method', type: 'select', options: ['cash', 'card', 'check', 'transfer'], required: true }, { key: 'reference', label: 'Reference' }], columns: ['invoiceId', 'amount', 'paymentMethod', 'reference'], empty: 'No payments recorded.' }} /> }
+
+export default function InvoicePaymentsPage() {
+  return (
+    <EntityCrudPage
+      config={{
+        resource: 'invoicePayments',
+        apiEndpoint: '/backend-api/invoice-payments',
+        companyScoped: true,
+        title: 'Invoice Payments',
+        description: 'Record payments and keep balances visible for every invoice.',
+        hideCreateButton: true,
+        hideStatusAction: true,
+        hideDeleteAction: true,
+        updateFields: ['payment_status'],
+        fileUrlPrefix: '/payment_proof_images/',
+        fields: [
+          {
+            key: 'payment_status',
+            label: 'Payment status',
+            type: 'select',
+            options: ['pending', 'not_verified', 'verified', 'rejected'],
+            required: true,
+          },
+        ],
+        columns: ['invoice_number', 'amount', 'payment_method', 'payment_status', 'date'],
+        empty: 'No payments recorded.',
+      }}
+    />
+  )
+}

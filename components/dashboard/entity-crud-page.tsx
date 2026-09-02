@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -35,7 +36,9 @@ import {
   Boxes,
   Bell,
   CalendarCheck,
+  Download,
   Image as ImageIcon,
+  KeyRound,
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -66,6 +69,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGarageStore } from "@/lib/store/garage-store";
+import { useBranch } from "@/lib/branch-context";
+import { useAuth } from "@/lib/auth-context";
+import { getDashboardRole, type DashboardRole } from "@/lib/role-access";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -91,12 +97,45 @@ type Field = {
   /** Override input type when editing (e.g. registration_no is number on Create, text on Update) */
   updateType?: FieldType;
   options?: { label: string; value: string }[];
+  /** Endpoint returning `{ success, data }` records for a select field. */
+  optionsEndpoint?: string;
   required?: boolean;
   readOnly?: boolean;
   multiple?: boolean;
+  fullWidth?: boolean;
 };
 type Config = {
   resource: string;
+  /** Relative API endpoint for resources that use the live backend. */
+  apiEndpoint?: string;
+  /** Loads and saves records for the active company only. */
+  companyScoped?: boolean;
+  /** Sends the logged-in user's ID as `created_by` for newly created records. */
+  assignCurrentUserId?: boolean;
+  /** Hides the header action for resources created through another workflow. */
+  hideCreateButton?: boolean;
+  /** Hides edit, view, and delete actions for read-only listings. */
+  hideRowActions?: boolean;
+  /** Hides only the Edit action while retaining the other row actions. */
+  hideEditAction?: boolean;
+  /** Hides the activate/deactivate action. */
+  hideStatusAction?: boolean;
+  /** Hides the delete action. */
+  hideDeleteAction?: boolean;
+  /** Makes row mutation actions unavailable for these roles. */
+  readOnlyForRoles?: DashboardRole[];
+  /** Enables a date range filter for a record date field. */
+  dateRangeField?: string;
+  /** Hides the generic active/inactive status filter. */
+  hideStatusFilter?: boolean;
+  /** Enables an Excel-compatible balance sheet export for ledger records. */
+  balanceSheetExport?: boolean;
+  /** Limits edit submissions to these fields. */
+  updateFields?: string[];
+  /** URL prefix for the record's `picture` file, shown in the edit dialog. */
+  fileUrlPrefix?: string;
+  /** Loads and saves records for the customer identified by `customer_id` in the URL. */
+  customerScoped?: boolean;
   title: string;
   description: string;
   icon?: React.ComponentType<{ className?: string }>;
@@ -172,20 +211,18 @@ const exactFields: Record<string, Field[]> = {
       type: "dynamic-list",
       required: true,
     },
+    statusField,
   ],
   admin: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", required: true },
   ],
   roles: [{ key: "name", label: "Name", required: true }],
   customers: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
-    // ⚠️ SPEC FLAG: Customers have a password field — this implies a customer-facing portal login.
-    // Confirm with team whether this is intentional for a garage internal admin tool.
-    { key: "password", label: "Password", type: "password", required: true, optionalOnUpdate: true },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
   ],
@@ -206,14 +243,7 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
     { key: "email", label: "Email", type: "email", required: true },
-    {
-      key: "password",
-      label: "Password",
-      type: "password",
-      required: true,
-      optionalOnUpdate: true,
-    },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", required: true },
     { key: "address", label: "Address", required: true },
   ],
   // Company Users module — users scoped to a specific company (includes role)
@@ -233,22 +263,14 @@ const exactFields: Record<string, Field[]> = {
       ]),
     },
     { key: "email", label: "Email", type: "email", required: true },
-    {
-      key: "password",
-      label: "Password",
-      type: "password",
-      required: true,
-      optionalOnUpdate: true,
-    },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
     {
-      key: "role",
+      key: "role_id",
       label: "Role",
       type: "select",
       required: true,
-      // Spec: fixed list (Mechanic / Finance). Flag if dynamic Role module is needed.
-      options: options(["Mechanic", "Finance"]),
+      optionsEndpoint: "/backend-api/roles",
     },
   ],
   // ⚠️ SPEC FLAG: Company spec has no 'name' field — only 'user' (owner dropdown).
@@ -258,11 +280,11 @@ const exactFields: Record<string, Field[]> = {
   companies: [
     { key: "name", label: "Company Name", required: true },
     {
-      key: "user",
-      label: "Owner / User",
+      key: "owner_id",
+      label: "Owner",
       type: "select",
       required: true,
-      options: options(["Garage Admin", "Manager User", "Branch Owner"]),
+      optionsEndpoint: "/backend-api/users",
     },
     { key: "logo", label: "Logo", type: "file" },
     { key: "email", label: "Email", type: "email", required: true },
@@ -330,9 +352,8 @@ const exactFields: Record<string, Field[]> = {
       type: "datetime-local",
       required: true,
     },
-    { key: "note", label: "Note", type: "textarea" },
     {
-      key: "appointments",
+      key: "status",
       label: "Appointment status",
       type: "select",
       required: true,
@@ -344,22 +365,23 @@ const exactFields: Record<string, Field[]> = {
         "no_show",
       ]),
     },
+    { key: "note", label: "Note", type: "textarea", fullWidth: true },
   ],
   // Package Subscriptions: links Company + Package with date range
   packageSubscriptions: [
     {
-      key: "company",
+      key: "company_id",
       label: "Company",
       type: "select",
       required: true,
-      options: options(["GarageOS Demo", "AutoFix Co", "FastLane Motors", "ProGarage Ltd"]),
+      optionsEndpoint: "/backend-api/companies",
     },
     {
-      key: "package",
+      key: "package_id",
       label: "Package",
       type: "select",
       required: true,
-      options: options(["Basic", "Pro", "Enterprise"]),
+      optionsEndpoint: "/backend-api/packages",
     },
     { key: "start_date", label: "Start Date", type: "datetime-local", required: true },
     { key: "end_date", label: "End Date", type: "datetime-local", required: true },
@@ -442,39 +464,6 @@ const exactFields: Record<string, Field[]> = {
   ],
   invoicePayments: [
     {
-      key: "invoice_id",
-      label: "Invoice ID",
-      type: "number",
-      required: true,
-      readOnly: true,
-    },
-    {
-      key: "total_amount",
-      label: "Total amount",
-      type: "number",
-      required: true,
-    },
-    {
-      key: "balance_amount",
-      label: "Balance amount",
-      type: "number",
-      required: true,
-    },
-    {
-      key: "paid_amount",
-      label: "Paid amount",
-      type: "number",
-      required: true,
-    },
-    { key: "picture", label: "Picture", type: "file" },
-    {
-      key: "payment_method",
-      label: "Payment method",
-      type: "select",
-      required: true,
-      options: options(["cash", "card", "bank_transfer", "online"]),
-    },
-    {
       key: "payment_status",
       label: "Payment status",
       type: "select",
@@ -510,6 +499,13 @@ const exactFields: Record<string, Field[]> = {
     },
   ],
   smsSettings: [
+    {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
     { key: "sms_account_sid", label: "SMS Account SID", required: true },
     {
       key: "sms_auth_token",
@@ -521,6 +517,13 @@ const exactFields: Record<string, Field[]> = {
     statusField,
   ],
   whatsappSettings: [
+    {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
     {
       key: "whatsapp_account_sid",
       label: "WhatsApp Account SID",
@@ -541,9 +544,22 @@ const exactFields: Record<string, Field[]> = {
   ],
   emailSettings: [
     {
+      key: "company_id",
+      label: "Company",
+      type: "select",
+      required: true,
+      optionsEndpoint: "/backend-api/companies",
+    },
+    {
       key: "sendgrid_api_key",
       label: "SendGrid API Key",
       type: "password",
+      required: true,
+    },
+    {
+      key: "email",
+      label: "Sender Email",
+      type: "email",
       required: true,
     },
     statusField,
@@ -786,6 +802,29 @@ function FormFieldRenderer({
   isEditing?: boolean;
 }) {
   const [showPw, setShowPw] = useState(false);
+  const [endpointOptions, setEndpointOptions] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    if (!field.optionsEndpoint) return;
+
+    const loadOptions = async () => {
+      try {
+        const response = await fetch(field.optionsEndpoint!);
+        const body = await response.json();
+        if (!response.ok || body.success === false || !Array.isArray(body.data)) return;
+        setEndpointOptions(
+          body.data.map((record: { id: string | number; name?: string; email?: string }) => ({
+            value: String(record.id),
+            label: record.name ?? record.email ?? `User ${record.id}`,
+          })),
+        );
+      } catch {
+        setEndpointOptions([]);
+      }
+    };
+
+    void loadOptions();
+  }, [field.optionsEndpoint]);
 
   if (field.type === "dynamic-list") {
     return <DynamicListField field={field} form={form} />;
@@ -794,9 +833,13 @@ function FormFieldRenderer({
   // Resolve the actual input type (updateType overrides type when editing)
   const resolvedType = isEditing && field.updateType ? field.updateType : (field.type ?? "text");
   const isOptional = isEditing && field.optionalOnUpdate;
+  const selectOptions = field.optionsEndpoint ? endpointOptions : field.options ?? [];
+  const selectedOption = selectOptions.find(
+    (option) => option.value === String(form.watch(field.key) ?? ""),
+  );
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col gap-1.5${field.fullWidth ? " md:col-span-2" : ""}`}>
       <Label
         htmlFor={`${resourceKey}-${field.key}`}
         className="text-sm font-semibold text-foreground"
@@ -807,17 +850,19 @@ function FormFieldRenderer({
       </Label>
       {resolvedType === "select" ? (
         <Select
-          value={form.watch(field.key) ?? ""}
+          value={String(form.watch(field.key) ?? "")}
           onValueChange={(value) =>
             form.setValue(field.key, value, { shouldValidate: true })
           }
         >
-          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10">
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10 w-full">
+            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`}>
+              {selectedOption?.label}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {field.options?.map((option: any, idx: number) => {
+              {selectOptions.map((option: any, idx: number) => {
                 const val = typeof option === "string" ? option : (option.value ?? String(option));
                 const lbl = typeof option === "string" ? option.replaceAll("_", " ") : (option.label ?? val);
                 return (
@@ -855,13 +900,15 @@ function FormFieldRenderer({
               accept="image/*"
               multiple={field.multiple}
               onChange={(e) =>
-                form.setValue(field.key, e.target.files?.[0]?.name ?? "")
+                form.setValue(field.key, e.target.files?.[0] ?? "")
               }
             />
           </label>
           <div className="flex flex-col gap-0.5">
             {form.watch(field.key) ? (
-              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{form.watch(field.key)}</span>
+              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">
+                {form.watch(field.key) instanceof File ? form.watch(field.key).name : form.watch(field.key)}
+              </span>
             ) : (
               <span className="text-sm text-slate-500 font-medium">JPEG, PNG, or WebP. Max 5MB.</span>
             )}
@@ -940,6 +987,17 @@ function FormFieldRenderer({
 export function EntityCrudPage({ config }: { config: Config }) {
   const router = useRouter();
   const store = useGarageStore();
+  const { selectedCompany } = useBranch();
+  const { user } = useAuth();
+  const dashboardRole = getDashboardRole(user);
+  const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
+
+  useEffect(() => {
+    const customerId = new URLSearchParams(window.location.search).get("customer_id");
+    setSelectedCustomer(customerId ?? undefined);
+  }, []);
+  const apiEnabled = Boolean(config.apiEndpoint);
+  const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
   const schemaKey =
     config.title === "Admin"
       ? "admin"
@@ -953,11 +1011,13 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ? "taskCards"
               : config.resource;
   const fields = exactFields[schemaKey] ?? config.fields;
-  const isExcluded = ["taskCards", "estimations", "invoices"].includes(config.resource);
+  const isExcluded = ["taskCards", "estimations", "invoices", "invoicePayments"].includes(config.resource);
   const singular = singularize(config.resource);
-  const rows = ((store as any)[config.resource] ??
-    (store as any).crudRecords?.[config.resource] ??
-    []) as Record<string, any>[];
+  const rows = (apiEnabled
+    ? apiRows
+    : (store as any)[config.resource] ??
+      (store as any).crudRecords?.[config.resource] ??
+      []) as Record<string, any>[];
 
   const typedAdd = (store as any)[
     `add${singular.charAt(0).toUpperCase()}${singular.slice(1)}`
@@ -971,9 +1031,112 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const remove = (id: string) =>
     (store as any).deleteCrudRecord(config.resource, id);
 
+  const requestApi = useCallback(async (path = "", init?: RequestInit) => {
+    const isFormData = init?.body instanceof FormData;
+    const response = await fetch(`${config.apiEndpoint}${path}`, {
+      ...init,
+      headers: isFormData
+        ? init?.headers
+        : { "Content-Type": "application/json", ...init?.headers },
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body.success === false) {
+      throw new Error(body.message || body.error || "Unable to complete the request.");
+    }
+    return body.data ?? body;
+  }, [config.apiEndpoint]);
+
+  const loadApiRows = useCallback(async () => {
+    if (!apiEnabled) return;
+    if (config.companyScoped && !selectedCompany) {
+      setApiRows([]);
+      return;
+    }
+    if (config.customerScoped && !selectedCustomer) {
+      setApiRows([]);
+      return;
+    }
+    try {
+      const queryParams = new URLSearchParams();
+      if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
+      if (config.customerScoped) queryParams.set("customer_id", selectedCustomer!);
+      const query = queryParams.size ? `?${queryParams.toString()}` : "";
+      const data = await requestApi(query);
+      const records = Array.isArray(data) ? data : [];
+      setApiRows(
+        ["smsSettings", "whatsappSettings", "emailSettings"].includes(config.resource)
+          ? records.map((record) => ({
+              ...record,
+              company_name: record.company?.name ?? `Company #${record.company_id}`,
+            }))
+          : config.resource === "companies"
+          ? records.map((record) => ({
+              ...record,
+              owner_name: record.owner?.name ?? `User #${record.owner_id}`,
+            }))
+          : config.resource === "companyUsers"
+          ? records.map((record) => ({
+              ...record,
+              ...record.user,
+              company_user_id: record.id,
+              company_id: record.company_id,
+              role_id: String(record.role_id ?? record.role?.id ?? ""),
+              role: record.role?.name ?? record.role_id,
+            }))
+          : config.resource === "packages"
+          ? records.map((record) => ({
+              ...record,
+              information:
+                record.information ??
+                record.packageInfos?.map((item: { information?: string }) => item.information) ??
+                [],
+            }))
+          : config.resource === "invoicePayments"
+          ? records.map((record) => ({
+              ...record,
+              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+              amount: record.paid_amount,
+              date: record.createdAt ? new Date(record.createdAt).toLocaleDateString() : "—",
+            }))
+          : config.resource === "sales"
+          ? records.map((record) => ({
+              ...record,
+              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+            }))
+          : config.resource === "companyExpenses"
+          ? records.map((record) => ({
+              ...record,
+              created_by_name: record.creator?.name ?? `User #${record.created_by}`,
+            }))
+          : config.resource === "communicationLogs"
+          ? records.map((record) => ({
+              ...record,
+              user_name: record.user?.name ?? `User #${record.user_id}`,
+            }))
+          : config.resource === "notifications"
+          ? records.map((record) => ({
+              ...record,
+              user_name: record.user?.name ?? `User #${record.user_id}`,
+              read: String(record.read) === "1" || record.read === true ? "Read" : "Unread",
+            }))
+          : config.resource === "reviews"
+          ? records.map((record) => ({
+              ...record,
+              task_card_number: record.taskCard?.task_cards_number ?? `Task Card #${record.task_card_id}`,
+            }))
+          : records,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to load records.");
+    }
+  }, [apiEnabled, config.companyScoped, config.customerScoped, config.resource, requestApi, selectedCompany, selectedCustomer]);
+
   /* ── State ── */
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
+  const editingFileUrl = editing?.picture && config.fileUrlPrefix
+    ? `${config.fileUrlPrefix}${encodeURIComponent(String(editing.picture))}`
+    : undefined;
   const formFields =
     !fields.some((field) => field.key === "status") &&
     ![
@@ -982,12 +1145,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
       "smsSettings",
       "whatsappSettings",
       "emailSettings",
+      "companyExpenses",
     ].includes(schemaKey)
       ? [...fields, statusField]
       : fields;
   const [viewing, setViewing] = useState<Record<string, any> | null>(null);
+  const [resettingEmployee, setResettingEmployee] = useState<Record<string, any> | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
@@ -996,6 +1164,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
     ["estimations", "jobCards", "taskCards", "invoices"].includes(
       config.resource,
     ) || schemaKey === "taskCards" || schemaKey === "estimations";
+
+  useEffect(() => {
+    void loadApiRows();
+  }, [loadApiRows]);
 
   /* ── Form schema ── */
   const formSchema = useMemo(
@@ -1086,7 +1258,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   /* ── Seed data ── */
   useEffect(() => {
-    if (!rows.length && !seededResources.current.has(config.resource)) {
+    if (!apiEnabled && !rows.length && !seededResources.current.has(config.resource)) {
       seededResources.current.add(config.resource);
       for (let index = 1; index <= 2; index += 1) {
         const seedRecord = Object.fromEntries(
@@ -1117,7 +1289,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
         add(seedRecord);
       }
     }
-  }, [add, config.resource, fields, rows.length]);
+  }, [add, apiEnabled, config.resource, fields, rows.length]);
 
   /* ── Filtered / sorted data ── */
   const filtered = useMemo(
@@ -1126,21 +1298,41 @@ export function EntityCrudPage({ config }: { config: Config }) {
         .filter(
           (row) =>
             JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
-            (status === "all" || String(row.status ?? "1") === status),
+            (status === "all" || String(row.status ?? "1") === status) &&
+            (!config.dateRangeField || !dateFrom || new Date(row[config.dateRangeField]).getTime() >= new Date(`${dateFrom}T00:00:00`).getTime()) &&
+            (!config.dateRangeField || !dateTo || new Date(row[config.dateRangeField]).getTime() <= new Date(`${dateTo}T23:59:59.999`).getTime()),
         )
         .sort(
           (a, b) =>
             String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? "")) *
             (sortAsc ? 1 : -1),
         ),
-    [rows, query, status, sortKey, sortAsc],
+    [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField],
   );
+
+  const exportBalanceSheet = () => {
+    const xmlEntities: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" };
+    const escapeXml = (value: unknown) => String(value ?? "").replace(/[<>&'\"]/g, (character) => xmlEntities[character]);
+    const totalCredits = filtered.reduce((total, row) => total + (String(row.transaction_type).toLowerCase() === "credit" ? Number(row.amount) || 0 : 0), 0);
+    const totalDebits = filtered.reduce((total, row) => total + (String(row.transaction_type).toLowerCase() === "debit" ? Number(row.amount) || 0 : 0), 0);
+    const netBalance = totalCredits - totalDebits;
+    const dateRange = [dateFrom || "All dates", dateTo || "All dates"].join(" to ");
+    const cells = (values: unknown[]) => `<Row>${values.map((value) => `<Cell><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`).join("")}</Row>`;
+    const workbook = `<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Balance Sheet"><Table>${cells(["Balance Sheet"])}${cells(["Date range", dateRange])}${cells(["Total Credit", totalCredits.toFixed(2)])}${cells(["Total Debit", totalDebits.toFixed(2)])}${cells(["Net Balance", netBalance.toFixed(2)])}${cells([])}${cells(["Created At", "Transaction Type", "Reason", "Amount", "Balance", "Created By"])}${filtered.map((row) => cells([row.createdAt ? new Date(row.createdAt).toLocaleString() : "", row.transaction_type, row.reason, Number(row.amount ?? 0).toFixed(2), Number(row.balance ?? 0).toFixed(2), row.created_by_name])).join("")}</Table></Worksheet></Workbook>`;
+    const blob = new Blob([workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `balance-sheet-${dateFrom || "all"}-${dateTo || "dates"}.xls`;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+  };
 
   /* ── Handlers ── */
   const openCreate = () => {
     setEditing(null);
     form.reset({
-      status: "1",
+      status: schemaKey === "appointments" ? "pending" : "1",
       information: [{ value: "" }], // Pre-populate one row for repeatable package field
     });
     setLineItems([]);
@@ -1156,24 +1348,105 @@ export function EntityCrudPage({ config }: { config: Config }) {
     }
     form.reset({
       ...row,
+      ...(schemaKey === "companies" && { owner_id: String(row.owner_id ?? "") }),
+      ...(schemaKey === "vehicles" && {
+        insured:
+          String(row.insured) === "1" || row.insured === true || row.insured === "Yes"
+            ? "1"
+            : "0",
+      }),
+      status: String(row.status ?? "1"),
       information: formattedInfo || [{ value: "" }],
+      ...(schemaKey === "packageSubscriptions" && {
+        start_date: row.start_date ? String(row.start_date).slice(0, 16) : "",
+        end_date: row.end_date ? String(row.end_date).slice(0, 16) : "",
+      }),
     });
     setLineItems(row.lineItems ?? []);
     setOpen(true);
   };
 
-  const submit = (data: Record<string, any>) => {
+  const resetEmployeePassword = async () => {
+    if (!resettingEmployee) return;
+    setIsResettingPassword(true);
+    try {
+      const targetId = config.resource === "companyUsers"
+        ? (resettingEmployee.company_user_id || resettingEmployee.id)
+        : resettingEmployee.id;
+      if (apiEnabled) {
+        await requestApi(`/${targetId}/reset-password`, { method: "POST" });
+      }
+      toast.success(`Password reset successfully.`);
+      setResettingEmployee(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to reset password.");
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const submit = async (data: Record<string, any>) => {
     // Flatten information array of objects into simple array of strings before saving to store
     let payload = { ...data };
+    if (editing && config.updateFields) {
+      payload = Object.fromEntries(
+        config.updateFields.map((field) => [field, data[field]]),
+      );
+    }
     if (data.information && Array.isArray(data.information)) {
       payload.information = data.information.map((item: any) => item.value);
     }
     payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
-    editing ? update(editing.id, payload) : add(payload);
-    toast.success(
-      `${singularize(config.title)} ${editing ? "updated" : "created"} successfully`,
-    );
-    setOpen(false);
+    try {
+      if (config.companyScoped) {
+        if (!selectedCompany) {
+          throw new Error("Select a company before managing company employees.");
+        }
+        payload.company_id = selectedCompany;
+      }
+      if (config.customerScoped) {
+        if (!selectedCustomer) {
+          throw new Error("Open Vehicles from a customer before managing vehicles.");
+        }
+        payload.customer_id = selectedCustomer;
+      }
+      if (config.assignCurrentUserId && !editing) {
+        if (!user) {
+          throw new Error("You must be logged in to create this record.");
+        }
+        payload.created_by = user.id;
+      }
+      if (apiEnabled) {
+        const { id, createdAt, updatedAt, is_deleted, packageInfos, ...apiPayload } = payload;
+        if (!apiPayload.password) delete apiPayload.password;
+        const fileFields = fields.filter((field) => field.type === "file");
+        const hasFile = fileFields.some((field) => apiPayload[field.key] instanceof File);
+        const body = hasFile
+          ? (() => {
+              const formData = new FormData();
+              Object.entries(apiPayload).forEach(([key, value]) => {
+                if (value instanceof File) {
+                  formData.append(key, value);
+                } else if (!fileFields.some((field) => field.key === key)) {
+                  formData.append(key, String(value ?? ""));
+                }
+              });
+              return formData;
+            })()
+          : JSON.stringify(apiPayload);
+        await requestApi(editing ? `/${editing.id}` : "", {
+          method: editing ? "PUT" : "POST",
+          body,
+        });
+        await loadApiRows();
+      } else {
+        editing ? update(editing.id, payload) : add(payload);
+      }
+      toast.success(`${singularize(config.title)} ${editing ? "updated" : "created"} successfully`);
+      setOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save record.");
+    }
   };
 
   /* ── Get first two visible text fields for identity display ── */
@@ -1187,7 +1460,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const getBadgeColor = (column: string, value: string) => {
     const v = String(value).toLowerCase();
-    if (column === "status" || column === "active") {
+    if (column === "status" || column === "active" || column === "insured") {
       return v === "1" || v === "active" || v === "true" || v === "yes"
         ? "bg-green-100 text-green-800 border-green-200"
         : "bg-red-100 text-red-800 border-red-200";
@@ -1204,6 +1477,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   };
 
   const IconComponent = config.icon || iconMap[config.title] || ShieldCheck;
+  const isRoleReadOnly = config.readOnlyForRoles?.includes(dashboardRole) ?? false;
 
   /* ══════════════════════════════════════════════════════════════ */
   /*                           RENDER                              */
@@ -1229,13 +1503,23 @@ export function EntityCrudPage({ config }: { config: Config }) {
               </p>
             </div>
           </div>
-          <Button
-            onClick={openCreate}
-            className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
-          >
-            <Plus className="size-4" />
-            Add {singularize(config.title)}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {!config.hideCreateButton && (
+              <Button
+                onClick={openCreate}
+                className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
+              >
+                <Plus className="size-4" />
+                Add {singularize(config.title)}
+              </Button>
+            )}
+            {config.balanceSheetExport && (
+              <Button onClick={exportBalanceSheet} variant="outline" className="gap-2 rounded-lg px-5 h-10 shrink-0" disabled={filtered.length === 0}>
+                <Download className="size-4" />
+                Export Balance Sheet
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* ═══ FILTER BAR ═══ */}
@@ -1251,17 +1535,36 @@ export function EntityCrudPage({ config }: { config: Config }) {
             />
           </div>
           {/* Status filter */}
-          <div className="flex items-center gap-2">
+          {!config.hideStatusFilter && <div className="flex items-center gap-2">
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none cursor-pointer"
             >
               <option value="all">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              {schemaKey === "appointments" ? (
+                <>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="no_show">No Show</option>
+                </>
+              ) : (
+                <>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </>
+              )}
             </select>
-          </div>
+          </div>}
+          {config.dateRangeField && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} type="date" aria-label="Created from" className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none" />
+              <span className="text-sm text-muted-foreground">to</span>
+              <input value={dateTo} onChange={(event) => setDateTo(event.target.value)} type="date" aria-label="Created to" className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none" />
+            </div>
+          )}
           {/* View mode toggle (visual only for now) */}
           <div className="flex items-center gap-0.5 ml-auto border border-border rounded-lg p-0.5 bg-muted/40">
             <button type="button" className="p-1.5 rounded bg-background text-primary shadow-sm" aria-label="List view">
@@ -1300,16 +1603,18 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       </button>
                     </th>
                   ))}
-                  <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Actions
-                  </th>
+                  {!config.hideRowActions && (
+                    <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-white">
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={config.columns.length + 2}
+                      colSpan={config.columns.length + (config.hideRowActions ? 1 : 2)}
                       className="px-5 py-12 text-center text-sm text-muted-foreground"
                     >
                       {config.empty}
@@ -1327,8 +1632,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             <span
                               className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase border ${getBadgeColor(column, row[column])}`}
                             >
-                              {column === "status" || column === "active"
-                                ? row[column] === "0" || row[column] === false
+                              {column === "insured"
+                                ? row[column] === 1 || row[column] === "1" || row[column] === true
+                                  ? "Yes"
+                                  : "No"
+                                : column === "active" || (column === "status" && schemaKey !== "appointments")
+                                ? String(row[column]) === "0" || row[column] === false
                                   ? "Inactive"
                                   : "Active"
                                 : labelize(String(row[column] ?? "—"))}
@@ -1371,7 +1680,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                         </td>
                       ))}
                       {/* Actions column */}
-                      <td className="px-5 py-4 text-right">
+                      {!config.hideRowActions && <td className="px-5 py-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
@@ -1387,16 +1696,27 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Eye className="size-4" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openEdit(row)}
-                              className="gap-2 cursor-pointer text-xs"
-                            >
-                              <Pencil className="size-4" />
-                              Edit
-                            </DropdownMenuItem>
+                            {!config.hideEditAction && !isRoleReadOnly && (
+                              <DropdownMenuItem
+                                onClick={() => openEdit(row)}
+                                className="gap-2 cursor-pointer text-xs"
+                              >
+                                <Pencil className="size-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            {config.resource === "customers" && (
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.id))}`)}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <Truck className="size-4 text-blue-600" />
+                                Vehicles
+                              </DropdownMenuItem>
+                            )}
                             {(config.resource === "vehicles" || schemaKey === "vehicles") && (
                               <DropdownMenuItem
-                                onClick={() => router.push("/quotations")}
+                                onClick={() => router.push(`/quotations?vehicle_id=${encodeURIComponent(String(row.id))}`)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
                               >
                                 <ClipboardList className="size-4 text-blue-600" />
@@ -1421,36 +1741,62 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Invoice
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => {
-                                const updated = { ...row, status: row.status === "0" ? "1" : "0" };
-                                update(row.id, updated);
-                                toast.success(
-                                  `${singularize(config.title)} ${updated.status === "1" ? "activated" : "deactivated"} successfully`,
-                                );
+                            {(config.resource === "companyUsers" || config.resource === "customers" || schemaKey === "customers" || config.title === "Customers") && (
+                              <DropdownMenuItem
+                                onClick={() => setResettingEmployee(row)}
+                                className="gap-2 cursor-pointer text-xs"
+                              >
+                                <KeyRound className="size-4" />
+                                Reset Password
+                              </DropdownMenuItem>
+                            )}
+                            {!config.hideStatusAction && !isRoleReadOnly && <DropdownMenuItem
+                              onClick={async () => {
+                                const updated = { ...row, status: String(row.status) === "0" ? "1" : "0" };
+                                try {
+                                  if (apiEnabled) {
+                                    await requestApi(`/${row.id}`, {
+                                      method: "PUT",
+                                      body: JSON.stringify({ status: updated.status }),
+                                    });
+                                    await loadApiRows();
+                                  } else {
+                                    update(row.id, updated);
+                                  }
+                                  toast.success(`${singularize(config.title)} ${updated.status === "1" ? "activated" : "deactivated"} successfully`);
+                                } catch (error) {
+                                  toast.error(error instanceof Error ? error.message : "Unable to update record.");
+                                }
                               }}
                               className="gap-2 cursor-pointer text-amber-600 focus:text-amber-600 text-xs"
                             >
                               <CircleX className="size-4" />
                               Deactivate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
+                            </DropdownMenuItem>}
+                            {!config.hideDeleteAction && !isRoleReadOnly && <DropdownMenuItem
+                              onClick={async () => {
                                 if (confirm("Are you sure you want to delete this record?")) {
-                                  remove(row.id);
-                                  toast.success(
-                                    `${singularize(config.title)} deleted successfully`,
-                                  );
+                                  try {
+                                    if (apiEnabled) {
+                                      await requestApi(`/${row.id}`, { method: "DELETE" });
+                                      await loadApiRows();
+                                    } else {
+                                      remove(row.id);
+                                    }
+                                    toast.success(`${singularize(config.title)} deleted successfully`);
+                                  } catch (error) {
+                                    toast.error(error instanceof Error ? error.message : "Unable to delete record.");
+                                  }
                                 }
                               }}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >
                               <Trash2 className="size-4" />
                               Delete
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </td>
+                      </td>}
                     </tr>
                   ))
                 )}
@@ -1464,7 +1810,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       {/*                   ADD / EDIT MODAL                         */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={isExcluded ? "flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
+        <DialogContent className={config.resource === "invoicePayments" ? "flex max-h-[90vh] sm:max-w-lg flex-col gap-0 overflow-hidden p-0 bg-background border-border" : isExcluded ? "flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
           <DialogHeader className={isExcluded ? "shrink-0 border-b border-border px-6 py-5 pr-14" : "shrink-0 px-6 pt-6 pb-4 space-y-1 pr-14"}>
             <DialogTitle className={isExcluded ? "text-lg font-bold text-foreground" : "text-xl font-bold text-slate-900"}>
               {editing
@@ -1482,21 +1828,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className={isExcluded ? "min-h-0 flex-1 overflow-y-auto px-6 py-5" : "min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-2"}>
-              {/* Edit mode: identity block */}
-              {editing && identityFields.length > 0 && (
-                <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
-                  <p className="font-semibold text-foreground">
-                    {formatValue(editing[identityFields[0].key])}
-                  </p>
-                  {identityFields[1] && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatValue(editing[identityFields[1].key])}
-                    </p>
-                  )}
-                </div>
-              )}
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className={config.resource === "invoicePayments" ? "grid gap-4" : "grid gap-4 md:grid-cols-2"}>
                 {formFields
+                  .filter(
+                    (field) =>
+                      !(["admin", "customers", "employees", "packages", "roles", "companies", "companyUsers", "vehicles", "smsSettings", "whatsappSettings", "emailSettings"].includes(schemaKey) && field.key === "status"),
+                  )
                   .filter(
                     (field) =>
                       !(
@@ -1547,6 +1884,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       isEditing={Boolean(editing)}
                     />
                   ))}
+                {editing && editingFileUrl && (
+                  <div className="space-y-2">
+                    <Label>Payment proof</Label>
+                    <Button type="button" variant="outline" className="w-fit" onClick={() => window.open(editingFileUrl, "_blank", "noopener,noreferrer")}>
+                      <Eye className="size-4" />
+                      View file
+                    </Button>
+                  </div>
+                )}
                 {isLineItemModule && (
                   <LineItems
                     resource={config.resource}
@@ -1556,7 +1902,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 )}
               </div>
               {/* Active Toggle (Mockup Style) */}
-              {!isExcluded && (
+              {!isExcluded && schemaKey !== "appointments" && (
                 <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Active</p>
@@ -1679,6 +2025,48 @@ export function EntityCrudPage({ config }: { config: Config }) {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/*                RESET PASSWORD MODAL                         */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <Dialog
+        open={Boolean(resettingEmployee)}
+        onOpenChange={(value) => !value && setResettingEmployee(null)}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reset password?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-sm text-slate-600">
+              New password will be{" "}
+              <code className="rounded bg-slate-100 px-2 py-1 font-mono text-sm font-semibold text-slate-900 border border-slate-200">
+                {config.resource === "customers" || schemaKey === "customers" || config.title === "Customers" ? "garageCustomer@123" : "garage@123"}
+              </code>
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setResettingEmployee(null)}
+              disabled={isResettingPassword}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={resetEmployeePassword}
+              disabled={isResettingPassword}
+            >
+              {isResettingPassword ? "Resetting..." : "Reset"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

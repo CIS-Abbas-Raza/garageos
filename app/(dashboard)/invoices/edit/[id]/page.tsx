@@ -1,11 +1,12 @@
 import { InvoiceFormPage } from '@/components/invoices/invoice-form-page'
 
 type EditInvoicePageProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function EditInvoicePage({ params }: EditInvoicePageProps) {
-  return <InvoiceFormPage mode="edit" invoiceId={params.id} />
+export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
+  const { id } = await params
+  return <InvoiceFormPage mode="edit" invoiceId={id} />
 }
