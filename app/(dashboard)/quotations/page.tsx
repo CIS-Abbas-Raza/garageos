@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -29,6 +29,7 @@ export default function QuotationsPage() {
   const canManageQuotations = getDashboardRole(user, isSuperAdmin) !== 'customer'
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [vehicleId, setVehicleId] = useState<string | undefined>()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
@@ -36,13 +37,19 @@ export default function QuotationsPage() {
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
 
   useEffect(() => {
-    setVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
-  }, [])
+    setVehicleId(searchParams.get('vehicle_id') ?? undefined)
+  }, [searchParams])
 
   useEffect(() => {
     const loadQuotations = async () => {
       try {
-        const query = vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''
+        // Only call the backend listing when a vehicle_id is present in the URL
+        if (!vehicleId) {
+          setRows([])
+          return
+        }
+
+        const query = `?vehicle_id=${encodeURIComponent(vehicleId)}`
         const response = await fetch(`/backend-api/quotations${query}`)
         const result = await response.json()
         if (!response.ok || result.success === false) {

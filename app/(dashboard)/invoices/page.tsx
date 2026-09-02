@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
@@ -37,12 +37,19 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState('all')
 
   const [taskId, setTaskId] = useState<string | undefined>()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
-  }, [])
+    setTaskId(searchParams.get('task_id') ?? undefined)
+  }, [searchParams])
 
   const loadInvoices = useCallback(async () => {
+    // Only fetch invoices when a `task_id` is provided in the URL
+    if (!taskId) {
+      setInvoices([])
+      return
+    }
+
     if (!selectedCompany) {
       setInvoices([])
       return
@@ -50,7 +57,7 @@ export default function InvoicesPage() {
 
     try {
       const queryParams = new URLSearchParams({ company_id: String(selectedCompany) })
-      if (taskId) queryParams.set('task_id', taskId)
+      queryParams.set('task_id', taskId)
       const query = `?${queryParams.toString()}`
       const response = await fetch(`/backend-api/invoices${query}`)
       const result = await response.json()

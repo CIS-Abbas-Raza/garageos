@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Image, Search, Star } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -28,18 +28,25 @@ export default function TaskCardsListingPage() {
   const canManageTaskCards = getDashboardRole(user, isSuperAdmin) !== 'customer'
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [quotationId, setQuotationId] = useState<string | undefined>()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [reviewTarget, setReviewTarget] = useState<Record<string, any> | null>(null)
 
   useEffect(() => {
-    setQuotationId(new URLSearchParams(window.location.search).get('quotation_id') ?? undefined)
-  }, [])
+    setQuotationId(searchParams.get('quotation_id') ?? undefined)
+  }, [searchParams])
 
   useEffect(() => {
     const loadTaskCards = async () => {
       try {
-        const query = quotationId ? `?quotation_id=${encodeURIComponent(quotationId)}` : ''
+        // Only call backend listing when a quotation_id is present in the URL
+        if (!quotationId) {
+          setRows([])
+          return
+        }
+
+        const query = `?quotation_id=${encodeURIComponent(quotationId)}`
         const response = await fetch(`/backend-api/task-cards${query}`)
         const result = await response.json()
         if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load task cards.')
