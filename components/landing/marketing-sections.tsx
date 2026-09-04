@@ -98,11 +98,11 @@ export function MarketingHeader() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
-            <Link href="/login">Login</Link>
+          <Button render={<Link href="/login" />} variant="ghost" size="sm" className="rounded-full px-4">
+            Login
           </Button>
-          <Button asChild size="sm" className="rounded-full px-5 shadow-sm">
-            <Link href="/register">Get Started</Link>
+          <Button render={<Link href="/register" />} size="sm" className="rounded-full px-5 shadow-sm">
+            Get Started
           </Button>
         </div>
         <button type="button" onClick={() => setOpen(!open)} className="rounded-lg p-2 text-foreground md:hidden" aria-label="Toggle navigation">
@@ -116,11 +116,11 @@ export function MarketingHeader() {
               {label}
             </a>
           ))}
-          <Button asChild variant="ghost" className="mt-2 w-full justify-start rounded-lg px-3 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
-            <Link href="/login">Login</Link>
+          <Button render={<Link href="/login" />} variant="ghost" className="mt-2 w-full justify-start rounded-lg px-3 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
+            Login
           </Button>
-          <Button asChild className="mt-2 w-full rounded-full px-5 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
-            <Link href="/register">Get Started</Link>
+          <Button render={<Link href="/register" />} className="mt-2 w-full rounded-full px-5 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
+            Get Started
           </Button>
         </nav>
       )}

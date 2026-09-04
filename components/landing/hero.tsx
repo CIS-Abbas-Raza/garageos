@@ -152,14 +152,12 @@ export function LandingHero() {
 
           <div className="hero-fade hero-fade-4 mt-8 flex justify-center">
             <Button
-              asChild
+              render={<Link href="/register" />}
               size="lg"
               className="h-12 gap-2 rounded-full px-6 text-base shadow-[0_12px_30px_rgba(59,130,246,0.25)] transition-all duration-200 hover:scale-[1.05] hover:shadow-[0_18px_36px_rgba(59,130,246,0.3)]"
             >
-              <Link href="/register">
-                Get Started
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+              Get Started
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
 
