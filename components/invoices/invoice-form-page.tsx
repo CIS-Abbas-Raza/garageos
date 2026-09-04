@@ -140,10 +140,8 @@ export type InvoicePdfPayload = {
   customerEmail: string
   customerPhone: string
   customerAddress: string
-  vehicleName: string
   vehicleMake: string
   vehicleModel: string
-  vehicleVariant: string
   vehicleYear: string
   vin: string
   licensePlate: string
@@ -245,16 +243,14 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   ])
 
   drawSection(rightColX, 'Vehicle Detail', [
-    `Name: ${safePdfText(payload.vehicleName)}`,
     `Make: ${safePdfText(payload.vehicleMake)}`,
     `Model: ${safePdfText(payload.vehicleModel)}`,
-    `Variant: ${safePdfText(payload.vehicleVariant)}`,
     `Year: ${safePdfText(payload.vehicleYear)}`,
     `VIN: ${safePdfText(payload.vin)}`,
     `License Plate: ${safePdfText(payload.licensePlate)}`,
   ])
 
-  const detailSectionHeight = 18 + 7 * 15 + 10
+  const detailSectionHeight = 18 + 5 * 15 + 10
   y += detailSectionHeight
   doc.setLineWidth(0.8)
   doc.line(margin, y, pageWidth - margin, y)
@@ -394,10 +390,8 @@ function InvoicePrintView({
   customerEmail,
   customerPhone,
   customerAddress,
-  vehicleName,
   vehicleMake,
   vehicleModel,
-  vehicleVariant,
   vehicleYear,
   vin,
   licensePlate,
@@ -426,10 +420,8 @@ function InvoicePrintView({
   customerEmail: string
   customerPhone: string
   customerAddress: string
-  vehicleName: string
   vehicleMake: string
   vehicleModel: string
-  vehicleVariant: string
   vehicleYear: string
   vin: string
   licensePlate: string
@@ -487,10 +479,9 @@ function InvoicePrintView({
 
           <section className="rounded-2xl border border-slate-200 p-5 space-y-1.5 text-sm">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Vehicle Detail</h2>
-            <p><span className="text-slate-500">Name:</span> {vehicleName}</p>
             <p><span className="text-slate-500">Make:</span> {vehicleMake}</p>
             <p><span className="text-slate-500">Model:</span> {vehicleModel}</p>
-            <p><span className="text-slate-500">Variant:</span> {vehicleVariant}</p>
+            
             <p><span className="text-slate-500">Year:</span> {vehicleYear}</p>
             <p><span className="text-slate-500">VIN:</span> {vin}</p>
             <p><span className="text-slate-500">License Plate:</span> {licensePlate}</p>
@@ -888,10 +879,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       customerEmail,
       customerPhone,
       customerAddress,
-      vehicleName: vehicleDisplayName,
       vehicleMake,
       vehicleModel,
-      vehicleVariant,
       vehicleYear,
       vin: vehicleVin,
       licensePlate: vehicleLicensePlate,
@@ -1019,10 +1008,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
         customerEmail={customerEmail}
         customerPhone={customerPhone}
         customerAddress={customerAddress}
-        vehicleName={vehicleDisplayName}
         vehicleMake={vehicleMake}
         vehicleModel={vehicleModel}
-        vehicleVariant={vehicleVariant}
         vehicleYear={vehicleYear}
         vin={vehicleVin}
         licensePlate={vehicleLicensePlate}
@@ -1113,10 +1100,10 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                 </div>
 
                 <div className="space-y-1 text-sm leading-6 text-foreground pt-1">
-                  <p><span className="text-muted-foreground">Name: </span><span className="font-medium">{vehicleDisplayName}</span></p>
+                  
                   <p><span className="text-muted-foreground">Make: </span><span>{vehicleMake}</span></p>
                   <p><span className="text-muted-foreground">Model: </span><span>{vehicleModel}</span></p>
-                  <p><span className="text-muted-foreground">Variant: </span><span>{vehicleVariant}</span></p>
+                  
                   <p><span className="text-muted-foreground">Year: </span><span>{vehicleYear}</span></p>
                   <p><span className="text-muted-foreground">VIN: </span><span>{vehicleVin}</span></p>
                   <p><span className="text-muted-foreground">License Plate: </span><span>{vehicleLicensePlate}</span></p>

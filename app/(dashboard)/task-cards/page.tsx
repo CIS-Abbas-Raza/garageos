@@ -68,15 +68,13 @@ export default function TaskCardsListingPage() {
 
     return rows.filter((card) => {
       const customerName = card.quotation?.vehicle?.customer?.name ?? getCustomerName(card.customerId)
-      const vehicleName = card.quotation?.vehicle?.name ||
-        [card.quotation?.vehicle?.make, card.quotation?.vehicle?.model].filter(Boolean).join(' ') ||
-        getVehicleName(card.vehicleId)
+      const vehicleVin = card.quotation?.vehicle?.vin ?? card.quotation?.vehicle?.VIN ?? getVehicleVin(card.vehicleId)
       const matchesSearch = !normalizedQuery || [
         card.task_cards_number,
         card.taskCardNumber,
         card.title,
         customerName,
-        vehicleName,
+        vehicleVin,
       ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
       const status = String(card.status ?? 1)
 
@@ -92,6 +90,11 @@ export default function TaskCardsListingPage() {
   function getVehicleName(vehicleId: string) {
     const vehicle = vehicles.find((item) => item.id === vehicleId)
     return vehicle ? `${vehicle.make} ${vehicle.model}` : '—'
+  }
+
+  function getVehicleVin(vehicleId: string) {
+    const vehicle = vehicles.find((item) => item.id === vehicleId)
+    return vehicle ? (vehicle.vin ?? vehicle.VIN ?? '—') : '—'
   }
 
   const handleDelete = async (id: number, title?: string) => {
@@ -160,7 +163,7 @@ export default function TaskCardsListingPage() {
                 <tr>
                   <th className="px-5 py-4 font-semibold">Task Card #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
-                  <th className="px-5 py-4 font-semibold">Vehicle</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
                   <th className="px-5 py-4 font-semibold text-right">Actions</th>
@@ -185,9 +188,7 @@ export default function TaskCardsListingPage() {
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
                         <span>
-                          {card.quotation?.vehicle?.name ??
-                            ([card.quotation?.vehicle?.make, card.quotation?.vehicle?.model].filter(Boolean).join(' ') ||
-                              getVehicleName(card.vehicleId))}
+                          {card.quotation?.vehicle?.vin ?? card.quotation?.vehicle?.VIN ?? getVehicleVin(card.vehicleId)}
                         </span>
                       </div>
                     </td>

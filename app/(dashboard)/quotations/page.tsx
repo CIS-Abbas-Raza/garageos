@@ -256,7 +256,7 @@ export default function QuotationsPage() {
                 <tr>
                   <th className="px-5 py-4 font-semibold">Quotation #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
-                  <th className="px-5 py-4 font-semibold">Vehicle</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
@@ -282,7 +282,7 @@ export default function QuotationsPage() {
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
                         <span>
-                          {quotation.vehicle?.name ??
+                          {quotation.vehicle?.vin ?? quotation.vehicle?.VIN ?? quotation.vin ?? quotation.VIN ??
                             ([quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
                               getVehicleName(quotation.vehicle_id ?? quotation.vehicleId))}
                         </span>

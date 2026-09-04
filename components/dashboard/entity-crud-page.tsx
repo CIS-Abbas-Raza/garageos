@@ -114,6 +114,8 @@ type Config = {
   assignCurrentUserId?: boolean;
   /** Hides the header action for resources created through another workflow. */
   hideCreateButton?: boolean;
+  /** Navigates the header create action to a dedicated page, preserving URL filters. */
+  createPath?: string;
   /** Hides edit, view, and delete actions for read-only listings. */
   hideRowActions?: boolean;
   /** Hides only the Edit action while retaining the other row actions. */
@@ -230,18 +232,10 @@ const exactFields: Record<string, Field[]> = {
   employees: [
     { key: "profile_photo", label: "Profile Photo", type: "file" },
     { key: "name", label: "Full Name", required: true },
-    {
-      key: "country",
-      label: "Country",
-      type: "select",
-      required: true,
-      options: options([
-        "Pakistan",
-        "United Arab Emirates",
-        "Saudi Arabia",
-        "United Kingdom",
-      ]),
-    },
+    { key: "country", label: "Country", type: "select", required: true, options: options(["United States"]) },
+    { key: "state", label: "State", type: "select", required: true, options: options([
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ]) },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "phone", label: "Phone", required: true },
     { key: "address", label: "Address", required: true },
@@ -250,18 +244,10 @@ const exactFields: Record<string, Field[]> = {
   companyUsers: [
     { key: "profile_photo", label: "Profile Photo", type: "file" },
     { key: "name", label: "Full Name", required: true },
-    {
-      key: "country",
-      label: "Country",
-      type: "select",
-      required: true,
-      options: options([
-        "Pakistan",
-        "United Arab Emirates",
-        "Saudi Arabia",
-        "United Kingdom",
-      ]),
-    },
+    { key: "country", label: "Country", type: "select", required: true, options: options(["United States"]) },
+    { key: "state", label: "State", type: "select", required: true, options: options([
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ]) },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
@@ -288,18 +274,10 @@ const exactFields: Record<string, Field[]> = {
     },
     { key: "logo", label: "Logo", type: "file" },
     { key: "email", label: "Email", type: "email", required: true },
-    {
-      key: "country",
-      label: "Country",
-      type: "select",
-      required: true,
-      options: options([
-        "Pakistan",
-        "United Arab Emirates",
-        "Saudi Arabia",
-        "United Kingdom",
-      ]),
-    },
+    { key: "country", label: "Country", type: "select", required: true, options: options(["United States"]) },
+    { key: "state", label: "State", type: "select", required: true, options: options([
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ]) },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "address", label: "Address", required: true },
     {
@@ -313,24 +291,20 @@ const exactFields: Record<string, Field[]> = {
   // ⚠️ SPEC FLAG: Vehicles has no customer/owner link field — a vehicle with no customer
   // relationship is unusual for a garage system. Confirm with team if this is intentional.
   vehicles: [
-    { key: "name", label: "Name", required: true },
     { key: "make", label: "Make", required: true },
     { key: "model", label: "Model", required: true },
-    { key: "variant", label: "Variant", required: true },
     { key: "year", label: "Year", type: "number", required: true },
-    { key: "VIN", label: "VIN", type: "number", required: true },
-    { key: "license_plate", label: "License plate", required: true },
+    { key: "VIN", label: "VIN", type: "text", required: true },
+    { key: "license_plate", label: "License plate", required: false },
     // Toggle (pill switch) — Yes = 1, No = 0
     { key: "insured", label: "Insured", type: "toggle", required: true },
-    { key: "insurance_number", label: "Insurance number", required: true },
     { key: "policy_number", label: "Policy number", required: true },
-    { key: "expiry_date", label: "Expiry date", type: "date", required: true },
     { key: "claim_number", label: "Claim number", required: true },
     { key: "insurance_company", label: "Insurance company", required: true },
     {
       key: "insurance_company_phone",
-      label: "Insurance company phone",
-      type: "number",
+      label: "Insurance company phone/Adjuster",
+      type: "text",
       required: true,
     },
   ],
@@ -462,6 +436,38 @@ const exactFields: Record<string, Field[]> = {
       required: true,
     },
   ],
+  towingInvoices: [
+    {
+      key: "invoice_status",
+      label: "Invoice status",
+      type: "select",
+      required: true,
+      options: options(["draft", "pending", "approved"]),
+    },
+    {
+      key: "payment_status",
+      label: "Payment status",
+      type: "select",
+      required: true,
+      options: options(["pending", "completed"]),
+    },
+    { key: "subtotal", label: "Subtotal", type: "number", required: true },
+    { key: "discount", label: "Discount", type: "number", required: true },
+    { key: "tax_amount", label: "Tax amount", type: "number", required: true },
+    {
+      key: "tax_percentage",
+      label: "Tax percentage",
+      type: "number",
+      required: true,
+    },
+    { key: "total", label: "Total", type: "number", required: true },
+    {
+      key: "creation_date",
+      label: "Creation date",
+      type: "date",
+      required: true,
+    },
+  ],
   invoicePayments: [
     {
       key: "payment_status",
@@ -478,7 +484,10 @@ const exactFields: Record<string, Field[]> = {
   demoBookings: [
     { key: "name", label: "Name", required: true },
     { key: "company_name", label: "Company name", required: true },
-    { key: "country", label: "Country", required: true },
+    { key: "country", label: "Country", required: true, type: "select", options: options(["United States"]) },
+    { key: "state", label: "State", type: "select", options: options([
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ]) },
     { key: "phone", label: "Phone", type: "number", required: true },
     { key: "email", label: "Email", type: "email", required: true },
   ],
@@ -1213,14 +1222,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
         schema = schema.superRefine((data: any, ctx: any) => {
           const isInsured = data.insured === "1" || data.insured === true || data.insured === "Yes";
           if (isInsured) {
-            const insuranceFields = [
-              { key: "insurance_number", label: "Insurance number" },
-              { key: "policy_number", label: "Policy number" },
-              { key: "expiry_date", label: "Expiry date" },
-              { key: "claim_number", label: "Claim number" },
-              { key: "insurance_company", label: "Insurance company" },
-              { key: "insurance_company_phone", label: "Insurance company phone" },
-            ];
+              const insuranceFields = [
+                { key: "policy_number", label: "Policy number" },
+                { key: "claim_number", label: "Claim number" },
+                { key: "insurance_company", label: "Insurance company" },
+                { key: "insurance_company_phone", label: "Insurance company phone/Adjuster" },
+              ];
             for (const f of insuranceFields) {
               if (data[f.key] === undefined || data[f.key] === null || String(data[f.key]).trim() === "") {
                 ctx.addIssue({
@@ -1330,6 +1337,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   /* ── Handlers ── */
   const openCreate = () => {
+    if (config.createPath) {
+      const query = new URLSearchParams(window.location.search).toString();
+      router.push(`${config.createPath}${query ? `?${query}` : ""}`);
+      return;
+    }
     setEditing(null);
     form.reset({
       status: schemaKey === "appointments" ? "pending" : "1",
@@ -1346,8 +1358,19 @@ export function EntityCrudPage({ config }: { config: Config }) {
     if (formattedInfo && Array.isArray(formattedInfo) && typeof formattedInfo[0] === "string") {
       formattedInfo = formattedInfo.map(v => ({ value: v }));
     }
+    // If vehicle has nested insuredVehicle, merge its fields to top-level so form fields bind correctly
+    const mergedRow = { ...row };
+    if (schemaKey === "vehicles" && row.insuredVehicle) {
+      mergedRow.insurance_number = row.insuredVehicle.insurance_number ?? row.insuredVehicle.insuranceNumber;
+      mergedRow.policy_number = row.insuredVehicle.policy_number ?? row.insuredVehicle.policyNumber;
+      mergedRow.expiry_date = row.insuredVehicle.expiry_date ?? row.insuredVehicle.expiryDate;
+      mergedRow.claim_number = row.insuredVehicle.claim_number ?? row.insuredVehicle.claimNumber;
+      mergedRow.insurance_company = row.insuredVehicle.insurance_company ?? row.insuredVehicle.insuranceCompany;
+      mergedRow.insurance_company_phone = row.insuredVehicle.insurance_company_phone ?? row.insuredVehicle.insuranceCompanyPhone;
+    }
+
     form.reset({
-      ...row,
+      ...mergedRow,
       ...(schemaKey === "companies" && { owner_id: String(row.owner_id ?? "") }),
       ...(schemaKey === "vehicles" && {
         insured:
@@ -1723,6 +1746,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Quotation
                               </DropdownMenuItem>
                             )}
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && (
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/towing-invoices?vehicle_id=${encodeURIComponent(String(row.id))}`)}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <FileText className="size-4 text-blue-600" />
+                                Towing Invoice
+                              </DropdownMenuItem>
+                            )}
                             {(config.resource === "estimations" || schemaKey === "estimations" || config.title === "Quotations") && (
                               <DropdownMenuItem
                                 onClick={() => router.push("/task-cards")}
@@ -1961,43 +1993,51 @@ export function EntityCrudPage({ config }: { config: Config }) {
           {viewing && (
             <div className={isExcluded ? "px-6 py-5" : "min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-2"}>
               {/* Identity block */}
-              {identityFields.length > 0 && (
-                <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
-                  <p className="font-semibold text-foreground">
-                    {formatValue(viewing[identityFields[0].key])}
-                  </p>
-                  {identityFields[1] && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatValue(viewing[identityFields[1].key])}
-                    </p>
-                  )}
-                </div>
-              )}
-              {/* Fields grid */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                {fields.map((field) => (
-                  <div key={field.key} className="border-b border-border/50 pb-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {field.label}
-                    </p>
-                    {field.type === "dynamic-list" ? (
-                      <ul className="mt-1 list-disc list-inside text-sm font-semibold text-foreground space-y-1">
-                        {Array.isArray(viewing[field.key]) ? (
-                          viewing[field.key].map((item: string, i: number) => (
-                            <li key={i}>{item}</li>
-                          ))
-                        ) : (
-                          <li>{formatValue(viewing[field.key])}</li>
+              {/* Merge insuredVehicle fields into view data for display */}
+              {(() => {
+                const viewData = schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing;
+                return (
+                  <> 
+                    {identityFields.length > 0 && (
+                      <div className="mb-5 rounded-lg bg-muted/40 border border-border px-4 py-3">
+                        <p className="font-semibold text-foreground">
+                          {formatValue(viewData[identityFields[0].key])}
+                        </p>
+                        {identityFields[1] && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatValue(viewData[identityFields[1].key])}
+                          </p>
                         )}
-                      </ul>
-                    ) : (
-                      <p className="mt-1 text-sm font-semibold text-foreground">
-                        {formatValue(viewing[field.key])}
-                      </p>
+                      </div>
                     )}
-                  </div>
-                ))}
-              </div>
+              {/* Fields grid */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {fields.map((field) => (
+                        <div key={field.key} className="border-b border-border/50 pb-2">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {field.label}
+                          </p>
+                          {field.type === "dynamic-list" ? (
+                            <ul className="mt-1 list-disc list-inside text-sm font-semibold text-foreground space-y-1">
+                              {Array.isArray((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key]) ? (
+                                (schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key].map((item: string, i: number) => (
+                                  <li key={i}>{item}</li>
+                                ))
+                              ) : (
+                                <li>{formatValue((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key])}</li>
+                              )}
+                            </ul>
+                          ) : (
+                            <p className="mt-1 text-sm font-semibold text-foreground">
+                              {formatValue((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key])}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
               {/* Timestamps */}
               {(viewing.createdAt || viewing.id) && (
                 <div className="mt-5 grid gap-4 sm:grid-cols-2 border-t border-border pt-4">

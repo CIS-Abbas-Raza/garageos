@@ -14,7 +14,7 @@ export default function CompanyUsersPage() {
         title: 'Company Employees',
         description: 'Assign staff members to roles and keep team details current.',
         fields: [],
-        columns: ['name', 'country', 'phone', 'role', 'status'],
+        columns: ['name', 'country', 'state', 'phone', 'role', 'status'],
         empty: 'No company employees configured yet.'
       }}
     />
