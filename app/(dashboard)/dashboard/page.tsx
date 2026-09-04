@@ -8,12 +8,22 @@ import TasksDoughnut from '@/components/dashboard/tasks-doughnut'
 import { Button } from '@/components/ui/button'
 import { useGarageStore } from '@/lib/store/garage-store'
 import { useEffect, useState } from 'react'
+import { endOfMonth, format, startOfMonth } from 'date-fns'
+import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
 
 export default function DashboardPage() {
   const { payments, jobCards, customers, vehicles, mechanics, parts, invoices, estimations, appointments, employees, currentCompanyId } = useGarageStore()
 
   const [apiStats, setApiStats] = useState<any | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(false)
+  const [dateRange, setDateRange] = useState<DateRangeValue>({ startDate: startOfMonth(new Date()), endDate: endOfMonth(new Date()) })
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const start = params.get('startDate')
+    const end = params.get('endDate')
+    if (start && end) setDateRange({ startDate: new Date(`${start}T00:00:00`), endDate: new Date(`${end}T23:59:59.999`) })
+  }, [])
 
   const revenue = payments.reduce((sum, payment) => sum + (payment.amount ?? 0), 0)
   const activeJobs = jobCards.filter((job) => job.status !== 'completed').length
@@ -46,7 +56,8 @@ export default function DashboardPage() {
     const fetchStats = async () => {
       try {
         setIsLoadingStats(true)
-        const res = await fetch(`/backend-api/dashboard/stats?company_id=${encodeURIComponent(String(companyParam))}`)
+        const params = new URLSearchParams({ company_id: String(companyParam), startDate: format(dateRange.startDate, 'yyyy-MM-dd'), endDate: format(dateRange.endDate, 'yyyy-MM-dd') })
+        const res = await fetch(`/backend-api/dashboard/stats?${params.toString()}`)
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.success !== false) {
           setApiStats(body.data ?? body)
@@ -61,7 +72,16 @@ export default function DashboardPage() {
     }
 
     void fetchStats()
-  }, [currentCompanyId])
+  }, [currentCompanyId, dateRange])
+
+  const handleDateRangeChange = (range: DateRangeValue | null) => {
+    const next = range ?? { startDate: startOfMonth(new Date()), endDate: endOfMonth(new Date()) }
+    setDateRange(next)
+    const params = new URLSearchParams(window.location.search)
+    params.set('startDate', format(next.startDate, 'yyyy-MM-dd'))
+    params.set('endDate', format(next.endDate, 'yyyy-MM-dd'))
+    window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+  }
 
   return (
     <div className="mx-auto flex max-w-[1440px] flex-col gap-7 p-5 sm:p-7 lg:p-8">
@@ -70,6 +90,7 @@ export default function DashboardPage() {
           <p className="text-sm font-medium text-primary">Garage Operations</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Home Overview</h1>
           <p className="mt-2 text-sm text-muted-foreground sm:text-base">Overview of your garage operations and key metrics</p>
+          <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
         </div>
         {/* <Button variant="outline" className="w-fit gap-2 rounded-full px-4"><Eye className="size-4" />Overview</Button> */}
       </div>
@@ -94,8 +115,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <TasksDoughnut />
-        <RevenueChart />
+        <TasksDoughnut dateRange={dateRange} />
+        <RevenueChart dateRange={dateRange} />
       </div>
     </div>
   )

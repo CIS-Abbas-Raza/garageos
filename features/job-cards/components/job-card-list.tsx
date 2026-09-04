@@ -9,6 +9,7 @@ import { useModulePermissions } from "@/lib/hooks/use-module-permissions"
 import { MODULE_RESOURCE } from "../permissions"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/data-table/data-table"
+import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal"
 import { createJobCardColumns } from "./job-card-columns"
 import { JobCardDialog } from "./job-card-dialog"
 
@@ -19,6 +20,7 @@ export function JobCardList() {
   const [selectedJobCard, setSelectedJobCard] = useState<JobCard | null>(null)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [deletingJobCard, setDeletingJobCard] = useState<JobCard | null>(null)
 
   const handleView = (jobCard: JobCard) => {
     setSelectedJobCard(jobCard)
@@ -31,10 +33,7 @@ export function JobCardList() {
   }
 
   const handleDelete = (jobCard: JobCard) => {
-    if (confirm(`Are you sure you want to delete this job card?`)) {
-      deleteJobCard(jobCard.id)
-      toast.success("Job card deleted successfully.")
-    }
+    setDeletingJobCard(jobCard)
   }
 
   const handleAddSubmit = (data: any) => {
@@ -85,6 +84,17 @@ export function JobCardList() {
         totalCounts={{
           total: jobCards.length,
           active: jobCards.filter(j => j.status === 'in-progress' || j.status === 'pending').length,
+        }}
+      />
+
+      <ConfirmDeleteModal
+        open={Boolean(deletingJobCard)}
+        onOpenChange={(open) => !open && setDeletingJobCard(null)}
+        title="Delete job card?"
+        message="Are you sure you want to delete this job card? This action cannot be undone."
+        successMessage="Job card deleted successfully."
+        onConfirm={() => {
+          if (deletingJobCard) deleteJobCard(deletingJobCard.id)
         }}
       />
 

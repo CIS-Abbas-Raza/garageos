@@ -20,6 +20,11 @@ import { cn } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
+import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
+import { Pagination } from '@/components/common/pagination'
+import { RecordCountBadges } from '@/components/common/record-count-badges'
+import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
+import { format } from 'date-fns'
 
 export default function QuotationsPage() {
   const router = useRouter()
@@ -34,6 +39,10 @@ export default function QuotationsPage() {
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
   const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
+  const [deletingQuotation, setDeletingQuotation] = useState<Record<string, any> | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
 
   useEffect(() => {
     setVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
@@ -42,7 +51,10 @@ export default function QuotationsPage() {
   useEffect(() => {
     const loadQuotations = async () => {
       try {
-        const query = vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''
+        const params = new URLSearchParams()
+        if (vehicleId) params.set('vehicle_id', vehicleId)
+        if (dateRange) { params.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); params.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
+        const query = params.size ? `?${params.toString()}` : ''
         const response = await fetch(`/backend-api/quotations${query}`)
         const result = await response.json()
         if (!response.ok || result.success === false) {
@@ -55,7 +67,7 @@ export default function QuotationsPage() {
     }
 
     void loadQuotations()
-  }, [vehicleId])
+  }, [vehicleId, dateRange])
 
   useEffect(() => {
     if (!selectedCompany) return setActiveChannels([])
@@ -97,6 +109,9 @@ export default function QuotationsPage() {
       return matchesSearch && (statusFilter === 'all' || status === statusFilter)
     })
   }, [rows, searchQuery, statusFilter, customers, vehicles])
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize))
+  const paginatedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize)
+  useEffect(() => { setPage(1) }, [searchQuery, statusFilter, pageSize])
 
   function getCustomerName(customerId: string) {
     const customer = customers.find((item) => item.id === customerId)
@@ -202,10 +217,20 @@ export default function QuotationsPage() {
             Create, review, and edit quotations using the new full-page workflow.
           </p>
         </div>
+        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         {canManageQuotations && <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Quotation
         </Button>}
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Draft', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase() === 'draft').length, color: 'neutral' },
+          { label: 'Accepted', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'accepted').length, color: 'green' },
+          { label: 'Rejected', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'rejected').length, color: 'red' },
+        ]} />
       </div>
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -257,7 +282,7 @@ export default function QuotationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((quotation) => (
+                {paginatedRows.map((quotation) => (
                   <tr key={quotation.id} className="bg-background transition-colors hover:bg-muted/20">
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
@@ -335,20 +360,8 @@ export default function QuotationsPage() {
                             {canManageQuotations && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             {canManageQuotations && <DropdownMenuItem
-                              onClick={async () => {
-                                if (confirm('Are you sure you want to delete this quotation?')) {
-                                  try {
-                                    const response = await fetch(`/backend-api/quotations/${quotation.id}`, { method: 'DELETE' })
-                                    const result = await response.json().catch(() => ({}))
-                                    if (!response.ok || result.success === false) {
-                                      throw new Error(result.message || 'Unable to delete quotation.')
-                                    }
-                                    setRows((currentRows) => currentRows.filter((item) => item.id !== quotation.id))
-                                    toast.success('Quotation deleted successfully')
-                                  } catch (error) {
-                                    toast.error(error instanceof Error ? error.message : 'Unable to delete quotation.')
-                                  }
-                                }
+                              onClick={() => {
+                                setDeletingQuotation(quotation)
                               }}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >
@@ -369,6 +382,27 @@ export default function QuotationsPage() {
           </div>
         </div>
       )}
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-4">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">Rows per page
+          <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-9 rounded-lg border border-border bg-background px-2"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option></select>
+        </label>
+        <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
+      <ConfirmDeleteModal
+        open={Boolean(deletingQuotation)}
+        onOpenChange={(open) => !open && setDeletingQuotation(null)}
+        title="Delete quotation?"
+        message="Are you sure you want to delete this quotation? This action cannot be undone."
+        successMessage="Quotation deleted successfully."
+        onConfirm={async () => {
+          if (!deletingQuotation) return
+          const response = await fetch(`/backend-api/quotations/${deletingQuotation.id}`, { method: 'DELETE' })
+          const result = await response.json().catch(() => ({}))
+          if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete quotation.')
+          setRows((currentRows) => currentRows.filter((item) => item.id !== deletingQuotation.id))
+        }}
+      />
       <SendCustomerMessageDialog channel={messageTarget?.channel ?? null} companyId={messageTarget?.companyId} customerId={messageTarget?.customerId} documentLabel="this quotation" onOpenChange={(open) => !open && setMessageTarget(null)} />
     </div>
   )
