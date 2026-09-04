@@ -21,9 +21,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { ChevronDown, ChevronLeft, ChevronRight, Columns3, Download, Search, LayoutGrid, List, AlertTriangle } from "lucide-react"
+import { ChevronDown, Columns3, Download, Search, LayoutGrid, List } from "lucide-react"
 import { TableSkeleton } from "./table-skeleton"
+import { Pagination } from "@/components/common/pagination"
+import { RecordCountBadges, type RecordCount } from "@/components/common/record-count-badges"
 
 interface ServerPagination {
   page: number
@@ -40,6 +41,7 @@ interface TotalCounts {
   activeLabel?: string
   inactiveLabel?: string
   warningLabel?: string
+  counts?: RecordCount[]
 }
 
 interface DataTableProps<TData, TValue> {
@@ -149,26 +151,6 @@ export function DataTable<TData, TValue>({
   const totalPages = serverPagination
     ? (serverPagination.totalPages ?? 1)
     : table.getPageCount()
-
-  const handlePreviousPage = useCallback(() => {
-    if (serverPagination) {
-      if (onPageChange && currentPage > 1) {
-        onPageChange(currentPage - 1)
-      }
-    } else {
-      table.previousPage()
-    }
-  }, [serverPagination, onPageChange, currentPage, table])
-
-  const handleNextPage = useCallback(() => {
-    if (serverPagination) {
-      if (onPageChange && currentPage < totalPages) {
-        onPageChange(currentPage + 1)
-      }
-    } else {
-      table.nextPage()
-    }
-  }, [serverPagination, onPageChange, currentPage, totalPages, table])
 
   return (
     <div className="space-y-4">
@@ -380,25 +362,12 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-wrap items-center gap-2">
           {totalCounts && (
             <div className="flex items-center gap-2 mr-4">
-              <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200 font-bold px-3 py-1 text-[11px] rounded-full">
-                Total: {totalCounts.total ?? 0}
-              </Badge>
-              {totalCounts.active !== undefined && (
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold px-3 py-1 text-[11px] rounded-full">
-                  {totalCounts.activeLabel ?? "Active"}: {totalCounts.active ?? 0}
-                </Badge>
-              )}
-              {totalCounts.inactive !== undefined && (
-                <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200 font-bold px-3 py-1 text-[11px] rounded-full">
-                  {totalCounts.inactiveLabel ?? "Inactive"}: {totalCounts.inactive ?? 0}
-                </Badge>
-              )}
-              {totalCounts.warning !== undefined && (
-                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 font-bold px-3 py-1 text-[11px] rounded-full flex items-center gap-1">
-                  {totalCounts.warningLabel === "Low Stock" && <AlertTriangle className="h-3.5 w-3.5 text-red-500" />}
-                  {totalCounts.warningLabel ?? "Warning"}: {totalCounts.warning ?? 0}
-                </Badge>
-              )}
+              <RecordCountBadges counts={totalCounts.counts ?? [
+                { label: "Total", value: totalCounts.total ?? 0 },
+                ...(totalCounts.active !== undefined ? [{ label: totalCounts.activeLabel ?? "Active", value: totalCounts.active, color: "green" as const }] : []),
+                ...(totalCounts.inactive !== undefined ? [{ label: totalCounts.inactiveLabel ?? "Inactive", value: totalCounts.inactive }] : []),
+                ...(totalCounts.warning !== undefined ? [{ label: totalCounts.warningLabel ?? "Warning", value: totalCounts.warning, color: "red" as const }] : []),
+              ]} />
             </div>
           )}
           {footerLeft}
@@ -439,26 +408,11 @@ export function DataTable<TData, TValue>({
           <div className="text-sm text-muted-foreground font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
             Page {currentPage} of {totalPages}
           </div>
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 bg-white border-gray-200 hover:bg-gray-50"
-              onClick={handlePreviousPage}
-              disabled={currentPage <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 bg-white border-gray-200 hover:bg-gray-50"
-              onClick={handleNextPage}
-              disabled={currentPage >= totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+          <Pagination page={currentPage} totalPages={Math.max(totalPages, 1)} onPageChange={(nextPage) => {
+            if (serverPagination) onPageChange?.(nextPage)
+            else if (nextPage > currentPage) table.nextPage()
+            else table.previousPage()
+          }} />
         </div>
       </div>
     </div>

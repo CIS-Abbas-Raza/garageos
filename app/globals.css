@@ -187,6 +187,47 @@
   display: none;
 }
 
+.date-range-filter .rdrCalendarWrapper,
+.rdrCalendarWrapper {
+  min-width: 680px;
+  background: var(--popover);
+  color: var(--foreground);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .date-range-filter .rdrCalendarWrapper,
+  .rdrCalendarWrapper {
+    min-width: 620px;
+  }
+}
+
+.rdrDefinedRangesWrapper {
+  background: var(--popover);
+  border-right: 1px solid var(--border);
+}
+
+.rdrStaticRange {
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  color: var(--foreground);
+}
+
+.rdrStaticRange:hover,
+.rdrStaticRange:focus {
+  background: var(--accent);
+}
+
+.rdrDayNumber span,
+.rdrMonthAndYearPickers select,
+.rdrWeekDay {
+  color: var(--foreground);
+}
+
+.rdrDayPassive .rdrDayNumber span {
+  color: var(--muted-foreground);
+}
+
 @media print {
   .no-print {
     display: none !important;

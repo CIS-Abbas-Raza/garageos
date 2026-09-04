@@ -42,6 +42,7 @@ import {
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -72,6 +73,10 @@ import { useGarageStore } from "@/lib/store/garage-store";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth-context";
 import { getDashboardRole, type DashboardRole } from "@/lib/role-access";
+import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal";
+import { Pagination } from "@/components/common/pagination";
+import { RecordCountBadges } from "@/components/common/record-count-badges";
+import { DateRangeFilter, type DateRangeValue } from "@/components/common/date-range-filter";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -998,6 +1003,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
   }, []);
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [apiTotal, setApiTotal] = useState(0);
+  const [apiTotalPages, setApiTotalPages] = useState(1);
+  const [apiStatusCounts, setApiStatusCounts] = useState<Record<string, number>>({});
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const schemaKey =
     config.title === "Admin"
       ? "admin"
@@ -1043,7 +1057,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     if (!response.ok || body.success === false) {
       throw new Error(body.message || body.error || "Unable to complete the request.");
     }
-    return body.data ?? body;
+    return body;
   }, [config.apiEndpoint]);
 
   const loadApiRows = useCallback(async () => {
@@ -1058,11 +1072,21 @@ export function EntityCrudPage({ config }: { config: Config }) {
     }
     try {
       const queryParams = new URLSearchParams();
+      queryParams.set("page", String(page));
+      queryParams.set("limit", String(pageSize));
+      if (query.trim()) queryParams.set("search", query.trim());
+      if (status !== "all") queryParams.set("status", status);
+      queryParams.set("dateField", config.dateRangeField ?? "createdAt");
+      if (dateFrom) queryParams.set("startDate", dateFrom);
+      if (dateTo) queryParams.set("endDate", dateTo);
       if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
       if (config.customerScoped) queryParams.set("customer_id", selectedCustomer!);
-      const query = queryParams.size ? `?${queryParams.toString()}` : "";
-      const data = await requestApi(query);
-      const records = Array.isArray(data) ? data : [];
+      const requestQuery = queryParams.size ? `?${queryParams.toString()}` : "";
+      const responseBody = await requestApi(requestQuery);
+      const records = Array.isArray(responseBody.data) ? responseBody.data : [];
+      setApiTotal(Number(responseBody.total ?? records.length));
+      setApiTotalPages(Number(responseBody.totalPages ?? 1));
+      setApiStatusCounts(responseBody.statusCounts ?? {});
       setApiRows(
         ["smsSettings", "whatsappSettings", "emailSettings"].includes(config.resource)
           ? records.map((record) => ({
@@ -1129,7 +1153,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
-  }, [apiEnabled, config.companyScoped, config.customerScoped, config.resource, requestApi, selectedCompany, selectedCustomer]);
+  }, [apiEnabled, config.companyScoped, config.customerScoped, config.dateRangeField, config.resource, dateFrom, dateTo, page, pageSize, query, requestApi, selectedCompany, selectedCustomer, status]);
 
   /* ── State ── */
   const [open, setOpen] = useState(false);
@@ -1150,12 +1174,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
       ? [...fields, statusField]
       : fields;
   const [viewing, setViewing] = useState<Record<string, any> | null>(null);
+  const [deleting, setDeleting] = useState<Record<string, any> | null>(null);
   const [resettingEmployee, setResettingEmployee] = useState<Record<string, any> | null>(null);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
@@ -1309,6 +1330,22 @@ export function EntityCrudPage({ config }: { config: Config }) {
         ),
     [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField],
   );
+
+  const totalPages = apiEnabled ? apiTotalPages : Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = apiEnabled ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize);
+  const statusCounts = useMemo(() => {
+    if (apiEnabled) return Object.entries(apiStatusCounts);
+    const counts = new Map<string, number>();
+    rows.forEach((row) => {
+      const value = String(row.status ?? "1").toLowerCase();
+      counts.set(value, (counts.get(value) ?? 0) + 1);
+    });
+    return Array.from(counts.entries()).slice(0, 3);
+  }, [apiEnabled, apiStatusCounts, rows]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, status, dateFrom, dateTo, pageSize]);
 
   const exportBalanceSheet = () => {
     const xmlEntities: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" };
@@ -1534,6 +1571,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
               className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
             />
           </div>
+          <DateRangeFilter
+            value={dateFrom && dateTo ? { startDate: new Date(`${dateFrom}T00:00:00`), endDate: new Date(`${dateTo}T23:59:59.999`) } : null}
+            onChange={(range: DateRangeValue | null) => {
+              setDateFrom(range ? format(range.startDate, "yyyy-MM-dd") : "");
+              setDateTo(range ? format(range.endDate, "yyyy-MM-dd") : "");
+              setPage(1);
+            }}
+          />
           {/* Status filter */}
           {!config.hideStatusFilter && <div className="flex items-center gap-2">
             <select
@@ -1611,7 +1656,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-white">
-                {filtered.length === 0 ? (
+                {paginated.length === 0 ? (
                   <tr>
                     <td
                       colSpan={config.columns.length + (config.hideRowActions ? 1 : 2)}
@@ -1621,7 +1666,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((row) => (
+                  paginated.map((row) => (
                     <tr key={row.id} className="bg-white hover:bg-[#FAFAFA] transition-colors">
                       <td className="px-5 py-4">
                         <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
@@ -1774,21 +1819,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               Deactivate
                             </DropdownMenuItem>}
                             {!config.hideDeleteAction && !isRoleReadOnly && <DropdownMenuItem
-                              onClick={async () => {
-                                if (confirm("Are you sure you want to delete this record?")) {
-                                  try {
-                                    if (apiEnabled) {
-                                      await requestApi(`/${row.id}`, { method: "DELETE" });
-                                      await loadApiRows();
-                                    } else {
-                                      remove(row.id);
-                                    }
-                                    toast.success(`${singularize(config.title)} deleted successfully`);
-                                  } catch (error) {
-                                    toast.error(error instanceof Error ? error.message : "Unable to delete record.");
-                                  }
-                                }
-                              }}
+                              onClick={() => setDeleting(row)}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >
                               <Trash2 className="size-4" />
@@ -1804,7 +1835,46 @@ export function EntityCrudPage({ config }: { config: Config }) {
             </table>
           </div>
         </div>
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <RecordCountBadges counts={[
+            { label: "Total", value: apiEnabled ? apiTotal : rows.length },
+            ...statusCounts.map(([value, count]) => ({
+              label: value === "1" ? "Active" : value === "0" ? "Inactive" : labelize(value),
+              value: count,
+              color: value === "1" ? "green" as const : value === "0" ? "neutral" as const : "blue" as const,
+            })),
+          ]} />
+          <div className="flex flex-wrap items-center gap-4 sm:ml-auto">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              Rows per page
+              <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
+                <SelectTrigger className="h-9 w-[70px] bg-white"><SelectValue /></SelectTrigger>
+                <SelectContent>{[10, 25, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectContent>
+              </Select>
+            </label>
+            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        </div>
       </div>
+
+      <ConfirmDeleteModal
+        open={Boolean(deleting)}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={`Delete ${singularize(config.title).toLowerCase()}?`}
+        message={`Are you sure you want to delete this ${singularize(config.title).toLowerCase()}? This action cannot be undone.`}
+        successMessage={`${singularize(config.title)} deleted successfully.`}
+        onConfirm={async () => {
+          if (!deleting) return;
+          if (apiEnabled) {
+            await requestApi(`/${deleting.id}`, { method: "DELETE" });
+            await loadApiRows();
+          } else {
+            remove(deleting.id);
+          }
+          setDeleting(null);
+        }}
+      />
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/*                   ADD / EDIT MODAL                         */}

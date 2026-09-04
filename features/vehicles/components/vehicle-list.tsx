@@ -9,6 +9,7 @@ import { useModulePermissions } from "@/lib/hooks/use-module-permissions"
 import { MODULE_RESOURCE } from "../permissions"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/data-table/data-table"
+import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal"
 import { createVehicleColumns } from "./vehicle-columns"
 import { VehicleDialog } from "./vehicle-dialog"
 
@@ -19,6 +20,7 @@ export function VehicleList() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [deletingVehicle, setDeletingVehicle] = useState<Vehicle | null>(null)
 
   // In a real app we'd have a View Dialog. Using Edit for now to simplify.
   const handleView = (vehicle: Vehicle) => {
@@ -32,10 +34,7 @@ export function VehicleList() {
   }
 
   const handleDelete = (vehicle: Vehicle) => {
-    if (confirm(`Are you sure you want to delete ${vehicle.make} ${vehicle.model}?`)) {
-      deleteVehicle(vehicle.id)
-      toast.success("Vehicle deleted successfully.")
-    }
+    setDeletingVehicle(vehicle)
   }
 
   const handleAddSubmit = (data: any) => {
@@ -85,6 +84,17 @@ export function VehicleList() {
         enableViewToggle={false}
         totalCounts={{
           total: vehicles.length,
+        }}
+      />
+
+      <ConfirmDeleteModal
+        open={Boolean(deletingVehicle)}
+        onOpenChange={(open) => !open && setDeletingVehicle(null)}
+        title="Delete vehicle?"
+        message={`Are you sure you want to delete ${deletingVehicle?.make ?? "this"} ${deletingVehicle?.model ?? "vehicle"}? This action cannot be undone.`}
+        successMessage="Vehicle deleted successfully."
+        onConfirm={() => {
+          if (deletingVehicle) deleteVehicle(deletingVehicle.id)
         }}
       />
 

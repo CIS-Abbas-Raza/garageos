@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts'
 import { useGarageStore } from '@/lib/store/garage-store'
+import type { DateRangeValue } from '@/components/common/date-range-filter'
+import { format } from 'date-fns'
 
-export function RevenueChart() {
+export function RevenueChart({ dateRange }: { dateRange?: DateRangeValue }) {
   const { invoices, expenses, currentCompanyId } = useGarageStore()
   const [apiData, setApiData] = useState<{ labels: string[]; revenue: number[]; expenses: number[] } | null>(null)
 
@@ -19,7 +21,8 @@ export function RevenueChart() {
 
     const fetchOverview = async () => {
       try {
-        const res = await fetch(`/backend-api/dashboard/overview?company_id=${encodeURIComponent(String(companyParam))}`)
+        const rangeQuery = dateRange ? `&startDate=${format(dateRange.startDate, 'yyyy-MM-dd')}&endDate=${format(dateRange.endDate, 'yyyy-MM-dd')}` : ''
+        const res = await fetch(`/backend-api/dashboard/overview?company_id=${encodeURIComponent(String(companyParam))}${rangeQuery}`)
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.success !== false) {
           setApiData(body.data ?? body)
@@ -32,7 +35,7 @@ export function RevenueChart() {
     }
 
     void fetchOverview()
-  }, [currentCompanyId])
+  }, [currentCompanyId, dateRange])
 
   const revenueData = useMemo(() => {
     if (apiData) {

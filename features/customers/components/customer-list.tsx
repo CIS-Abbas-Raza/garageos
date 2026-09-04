@@ -9,6 +9,7 @@ import { useModulePermissions } from "@/lib/hooks/use-module-permissions"
 import { MODULE_RESOURCE } from "../permissions"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/data-table/data-table"
+import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal"
 import { createCustomerColumns } from "./customer-columns"
 import { CustomerDialog } from "./customer-dialog"
 import {
@@ -29,6 +30,7 @@ export function CustomerList() {
   const [isResetting, setIsResetting] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null)
 
   const handleView = (customer: Customer) => {
     setSelectedCustomer(customer)
@@ -41,10 +43,7 @@ export function CustomerList() {
   }
 
   const handleDelete = (customer: Customer) => {
-    if (confirm(`Are you sure you want to delete ${customer.firstName} ${customer.lastName}?`)) {
-      deleteCustomer(customer.id)
-      toast.success("Customer deleted successfully.")
-    }
+    setDeletingCustomer(customer)
   }
 
   const handleResetPassword = async () => {
@@ -115,6 +114,17 @@ export function CustomerList() {
         enableViewToggle={false}
         totalCounts={{
           total: customers.length,
+        }}
+      />
+
+      <ConfirmDeleteModal
+        open={Boolean(deletingCustomer)}
+        onOpenChange={(open) => !open && setDeletingCustomer(null)}
+        title="Delete customer?"
+        message={`Are you sure you want to delete ${deletingCustomer?.firstName ?? "this"} ${deletingCustomer?.lastName ?? "customer"}? This action cannot be undone.`}
+        successMessage="Customer deleted successfully."
+        onConfirm={() => {
+          if (deletingCustomer) deleteCustomer(deletingCustomer.id)
         }}
       />
 

@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { useGarageStore } from '@/lib/store/garage-store'
+import type { DateRangeValue } from '@/components/common/date-range-filter'
+import { format } from 'date-fns'
 
 const COLORS = ['#f59e0b', '#2563eb', '#16a34a'] // Pending (amber), In Progress (blue), Completed (green)
 
-export function TasksDoughnut() {
+export function TasksDoughnut({ dateRange }: { dateRange?: DateRangeValue }) {
   const { jobCards, currentCompanyId } = useGarageStore()
   const [apiData, setApiData] = useState<{ labels: string[]; values: number[] } | null>(null)
 
@@ -21,7 +23,8 @@ export function TasksDoughnut() {
 
     const fetchDoughnut = async () => {
       try {
-        const res = await fetch(`/backend-api/dashboard/tasks-doughnut?company_id=${encodeURIComponent(String(companyParam))}`)
+        const rangeQuery = dateRange ? `&startDate=${format(dateRange.startDate, 'yyyy-MM-dd')}&endDate=${format(dateRange.endDate, 'yyyy-MM-dd')}` : ''
+        const res = await fetch(`/backend-api/dashboard/tasks-doughnut?company_id=${encodeURIComponent(String(companyParam))}${rangeQuery}`)
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.success !== false) {
           setApiData(body.data?.doughnut ?? body.doughnut ?? null)
@@ -34,7 +37,7 @@ export function TasksDoughnut() {
     }
 
     void fetchDoughnut()
-  }, [currentCompanyId])
+  }, [currentCompanyId, dateRange])
 
   const fallback = useMemo(() => {
     const totalPending = jobCards.filter((j) => j.status === 'pending').length

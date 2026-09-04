@@ -20,6 +20,11 @@ import { cn } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
+import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
+import { Pagination } from '@/components/common/pagination'
+import { RecordCountBadges } from '@/components/common/record-count-badges'
+import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
+import { format } from 'date-fns'
 
 export default function InvoicesPage() {
   const router = useRouter()
@@ -35,6 +40,10 @@ export default function InvoicesPage() {
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [deletingInvoice, setDeletingInvoice] = useState<Record<string, any> | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
 
   const [taskId, setTaskId] = useState<string | undefined>()
 
@@ -51,6 +60,7 @@ export default function InvoicesPage() {
     try {
       const queryParams = new URLSearchParams({ company_id: String(selectedCompany) })
       if (taskId) queryParams.set('task_id', taskId)
+      if (dateRange) { queryParams.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); queryParams.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
       const query = `?${queryParams.toString()}`
       const response = await fetch(`/backend-api/invoices${query}`)
       const result = await response.json()
@@ -59,7 +69,7 @@ export default function InvoicesPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
     }
-  }, [selectedCompany, taskId])
+  }, [selectedCompany, taskId, dateRange])
 
   useEffect(() => {
     void loadInvoices()
@@ -111,6 +121,9 @@ export default function InvoicesPage() {
       return matchesSearch && (statusFilter === 'all' || status === statusFilter)
     })
   }, [rows, searchQuery, statusFilter, customers, vehicles])
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize))
+  const paginatedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize)
+  useEffect(() => { setPage(1) }, [searchQuery, statusFilter, pageSize])
 
   function getCustomerName(customerId: string) {
     const customer = customers.find((item) => item.id === customerId)
@@ -221,12 +234,21 @@ export default function InvoicesPage() {
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
+        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         {canManageInvoices && (
           <Button onClick={() => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
             <Plus className="size-4" />
             Add Invoice
           </Button>
         )}
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Pending', value: rows.filter((invoice) => ['pending', 'draft'].includes(String(invoice.invoice_status ?? invoice.status ?? 'draft').toLowerCase())).length, color: 'amber' },
+          { label: 'Approved', value: rows.filter((invoice) => String(invoice.invoice_status ?? invoice.status).toLowerCase() === 'approved').length, color: 'green' },
+        ]} />
       </div>
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -278,7 +300,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((invoice) => (
+                {paginatedRows.map((invoice) => (
                   <tr key={invoice.id} className="bg-background transition-colors hover:bg-muted/20">
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
@@ -372,18 +394,8 @@ export default function InvoicesPage() {
                             {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             {canManageInvoices && <DropdownMenuItem
-                              onClick={async () => {
-                                if (confirm('Are you sure you want to delete this invoice?')) {
-                                  try {
-                                    const response = await fetch(`/backend-api/invoices/${invoice.id}`, { method: 'DELETE' })
-                                    const result = await response.json().catch(() => ({}))
-                                    if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete invoice.')
-                                    setInvoices((current) => current.filter((item) => item.id !== invoice.id))
-                                    toast.success('Invoice deleted successfully')
-                                  } catch (error) {
-                                    toast.error(error instanceof Error ? error.message : 'Unable to delete invoice.')
-                                  }
-                                }
+                              onClick={() => {
+                                setDeletingInvoice(invoice)
                               }}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >
@@ -404,6 +416,27 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-4">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">Rows per page
+          <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-9 rounded-lg border border-border bg-background px-2"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option></select>
+        </label>
+        <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
+      <ConfirmDeleteModal
+        open={Boolean(deletingInvoice)}
+        onOpenChange={(open) => !open && setDeletingInvoice(null)}
+        title="Delete invoice?"
+        message="Are you sure you want to delete this invoice? This action cannot be undone."
+        successMessage="Invoice deleted successfully."
+        onConfirm={async () => {
+          if (!deletingInvoice) return
+          const response = await fetch(`/backend-api/invoices/${deletingInvoice.id}`, { method: 'DELETE' })
+          const result = await response.json().catch(() => ({}))
+          if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete invoice.')
+          setInvoices((current) => current.filter((item) => item.id !== deletingInvoice.id))
+        }}
+      />
       <InvoicePaymentDialog
         invoice={payingInvoice}
         open={Boolean(payingInvoice)}
