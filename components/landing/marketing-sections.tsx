@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   ArrowRight,
   BarChart3,
@@ -69,23 +70,60 @@ function Logo() {
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const links = [['Features', '#features'], ['Packages', '#packages'], ['Pricing', '#pricing'], ['FAQ', '#faq'], ['Contact', '#contact']]
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 16)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="sticky top-0 z-50 border-b border-landing-line bg-landing-background/95 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 border-b transition-all duration-300 ease-out ${
+        isScrolled
+          ? 'border-border/60 bg-background/90 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl'
+          : 'border-transparent bg-background/0 backdrop-blur-none'
+      }`}
+    >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
         <Logo />
         <nav className="hidden items-center gap-8 md:flex">
-          {links.map(([label, href]) => <a key={href} href={href} className="text-sm font-medium text-landing-muted transition hover:text-landing-blue">{label}</a>)}
+          {links.map(([label, href]) => (
+            <a key={href} href={href} className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
+              {label}
+            </a>
+          ))}
         </nav>
-        <div className="hidden items-center gap-5 md:flex">
-          <Link href="/login" className="text-sm font-semibold text-landing-foreground hover:text-landing-blue">Sign in</Link>
-          <Link href="/register" className="rounded-full bg-landing-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90">Start free trial</Link>
+        <div className="hidden items-center gap-3 md:flex">
+          <Button render={<Link href="/login" />} variant="ghost" size="sm" className="rounded-full px-4">
+            Login
+          </Button>
+          <Button render={<Link href="/register" />} size="sm" className="rounded-full px-5 shadow-sm">
+            Get Started
+          </Button>
         </div>
-        <button type="button" onClick={() => setOpen(!open)} className="rounded-lg p-2 text-landing-foreground md:hidden" aria-label="Toggle navigation">
+        <button type="button" onClick={() => setOpen(!open)} className="rounded-lg p-2 text-foreground md:hidden" aria-label="Toggle navigation">
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
-      {open && <nav className="border-t border-landing-line px-5 py-4 md:hidden">{links.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="block py-3 text-sm font-semibold text-landing-foreground">{label}</a>)}<Link href="/login" className="block py-3 text-sm font-semibold text-landing-foreground">Sign in</Link><Link href="/register" className="mt-2 block rounded-full bg-landing-blue px-5 py-3 text-center text-sm font-semibold text-white">Start free trial</Link></nav>}
+      {open && (
+        <nav className="border-t border-border bg-background/95 px-5 py-4 md:hidden">
+          {links.map(([label, href]) => (
+            <a key={href} href={href} onClick={() => setOpen(false)} className="block py-3 text-sm font-semibold text-foreground">
+              {label}
+            </a>
+          ))}
+          <Button render={<Link href="/login" />} variant="ghost" className="mt-2 w-full justify-start rounded-lg px-3 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
+            Login
+          </Button>
+          <Button render={<Link href="/register" />} className="mt-2 w-full rounded-full px-5 py-3 text-sm font-semibold" onClick={() => setOpen(false)}>
+            Get Started
+          </Button>
+        </nav>
+      )}
     </header>
   )
 }
