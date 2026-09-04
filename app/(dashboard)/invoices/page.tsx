@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
@@ -46,12 +46,19 @@ export default function InvoicesPage() {
   const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
 
   const [taskId, setTaskId] = useState<string | undefined>()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
-  }, [])
+    setTaskId(searchParams.get('task_id') ?? undefined)
+  }, [searchParams])
 
   const loadInvoices = useCallback(async () => {
+    // Only fetch invoices when a `task_id` is provided in the URL
+    if (!taskId) {
+      setInvoices([])
+      return
+    }
+
     if (!selectedCompany) {
       setInvoices([])
       return
@@ -110,12 +117,12 @@ export default function InvoicesPage() {
     return rows.filter((invoice) => {
       const status = String(invoice.invoice_status ?? invoice.status ?? 'draft').toLowerCase()
       const customerName = invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)
-      const vehicleName = invoice.taskCard?.quotation?.vehicle?.name ?? getVehicleName(invoice.vehicleId)
+      const vehicleVin = invoice.taskCard?.quotation?.vehicle?.vin ?? invoice.taskCard?.quotation?.vehicle?.VIN ?? getVehicleVin(invoice.vehicleId)
       const matchesSearch = !normalizedQuery || [
         invoice.invoice_number,
         invoice.invoiceNumber,
         customerName,
-        vehicleName,
+        vehicleVin,
       ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
 
       return matchesSearch && (statusFilter === 'all' || status === statusFilter)
@@ -134,6 +141,12 @@ export default function InvoicesPage() {
     if (!vehicleId) return '—'
     const vehicle = vehicles.find((item) => item.id === vehicleId)
     return vehicle ? [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(' ') || '—' : '—'
+  }
+
+  function getVehicleVin(vehicleId?: string) {
+    if (!vehicleId) return '—'
+    const vehicle = vehicles.find((item) => item.id === vehicleId)
+    return vehicle ? (vehicle.vin ?? vehicle.VIN ?? '—') : '—'
   }
 
   const downloadInvoice = async (invoiceId: string | number) => {
@@ -290,7 +303,7 @@ export default function InvoicesPage() {
                 <tr>
                   <th className="px-5 py-4 font-semibold">Invoice #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
-                  <th className="px-5 py-4 font-semibold">Vehicle</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Payment</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
@@ -317,7 +330,7 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
-                        <span>{invoice.taskCard?.quotation?.vehicle?.name ?? getVehicleName(invoice.vehicleId)}</span>
+                        <span>{invoice.taskCard?.quotation?.vehicle?.vin ?? invoice.taskCard?.quotation?.vehicle?.VIN ?? getVehicleVin(invoice.vehicleId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4">

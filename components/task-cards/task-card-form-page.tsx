@@ -572,10 +572,9 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                 </div>
 
                 <div className="space-y-1 text-sm leading-6 text-foreground pt-1">
-                  <p><span className="text-muted-foreground">Name: </span><span className="font-medium">{vehicleDisplayName}</span></p>
                   <p><span className="text-muted-foreground">Make: </span><span>{vehicleMake}</span></p>
                   <p><span className="text-muted-foreground">Model: </span><span>{vehicleModel}</span></p>
-                  <p><span className="text-muted-foreground">Variant: </span><span>{vehicleVariant}</span></p>
+                  
                   <p><span className="text-muted-foreground">Year: </span><span>{vehicleYear}</span></p>
                   <p><span className="text-muted-foreground">VIN: </span><span>{vehicleVin}</span></p>
                   <p><span className="text-muted-foreground">License Plate: </span><span>{vehicleLicensePlate}</span></p>

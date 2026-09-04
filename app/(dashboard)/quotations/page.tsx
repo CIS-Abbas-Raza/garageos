@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -34,6 +34,7 @@ export default function QuotationsPage() {
   const canManageQuotations = getDashboardRole(user, isSuperAdmin) !== 'customer'
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [vehicleId, setVehicleId] = useState<string | undefined>()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
@@ -45,8 +46,8 @@ export default function QuotationsPage() {
   const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
 
   useEffect(() => {
-    setVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
-  }, [])
+    setVehicleId(searchParams.get('vehicle_id') ?? undefined)
+  }, [searchParams])
 
   useEffect(() => {
     const loadQuotations = async () => {
@@ -274,7 +275,7 @@ export default function QuotationsPage() {
                 <tr>
                   <th className="px-5 py-4 font-semibold">Quotation #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
-                  <th className="px-5 py-4 font-semibold">Vehicle</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
@@ -300,7 +301,7 @@ export default function QuotationsPage() {
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
                         <span>
-                          {quotation.vehicle?.name ??
+                          {quotation.vehicle?.vin ?? quotation.vehicle?.VIN ?? quotation.vin ?? quotation.VIN ??
                             ([quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
                               getVehicleName(quotation.vehicle_id ?? quotation.vehicleId))}
                         </span>

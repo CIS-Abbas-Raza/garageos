@@ -74,6 +74,7 @@ const menuSections = [
     items: [
       { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
       { href: '/invoices', label: 'Invoices', icon: FileText },
+      { href: '/towing-invoices', label: 'Towing Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
       { href: '/sales', label: 'Sales', icon: BarChart3 },
       { href: '/company-accounts', label: 'Company Account', icon: CreditCard },

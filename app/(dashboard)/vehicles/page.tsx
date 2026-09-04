@@ -16,7 +16,7 @@ export default function VehiclesPage() {
         title: 'Vehicles',
         description: 'Track customer vehicles, maintenance history, and service records.',
         fields: [],
-        columns: ['name', 'year', 'license_plate', 'insured', 'status'],
+          columns: ['make', 'year', 'VIN', 'insured', 'status'],
         empty: 'No vehicles configured yet.'
       }}
     />
