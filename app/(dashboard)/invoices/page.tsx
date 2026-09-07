@@ -26,7 +26,9 @@ import { RecordCountBadges } from '@/components/common/record-count-badges'
 import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
 import { format } from 'date-fns'
 
-export default function InvoicesPage() {
+type InvoiceListingType = 'service' | 'towing'
+
+export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { showAll?: boolean; invoiceType?: InvoiceListingType }) {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
@@ -53,8 +55,7 @@ export default function InvoicesPage() {
   }, [searchParams])
 
   const loadInvoices = useCallback(async () => {
-    // Only fetch invoices when a `task_id` is provided in the URL
-    if (!taskId) {
+    if (!showAll && !taskId) {
       setInvoices([])
       return
     }
@@ -66,17 +67,25 @@ export default function InvoicesPage() {
 
     try {
       const queryParams = new URLSearchParams({ company_id: String(selectedCompany) })
-      if (taskId) queryParams.set('task_id', taskId)
+      if (!showAll && taskId) queryParams.set('task_id', taskId)
       if (dateRange) { queryParams.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); queryParams.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
       const query = `?${queryParams.toString()}`
-      const response = await fetch(`/backend-api/invoices${query}`)
+      const endpoint = invoiceType === 'towing' ? 'towing-invoices' : 'invoices'
+      const response = await fetch(`/backend-api/${endpoint}${query}`)
       const result = await response.json()
       if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
-      setInvoices(Array.isArray(result.data) ? result.data : [])
+      const records = Array.isArray(result.data) ? result.data : []
+      setInvoices(invoiceType === 'towing'
+        ? records.map((invoice) => ({
+            ...invoice,
+            customerId: invoice.vehicle?.customer?.id,
+            vehicleId: invoice.vehicle_id,
+          }))
+        : records)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
     }
-  }, [selectedCompany, taskId, dateRange])
+  }, [selectedCompany, showAll, invoiceType, taskId, dateRange])
 
   useEffect(() => {
     void loadInvoices()
@@ -151,7 +160,9 @@ export default function InvoicesPage() {
 
   const downloadInvoice = async (invoiceId: string | number) => {
     try {
-      const invoiceResponse = await fetch(`/backend-api/invoices/${invoiceId}`)
+      const isTowingInvoice = invoiceType === 'towing'
+      const endpoint = isTowingInvoice ? 'towing-invoices' : 'invoices'
+      const invoiceResponse = await fetch(`/backend-api/${endpoint}/${invoiceId}`)
       const invoiceResult = await invoiceResponse.json()
       if (!invoiceResponse.ok || invoiceResult.success === false || !invoiceResult.data) {
         throw new Error(invoiceResult.message || 'Unable to load invoice for download.')
@@ -165,7 +176,7 @@ export default function InvoicesPage() {
       }
 
       const company = companyResult.data
-      const vehicle = invoice.taskCard?.quotation?.vehicle ?? {}
+      const vehicle = invoice.vehicle ?? invoice.taskCard?.quotation?.vehicle ?? {}
       const customer = vehicle.customer ?? {}
       const customerName = customer.name ?? ([customer.first_name ?? customer.firstName, customer.last_name ?? customer.lastName].filter(Boolean).join(' ') || '—')
       const companyAddress = [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(', ') || '—'
@@ -195,13 +206,18 @@ export default function InvoicesPage() {
         vin: vehicle.vin ?? vehicle.VIN ?? '—',
         licensePlate: vehicle.license_plate ?? vehicle.licensePlate ?? '—',
         notes: invoice.notes ?? '',
-        includeLineItems: (invoice.details ?? []).length > 0,
-        lineItems: (invoice.details ?? []).map((detail: any) => ({
-          type: detail.type,
-          description: detail.description ?? '',
-          qty: Number(detail.qty ?? 0),
-          unitPrice: Number(detail.unit_price ?? 0),
-        })),
+        includeLineItems: isTowingInvoice || (invoice.details ?? []).length > 0,
+        documentTitle: isTowingInvoice ? 'TOWING INVOICE' : 'INVOICE',
+        quantityLabel: isTowingInvoice ? 'Miles' : 'Qty',
+        unitPriceLabel: isTowingInvoice ? 'Rate / Mile' : 'Unit Price',
+        lineItems: isTowingInvoice
+          ? [{ type: 'service', description: 'Towing service', qty: Number(invoice.miles ?? 0), unitPrice: Number(invoice.rate ?? 0) }]
+          : (invoice.details ?? []).map((detail: any) => ({
+              type: detail.type,
+              description: detail.description ?? '',
+              qty: Number(detail.qty ?? 0),
+              unitPrice: Number(detail.unit_price ?? 0),
+            })),
         subtotal,
         taxPercentage: Number(invoice.tax_percentage ?? 0),
         taxAmount: Number(invoice.tax_amount ?? 0),
@@ -220,10 +236,11 @@ export default function InvoicesPage() {
   const sendInvoiceEmail = async (invoiceId: string | number) => {
     try {
       setSendingEmailId(invoiceId)
-      const response = await fetch('/backend-api/email/invoice', {
+      const isTowingInvoice = invoiceType === 'towing'
+      const response = await fetch(isTowingInvoice ? '/backend-api/email/towing-invoice' : '/backend-api/email/invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoice_id: invoiceId }),
+        body: JSON.stringify(isTowingInvoice ? { towing_invoice_id: invoiceId } : { invoice_id: invoiceId }),
       })
       const result = await response.json().catch(() => ({}))
       if (!response.ok || result.success === false) {
@@ -242,14 +259,14 @@ export default function InvoicesPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-primary">Garage Operations</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">Invoices</h1>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">{showAll ? 'All Invoices' : 'Invoices'}</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
         <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         {canManageInvoices && (
-          <Button onClick={() => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
+          <Button onClick={() => router.push(invoiceType === 'towing' ? '/towing-invoices/create' : `/invoices/create${!showAll && taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
             <Plus className="size-4" />
             Add Invoice
           </Button>
@@ -292,7 +309,7 @@ export default function InvoicesPage() {
           description="Create your first invoice to start tracking billing and payments."
           action={canManageInvoices ? {
             label: 'Add Invoice',
-            onClick: () => router.push(`/invoices/create${taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`),
+            onClick: () => router.push(invoiceType === 'towing' ? '/towing-invoices/create' : `/invoices/create${!showAll && taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`),
           } : undefined}
         />
       ) : (
@@ -324,13 +341,13 @@ export default function InvoicesPage() {
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <User className="size-4 text-muted-foreground" />
-                        <span>{invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)}</span>
+                        <span>{invoice.vehicle?.customer?.name ?? invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <CarFront className="size-4 text-muted-foreground" />
-                        <span>{invoice.taskCard?.quotation?.vehicle?.vin ?? invoice.taskCard?.quotation?.vehicle?.VIN ?? getVehicleVin(invoice.vehicleId)}</span>
+                        <span>{invoice.vehicle?.vin ?? invoice.vehicle?.VIN ?? invoice.taskCard?.quotation?.vehicle?.vin ?? invoice.taskCard?.quotation?.vehicle?.VIN ?? getVehicleVin(invoice.vehicleId)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
@@ -390,7 +407,7 @@ export default function InvoicesPage() {
                               Pay
                             </DropdownMenuItem>
                             {canManageInvoices && <DropdownMenuItem
-                              onClick={() => router.push(`/invoices/edit/${invoice.id}`)}
+                              onClick={() => router.push(invoiceType === 'towing' ? `/towing-invoices/edit/${invoice.id}` : `/invoices/edit/${invoice.id}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
@@ -403,9 +420,9 @@ export default function InvoicesPage() {
                               <Download className="size-4" />
                               Download PDF
                             </DropdownMenuItem>
-                            {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
+                            {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
                             {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
-                            {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
+                            {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             {canManageInvoices && <DropdownMenuItem
                               onClick={() => {
                                 setDeletingInvoice(invoice)
@@ -444,7 +461,8 @@ export default function InvoicesPage() {
         successMessage="Invoice deleted successfully."
         onConfirm={async () => {
           if (!deletingInvoice) return
-          const response = await fetch(`/backend-api/invoices/${deletingInvoice.id}`, { method: 'DELETE' })
+          const endpoint = invoiceType === 'towing' ? 'towing-invoices' : 'invoices'
+          const response = await fetch(`/backend-api/${endpoint}/${deletingInvoice.id}`, { method: 'DELETE' })
           const result = await response.json().catch(() => ({}))
           if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete invoice.')
           setInvoices((current) => current.filter((item) => item.id !== deletingInvoice.id))
@@ -452,6 +470,7 @@ export default function InvoicesPage() {
       />
       <InvoicePaymentDialog
         invoice={payingInvoice}
+        invoiceType={invoiceType === 'towing' ? 'towing' : 'invoice'}
         open={Boolean(payingInvoice)}
         onOpenChange={(open) => {
           if (!open) setPayingInvoice(null)
@@ -461,4 +480,8 @@ export default function InvoicesPage() {
       <SendCustomerMessageDialog channel={messageTarget?.channel ?? null} companyId={messageTarget?.companyId} customerId={messageTarget?.customerId} documentLabel="this invoice" onOpenChange={(open) => !open && setMessageTarget(null)} />
     </div>
   )
+}
+
+export default function InvoicesPageRoute() {
+  return <InvoicesPage />
 }

@@ -18,15 +18,24 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth-context'
 import type { Invoice } from '@/lib/types/store'
 
+type PayableInvoice = Invoice & {
+  company_id?: string | number
+  invoice_number?: string
+  balance_amount?: string | number
+  balanceAmount?: string | number
+  amountPaid?: string | number
+}
+
 type PaymentMethod = 'cash' | 'card' | 'bank_transfer' | 'online'
 type InvoicePaymentDialogProps = {
-  invoice: Invoice | null
+  invoice: PayableInvoice | null
+  invoiceType?: 'invoice' | 'towing'
   open: boolean
   onOpenChange: (open: boolean) => void
   onPaymentCreated?: () => void | Promise<void>
 }
 
-export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCreated }: InvoicePaymentDialogProps) {
+export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, onOpenChange, onPaymentCreated }: InvoicePaymentDialogProps) {
   const { user } = useAuth()
   const [step, setStep] = useState<'method' | 'form'>('method')
   const [methodGroup, setMethodGroup] = useState<'cash' | 'online'>('cash')
@@ -34,11 +43,10 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCre
   const [paidAmount, setPaidAmount] = useState('')
   const [picture, setPicture] = useState<File | null>(null)
 
-  const invoiceNumber = invoice?.invoiceNumber ?? (invoice as Invoice & { invoice_number?: string } | null)?.invoice_number ?? invoice?.id ?? ''
+  const invoiceNumber = invoice?.invoiceNumber ?? invoice?.invoice_number ?? invoice?.id ?? ''
   const [pictureError, setPictureError] = useState('')
 
-  const listedBalance = (invoice as Invoice & { balance_amount?: string | number; balanceAmount?: string | number } | null)?.balance_amount
-    ?? (invoice as Invoice & { balanceAmount?: string | number } | null)?.balanceAmount
+  const listedBalance = invoice?.balance_amount ?? invoice?.balanceAmount
   const totalAmount = Number(invoice?.total ?? 0)
   const currentPaid = Number(invoice?.amountPaid ?? 0)
   const balanceBeforePayment = Math.max(0, Number(listedBalance ?? totalAmount - currentPaid))
@@ -93,7 +101,7 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCre
       return
     }
 
-    const companyId = invoice.companyId ?? (invoice as Invoice & { company_id?: string | number }).company_id
+    const companyId = invoice.companyId ?? invoice.company_id
     if (!companyId || !user?.id) {
       toast.error('Company and signed-in user are required to create a payment.')
       return
@@ -105,6 +113,7 @@ export function InvoicePaymentDialog({ invoice, open, onOpenChange, onPaymentCre
       const formData = new FormData()
       formData.set('company_id', String(companyId))
       formData.set('invoice_id', String(invoice.id))
+      formData.set('invoice_type', invoiceType === 'towing' ? 'Towing Service' : 'Service')
       formData.set('total_amount', String(totalAmount))
       formData.set('balance_amount', String(balanceAmount))
       formData.set('paid_amount', String(paidValue))

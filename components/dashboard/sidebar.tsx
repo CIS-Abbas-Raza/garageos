@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/lib/auth-context'
+import { useBranch } from '@/lib/branch-context'
 import { canAccessDashboardPath, getDashboardRole } from '@/lib/role-access'
 import {
   BarChart3,
@@ -73,8 +74,7 @@ const menuSections = [
     icon: CreditCard,
     items: [
       { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
-      { href: '/invoices', label: 'Invoices', icon: FileText },
-      { href: '/towing-invoices', label: 'Towing Invoices', icon: FileText },
+      { href: '/all-invoices', label: 'All Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
       { href: '/sales', label: 'Sales', icon: BarChart3 },
       { href: '/company-accounts', label: 'Company Account', icon: CreditCard },
@@ -98,9 +98,11 @@ export function DashboardSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout, isSuperAdmin } = useAuth()
+  const { selectedCompany } = useBranch()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCompanyName, setSelectedCompanyName] = useState('')
 
   // Determine active states to auto-expand parent sections
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
@@ -122,6 +124,32 @@ export function DashboardSidebar() {
     return () => window.removeEventListener('garageos:toggle-sidebar', toggleSidebar)
   }, [])
 
+  useEffect(() => {
+    if (isSuperAdmin || !selectedCompany) {
+      setSelectedCompanyName('')
+      return
+    }
+
+    let cancelled = false
+    const loadSelectedCompany = async () => {
+      try {
+        const response = await fetch(`/backend-api/companies/${encodeURIComponent(selectedCompany)}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load company.')
+        }
+        if (!cancelled) {
+          setSelectedCompanyName(String(result.data.name ?? result.data.company_name ?? 'Selected Company'))
+        }
+      } catch {
+        if (!cancelled) setSelectedCompanyName('Selected Company')
+      }
+    }
+
+    void loadSelectedCompany()
+    return () => { cancelled = true }
+  }, [isSuperAdmin, selectedCompany])
+
   const handleSignOut = () => {
     logout()
     toast.success('You have been signed out.')
@@ -132,6 +160,7 @@ export function DashboardSidebar() {
   const initials = displayName.slice(0, 2).toUpperCase()
 
   const role = getDashboardRole(user, isSuperAdmin)
+  const sidebarLabel = isSuperAdmin ? 'Super Admin' : selectedCompanyName || 'Selected Company'
 
   // Filter sections by the active role, then by search query.
   const filteredSections = menuSections.map((section) => {
@@ -164,7 +193,7 @@ export function DashboardSidebar() {
             </span>
             <span className={`${collapsed ? 'hidden' : 'flex'} min-w-0 flex-col`}>
               <span className="truncate text-base font-bold text-foreground">GarageOS</span>
-              <span className="text-xs text-muted-foreground">v1.0.0</span>
+              <span className="truncate text-xs text-muted-foreground">{sidebarLabel}</span>
             </span>
           </Link>
           <Button

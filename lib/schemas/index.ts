@@ -108,6 +108,8 @@ export const invoiceSchema = z.object({
   paymentStatus: z.enum(['pending', 'completed']),
   creationDate: z.string().min(1, 'Creation date is required'),
   dueDate: z.string().min(1, 'Due date is required'),
+  pickUpAddress: z.string().optional(),
+  dropOffAddress: z.string().optional(),
   notes: z.string().optional(),
   documentName: z.string().optional(),
   taxPercentage: z.coerce.number().min(0).max(100),
