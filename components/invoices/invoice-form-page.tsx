@@ -34,6 +34,7 @@ type InvoiceMode = 'create' | 'edit'
 type InvoiceFormPageProps = {
   mode: InvoiceMode
   invoiceId?: string
+  variant?: 'standard' | 'towing'
 }
 
 const statusOptions = [
@@ -145,8 +146,13 @@ export type InvoicePdfPayload = {
   vehicleYear: string
   vin: string
   licensePlate: string
+  pickUpAddress?: string
+  dropOffAddress?: string
   notes: string
   includeLineItems: boolean
+  documentTitle?: string
+  quantityLabel?: string
+  unitPriceLabel?: string
   lineItems: PdfInvoiceLineItem[]
   subtotal: number
   taxPercentage: number
@@ -201,7 +207,7 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(24)
   doc.setCharSpace(1.4)
-  doc.text('INVOICE', metaX + 180, y + 18, { align: 'right' })
+  doc.text(payload.documentTitle ?? 'INVOICE', metaX + 180, y + 18, { align: 'right' })
   doc.setCharSpace(0)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
@@ -254,6 +260,31 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   y += detailSectionHeight
   doc.setLineWidth(0.8)
   doc.line(margin, y, pageWidth - margin, y)
+
+  const hasTowingAddresses = payload.pickUpAddress !== undefined || payload.dropOffAddress !== undefined
+  if (hasTowingAddresses) {
+    y += 18
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setCharSpace(1.2)
+    doc.text('TOWING DETAIL', margin, y)
+    doc.setCharSpace(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+
+    const towingAddressRows = [
+      `Pick Up Address: ${safePdfText(payload.pickUpAddress)}`,
+      `Drop Off Address: ${safePdfText(payload.dropOffAddress)}`,
+    ]
+    let towingRowY = y + 18
+    towingAddressRows.forEach((row) => {
+      const rowLines = doc.splitTextToSize(row, contentWidth)
+      doc.text(rowLines, margin, towingRowY)
+      towingRowY += rowLines.length * 15
+    })
+    y = towingRowY + 10
+    doc.line(margin, y, pageWidth - margin, y)
+  }
   y += 18
 
   const isEnabled = payload.includeLineItems !== false
@@ -272,7 +303,7 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
 
   autoTable(doc, {
     startY: y,
-    head: [['Type', 'Description', 'Qty', 'Unit Price', 'Amount']],
+    head: [['Type', 'Description', payload.quantityLabel ?? 'Qty', payload.unitPriceLabel ?? 'Unit Price', 'Amount']],
     body: lineItemsBody,
     margin: { left: margin, right: margin },
     theme: 'grid',
@@ -343,9 +374,9 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   doc.save(`Invoice-${safePdfText(payload.invoiceNumber, 'Invoice').replace(/[^a-z0-9-_]+/gi, '-')}.pdf`)
 }
 
-const initialLineItem = (): InvoiceFormData['lineItems'][number] => ({
+const initialLineItem = (isTowing = false): InvoiceFormData['lineItems'][number] => ({
   type: 'service',
-  description: '',
+  description: isTowing ? 'Towing service' : '',
   qty: 1,
   unitPrice: 0,
   amount: 0,
@@ -538,7 +569,8 @@ function InvoicePrintView({
   )
 }
 
-export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
+export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: InvoiceFormPageProps) {
+  const isTowing = variant === 'towing'
   const router = useRouter()
   const { selectedCompany } = useBranch()
   const { user } = useAuth()
@@ -561,16 +593,74 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   }, [])
 
   useEffect(() => {
+    if (!isTowing || !selectedCompany) return
+
+    let cancelled = false
+    const loadSelectedCompany = async () => {
+      try {
+        const response = await fetch(`/backend-api/companies/${encodeURIComponent(String(selectedCompany))}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false || !result.data) {
+          throw new Error(result.message || 'Unable to load company details.')
+        }
+        if (!cancelled) setApiCompany(result.data)
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(error instanceof Error ? error.message : 'Unable to load company details.')
+        }
+      }
+    }
+
+    void loadSelectedCompany()
+    return () => { cancelled = true }
+  }, [isTowing, selectedCompany])
+
+  useEffect(() => {
     if (mode !== 'edit' || !invoiceId) return
 
     const loadInvoice = async () => {
       try {
-        const response = await fetch(`/backend-api/invoices/${invoiceId}`)
+        const response = await fetch(`/backend-api/${isTowing ? 'towing-invoices' : 'invoices'}/${invoiceId}`)
         const result = await response.json()
         if (!response.ok || result.success === false || !result.data) {
           throw new Error(result.message || 'Unable to load invoice.')
         }
         const record = result.data
+        if (isTowing) {
+          const vehicle = record.vehicle
+          const customer = vehicle?.customer
+          if (record.company) setApiCompany(record.company)
+          if (vehicle) setApiVehicle(vehicle)
+          if (customer) setApiCustomer(customer)
+          setApiInvoice({
+            ...record,
+            companyId: String(record.company_id),
+            customerId: customer?.id ? String(customer.id) : '',
+            vehicleId: record.vehicle_id ? String(record.vehicle_id) : '',
+            invoiceNumber: record.invoice_number ?? `TOW-${record.id}`,
+            status: record.invoice_status,
+            paymentStatus: record.payment_status,
+            creationDate: record.creation_date,
+            dueDate: record.creation_date,
+            mileage: Number(record.mileage ?? 0),
+            pickUpAddress: record.pick_up_address ?? '',
+            dropOffAddress: record.drop_off_address ?? '',
+            taxPercentage: Number(record.tax_percentage ?? 0),
+            taxAmount: Number(record.tax_amount ?? 0),
+            discountAmount: Number(record.discount ?? 0),
+            discountPercentage: Number(record.discount_percentage ?? 0),
+            subtotal: Number(record.subtotal ?? 0),
+            total: Number(record.total ?? 0),
+            lineItems: [{
+              type: 'service',
+              description: 'Towing service',
+              qty: Number(record.miles ?? 0),
+              unitPrice: Number(record.rate ?? 0),
+              amount: Number(record.amount ?? 0),
+            }],
+          })
+          return
+        }
         const subtotal = Number(record.subtotal ?? 0)
         const discount = Number(record.discount ?? 0)
         setTaskId(String(record.task_card_id))
@@ -602,7 +692,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
     }
 
     void loadInvoice()
-  }, [mode, invoiceId])
+  }, [mode, invoiceId, isTowing])
 
   const Invoice = useMemo(
     () => (mode === 'edit' && invoiceId ? apiInvoice ?? invoices.find((item) => item.id === invoiceId) : undefined),
@@ -649,6 +739,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       paymentStatus: Invoice?.paymentStatus ?? 'pending',
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
+      pickUpAddress: (Invoice as any)?.pickUpAddress ?? (Invoice as any)?.pick_up_address ?? '',
+      dropOffAddress: (Invoice as any)?.dropOffAddress ?? (Invoice as any)?.drop_off_address ?? '',
       documentName: Invoice?.documentName ?? '',
       taxPercentage: Invoice?.taxPercentage ?? 0,
       discountPercentage: Invoice?.discountPercentage ?? (Invoice as any)?.discount_percentage ?? 0,
@@ -658,9 +750,9 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       total: Invoice?.total ?? 0,
       lineItems: Invoice?.lineItems?.length
         ? Invoice.lineItems.map((item: any) => normalizeLineItem(item))
-        : [initialLineItem()],
+        : [initialLineItem(isTowing)],
     }
-  }, [Invoice, customers, vehicles])
+  }, [Invoice, customers, vehicles, isTowing])
 
   const {
     register,
@@ -682,7 +774,50 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   }, [Invoice, defaultValues, reset])
 
   useEffect(() => {
-    if (!taskId) return
+    if (!isTowing) return
+
+    const vehicleId = new URLSearchParams(window.location.search).get('vehicle_id')
+    if (!vehicleId) return
+
+    let cancelled = false
+    const loadTowingVehicleAndCustomer = async () => {
+      try {
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(vehicleId)}`)
+        const vehicleResult = await vehicleResponse.json()
+        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+        }
+        if (cancelled) return
+
+        const vehicle = vehicleResult.data
+        setApiVehicle(vehicle)
+        setValue('vehicleId', String(vehicle.id ?? vehicleId), { shouldDirty: false, shouldValidate: true })
+
+        const customerId = vehicle.customer_id ?? vehicle.customerId
+        if (!customerId) return
+
+        const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
+        const customerResult = await customerResponse.json()
+        if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+          throw new Error(customerResult.message || 'Unable to load customer details.')
+        }
+        if (cancelled) return
+
+        setApiCustomer(customerResult.data)
+        setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(error instanceof Error ? error.message : 'Unable to load towing vehicle details.')
+        }
+      }
+    }
+
+    void loadTowingVehicleAndCustomer()
+    return () => { cancelled = true }
+  }, [isTowing, setValue])
+
+  useEffect(() => {
+    if (isTowing || !taskId) return
 
     let cancelled = false
     const loadLinkedRecords = async () => {
@@ -752,7 +887,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
 
     void loadLinkedRecords()
     return () => { cancelled = true }
-  }, [mode, taskId, setValue])
+  }, [isTowing, mode, taskId, setValue])
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -764,6 +899,18 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
   const watchedVehicleId = useWatch({ control, name: 'vehicleId' })
   const watchedTaxPercentage = Number(useWatch({ control, name: 'taxPercentage' }) ?? 0)
   const watchedDiscountPercentage = Number(useWatch({ control, name: 'discountPercentage' }) ?? 0)
+
+  useEffect(() => {
+    if (!isTowing) return
+    watchedLineItems.forEach((item, index) => {
+      if (item?.type !== 'service') {
+        setValue(`lineItems.${index}.type`, 'service', { shouldDirty: false, shouldValidate: true })
+      }
+      if (item?.description !== 'Towing service') {
+        setValue(`lineItems.${index}.description`, 'Towing service', { shouldDirty: false, shouldValidate: true })
+      }
+    })
+  }, [isTowing, watchedLineItems, setValue])
 
   const actualSubtotal = useMemo(
     () =>
@@ -884,9 +1031,16 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       vehicleYear,
       vin: vehicleVin,
       licensePlate: vehicleLicensePlate,
+      ...(isTowing ? {
+        pickUpAddress: values.pickUpAddress,
+        dropOffAddress: values.dropOffAddress,
+      } : {}),
       notes: values.notes ?? '',
       paymentStatus: values.paymentStatus ?? 'pending',
       includeLineItems,
+      documentTitle: isTowing ? 'TOWING INVOICE' : 'INVOICE',
+      quantityLabel: isTowing ? 'Miles' : 'Qty',
+      unitPriceLabel: isTowing ? 'Rate / Mile' : 'Unit Price',
       lineItems: (values.lineItems ?? []).map((item) => ({
         type: item.type,
         description: item.description,
@@ -907,7 +1061,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
 
   const addRow = () => {
     if (!includeLineItems) return
-    append(initialLineItem(), { shouldFocus: false })
+    append(initialLineItem(isTowing), { shouldFocus: false })
     window.requestAnimationFrame(() => {
       const nextIndex = fields.length
       const nextInput = document.querySelector<HTMLInputElement>(`[data-line-item-row="${nextIndex}"] input`)
@@ -922,12 +1076,16 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
       toast.error('Please select a company before saving this Invoice.')
       return
     }
-    if (!resolvedTaskId) {
+    if (!isTowing && !resolvedTaskId) {
       toast.error('Open invoices from a Task Card so its task ID can be assigned.')
       return
     }
+    if (isTowing && !values.vehicleId) {
+      toast.error('A vehicle is required before saving a towing invoice.')
+      return
+    }
 
-    const apiPayload = {
+    const standardInvoicePayload = {
       company_id: companyId,
       task_id: resolvedTaskId,
       invoice_number: values.invoiceNumber,
@@ -953,19 +1111,46 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
           is_deleted: 0,
         })) : [],
     }
+    const towingLineItem = values.lineItems?.[0]
+    const towingInvoicePayload = {
+      company_id: companyId,
+      vehicle_id: Number(values.vehicleId),
+      invoice_number: values.invoiceNumber,
+      invoice_status: values.status,
+      payment_status: values.paymentStatus,
+      pick_up_address: values.pickUpAddress || null,
+      drop_off_address: values.dropOffAddress || null,
+      mileage: Number(values.mileage ?? 0),
+      miles: Number(towingLineItem?.qty ?? 0),
+      rate: Number(towingLineItem?.unitPrice ?? 0),
+      amount: roundMoney(Number(towingLineItem?.qty ?? 0) * Number(towingLineItem?.unitPrice ?? 0)),
+      subtotal,
+      discount: discountAmount,
+      discount_percentage: values.discountPercentage,
+      tax_amount: taxAmount,
+      tax_percentage: values.taxPercentage,
+      total,
+      creation_date: values.creationDate,
+      created_by: user?.id,
+    }
+    const apiPayload = isTowing ? towingInvoicePayload : standardInvoicePayload
+    const endpoint = isTowing ? '/backend-api/towing-invoices' : '/backend-api/invoices'
+    const redirectPath = isTowing
+      ? `/towing-invoices?vehicle_id=${encodeURIComponent(values.vehicleId)}`
+      : `/invoices?task_id=${encodeURIComponent(String(resolvedTaskId))}`
 
     try {
-      const response = await fetch(`/backend-api/invoices${mode === 'edit' && invoiceId ? `/${invoiceId}` : ''}`, {
+      const response = await fetch(`${endpoint}${mode === 'edit' && invoiceId ? `/${invoiceId}` : ''}`, {
         method: mode === 'edit' && invoiceId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(apiPayload),
       })
       const result = await response.json().catch(() => ({}))
       if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to save invoice.')
-      toast.success(`Invoice ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
-      router.push(`/invoices?task_id=${encodeURIComponent(String(resolvedTaskId))}`)
+      toast.success(`${isTowing ? 'Towing invoice' : 'Invoice'} ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
+      router.push(redirectPath)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Unable to save invoice.')
+      toast.error(error instanceof Error ? error.message : `Unable to save ${isTowing ? 'towing invoice' : 'invoice'}.`)
     }
   }
 
@@ -1193,27 +1378,43 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                 {errors.paymentStatus && <p className="text-xs font-medium text-destructive">{errors.paymentStatus.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="creationDate">Creation Date</Label>
-                <Input
-                  id="creationDate"
-                  type="date"
-                  {...register('creationDate')}
-                  className={cn(errors.creationDate && 'border-destructive')}
-                />
-                {errors.creationDate && <p className="text-xs font-medium text-destructive">{errors.creationDate.message}</p>}
-              </div>
+              {isTowing ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="pickUpAddress">Pickup Address</Label>
+                    <Input id="pickUpAddress" placeholder="Enter pickup address" {...register('pickUpAddress')} />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  {...register('dueDate')}
-                  className={cn(errors.dueDate && 'border-destructive')}
-                />
-                {errors.dueDate && <p className="text-xs font-medium text-destructive">{errors.dueDate.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dropOffAddress">Drop Off Address</Label>
+                    <Input id="dropOffAddress" placeholder="Enter drop off address" {...register('dropOffAddress')} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="creationDate">Creation Date</Label>
+                    <Input
+                      id="creationDate"
+                      type="date"
+                      {...register('creationDate')}
+                      className={cn(errors.creationDate && 'border-destructive')}
+                    />
+                    {errors.creationDate && <p className="text-xs font-medium text-destructive">{errors.creationDate.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dueDate">Due Date</Label>
+                    <Input
+                      id="dueDate"
+                      type="date"
+                      {...register('dueDate')}
+                      className={cn(errors.dueDate && 'border-destructive')}
+                    />
+                    {errors.dueDate && <p className="text-xs font-medium text-destructive">{errors.dueDate.message}</p>}
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="notes">Notes</Label>
@@ -1238,7 +1439,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
               </div>
 
               <div className="flex items-center gap-4">
-                <button
+                {!isTowing && <button
                   type="button"
                   role="switch"
                   aria-checked={includeLineItems}
@@ -1256,12 +1457,12 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                       includeLineItems ? "bg-primary after:translate-x-5" : "bg-slate-300"
                     )}
                   />
-                </button>
+                </button>}
 
                 <Button
                   type="button"
                   onClick={addRow}
-                  disabled={!includeLineItems}
+                  disabled={!isTowing && !includeLineItems}
                   className="gap-2"
                 >
                   <Plus className="size-4" />
@@ -1277,8 +1478,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                     <tr>
                       <th className="w-36 px-4 py-3 font-semibold">Type</th>
                       <th className="px-4 py-3 font-semibold">Description</th>
-                      <th className="w-24 px-4 py-3 font-semibold">Qty</th>
-                      <th className="w-36 px-4 py-3 font-semibold">Unit Price</th>
+                      <th className="w-24 px-4 py-3 font-semibold">{isTowing ? 'Miles' : 'Qty'}</th>
+                      <th className="w-36 px-4 py-3 font-semibold">{isTowing ? 'Rate / Mile' : 'Unit Price'}</th>
                       <th className="w-36 px-4 py-3 font-semibold">Amount</th>
                       <th className="w-24 px-4 py-3 font-semibold text-right">Actions</th>
                     </tr>
@@ -1296,7 +1497,9 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                         return (
                           <tr key={field.id} data-line-item-row={index} className="align-top">
                             <td className="px-4 py-4">
-                              <Select
+                              {isTowing ? (
+                                <Input value="Service" readOnly className="bg-muted/50 font-medium text-foreground" />
+                              ) : <Select
                                 disabled={!includeLineItems}
                                 value={watch(`lineItems.${index}.type`) ?? 'service'}
                                 onValueChange={(value) =>
@@ -1313,13 +1516,14 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                                   <SelectItem value="service">Service</SelectItem>
                                   <SelectItem value="parts">Parts</SelectItem>
                                 </SelectContent>
-                              </Select>
+                              </Select>}
                             </td>
                             <td className="px-4 py-4">
                               <Input
-                                disabled={!includeLineItems}
+                                disabled={!isTowing && !includeLineItems}
+                                readOnly={isTowing}
                                 {...register(`lineItems.${index}.description` as const)}
-                                placeholder="Describe the work or part"
+                                placeholder={isTowing ? 'Towing service' : 'Describe the work or part'}
                                 className={cn(errors.lineItems?.[index]?.description && 'border-destructive')}
                               />
                               {errors.lineItems?.[index]?.description && (
@@ -1332,7 +1536,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                               <Input
                                 type="number"
                                 min={0}
-                                disabled={!includeLineItems}
+                                disabled={!isTowing && !includeLineItems}
                                 {...register(`lineItems.${index}.qty` as const, { valueAsNumber: true })}
                                 className={cn(errors.lineItems?.[index]?.qty && 'border-destructive')}
                               />
@@ -1347,7 +1551,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                                 type="number"
                                 min={0}
                                 step="0.01"
-                                disabled={!includeLineItems}
+                                disabled={!isTowing && !includeLineItems}
                                 {...register(`lineItems.${index}.unitPrice` as const, { valueAsNumber: true })}
                                 className={cn(errors.lineItems?.[index]?.unitPrice && 'border-destructive')}
                               />
@@ -1359,7 +1563,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                             </td>
                             <td className="px-4 py-4">
                               <Input
-                                value={formatMoney(includeLineItems ? rowAmount : 0)}
+                                value={formatMoney(rowAmount)}
                                 readOnly
                                 className="bg-muted/50 font-semibold text-foreground"
                               />
@@ -1370,9 +1574,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  disabled={!includeLineItems}
+                                  disabled={!isTowing && !includeLineItems}
                                   onClick={() => {
-                                    if (!includeLineItems) return
                                     const current = watch(`lineItems.${index}`)
                                     update(index, {
                                       ...current,
@@ -1387,8 +1590,8 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  disabled={!includeLineItems}
-                                  onClick={() => includeLineItems && remove(index)}
+                                  disabled={!isTowing && !includeLineItems}
+                                  onClick={() => remove(index)}
                                   aria-label={`Delete row ${index + 1}`}
                                   className="text-destructive hover:text-destructive"
                                 >
@@ -1425,7 +1628,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                         min={0}
                         max={100}
                         step="0.01"
-                        disabled={!includeLineItems}
+                        disabled={!isTowing && !includeLineItems}
                         {...register('taxPercentage', { valueAsNumber: true })}
                         className={cn('w-28', errors.taxPercentage && 'border-destructive')}
                       />
@@ -1448,7 +1651,7 @@ export function InvoiceFormPage({ mode, invoiceId }: InvoiceFormPageProps) {
                         min={0}
                         max={100}
                         step="0.01"
-                        disabled={!includeLineItems}
+                        disabled={!isTowing && !includeLineItems}
                         {...register('discountPercentage', { valueAsNumber: true })}
                         className={cn('w-28', errors.discountPercentage && 'border-destructive')}
                       />

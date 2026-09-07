@@ -1,5 +1,5 @@
 import { InvoiceFormPage } from '@/components/invoices/invoice-form-page'
 
 export default function CreateTowingInvoicePage() {
-  return <InvoiceFormPage mode="create" />
+  return <InvoiceFormPage mode="create" variant="towing" />
 }

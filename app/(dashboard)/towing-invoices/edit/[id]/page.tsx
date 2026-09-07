@@ -1,5 +1,12 @@
 import { InvoiceFormPage } from '@/components/invoices/invoice-form-page'
 
-export default function EditTowingInvoicePage({ params }: { params: { id: string } }) {
-  return <InvoiceFormPage mode="edit" invoiceId={params.id} />
+type EditTowingInvoicePageProps = {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export default async function EditTowingInvoicePage({ params }: EditTowingInvoicePageProps) {
+  const { id } = await params
+  return <InvoiceFormPage mode="edit" invoiceId={id} variant="towing" />
 }

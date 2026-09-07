@@ -37,6 +37,7 @@ import {
   Bell,
   CalendarCheck,
   Download,
+  Mail,
   Image as ImageIcon,
   KeyRound,
   Star,
@@ -77,6 +78,8 @@ import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal";
 import { Pagination } from "@/components/common/pagination";
 import { RecordCountBadges } from "@/components/common/record-count-badges";
 import { DateRangeFilter, type DateRangeValue } from "@/components/common/date-range-filter";
+import { InvoicePaymentDialog } from "@/components/invoices/invoice-payment-dialog";
+import { generateInvoicePdf } from "@/components/invoices/invoice-form-page";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -125,6 +128,8 @@ type Config = {
   hideRowActions?: boolean;
   /** Hides only the Edit action while retaining the other row actions. */
   hideEditAction?: boolean;
+  /** Hides the View action while retaining other row actions. */
+  hideViewAction?: boolean;
   /** Hides the activate/deactivate action. */
   hideStatusAction?: boolean;
   /** Hides the delete action. */
@@ -143,6 +148,10 @@ type Config = {
   fileUrlPrefix?: string;
   /** Loads and saves records for the customer identified by `customer_id` in the URL. */
   customerScoped?: boolean;
+  /** Loads records for the vehicle identified by `vehicle_id` in the URL. */
+  vehicleScoped?: boolean;
+  /** Adds the shared payment flow for invoice-like records. */
+  paymentType?: "invoice" | "towing";
   title: string;
   description: string;
   icon?: React.ComponentType<{ className?: string }>;
@@ -1005,10 +1014,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const { user } = useAuth();
   const dashboardRole = getDashboardRole(user);
   const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
+  const [selectedVehicle, setSelectedVehicle] = useState<string | undefined>();
 
   useEffect(() => {
-    const customerId = new URLSearchParams(window.location.search).get("customer_id");
+    const searchParams = new URLSearchParams(window.location.search);
+    const customerId = searchParams.get("customer_id");
+    const vehicleId = searchParams.get("vehicle_id");
     setSelectedCustomer(customerId ?? undefined);
+    setSelectedVehicle(vehicleId ?? undefined);
   }, []);
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
@@ -1079,6 +1092,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
       setApiRows([]);
       return;
     }
+    if (config.vehicleScoped && !selectedVehicle) {
+      setApiRows([]);
+      return;
+    }
     try {
       const queryParams = new URLSearchParams();
       queryParams.set("page", String(page));
@@ -1090,6 +1107,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       if (dateTo) queryParams.set("endDate", dateTo);
       if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
       if (config.customerScoped) queryParams.set("customer_id", selectedCustomer!);
+      if (config.vehicleScoped) queryParams.set("vehicle_id", selectedVehicle!);
       const requestQuery = queryParams.size ? `?${queryParams.toString()}` : "";
       const responseBody = await requestApi(requestQuery);
       const records = Array.isArray(responseBody.data) ? responseBody.data : [];
@@ -1162,11 +1180,42 @@ export function EntityCrudPage({ config }: { config: Config }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
-  }, [apiEnabled, config.companyScoped, config.customerScoped, config.dateRangeField, config.resource, dateFrom, dateTo, page, pageSize, query, requestApi, selectedCompany, selectedCustomer, status]);
+  }, [apiEnabled, config.companyScoped, config.customerScoped, config.vehicleScoped, config.dateRangeField, config.resource, dateFrom, dateTo, page, pageSize, query, requestApi, selectedCompany, selectedCustomer, selectedVehicle, status]);
 
   /* ── State ── */
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
+  const [paying, setPaying] = useState<Record<string, any> | null>(null);
+  const downloadTowingInvoice = async (invoiceId: string | number) => {
+    try {
+      const response = await fetch(`/backend-api/towing-invoices/${invoiceId}`);
+      const result = await response.json();
+      if (!response.ok || result.success === false || !result.data) throw new Error(result.message || "Unable to load towing invoice.");
+      const invoice = result.data;
+      const company = invoice.company ?? {};
+      const vehicle = invoice.vehicle ?? {};
+      const customer = vehicle.customer ?? {};
+      await generateInvoicePdf({
+        companyName: company.name ?? "Company", companyEmail: company.email ?? "â€”", companyCountry: company.country ?? "â€”", companyPhone: company.phone ?? "â€”",
+        companyAddress: [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(", ") || "â€”", companyRegNo: company.registration_no ?? company.registrationNo ?? "â€”", companyLogoUrl: company.logo_url ?? company.logoUrl ?? company.logo,
+        invoiceNumber: invoice.invoice_number ?? `TOW-${invoice.id}`, creationDate: invoice.creation_date ?? "", dueDate: invoice.creation_date ?? "", paymentStatus: invoice.payment_status ?? "pending",
+        customerName: customer.name ?? "â€”", customerEmail: customer.email ?? "â€”", customerPhone: customer.phone ?? "â€”", customerAddress: customer.address ?? "â€”",
+        vehicleMake: vehicle.make ?? "â€”", vehicleModel: vehicle.model ?? "â€”", vehicleYear: vehicle.year ? String(vehicle.year) : "â€”", vin: vehicle.vin ?? vehicle.VIN ?? "â€”", licensePlate: vehicle.license_plate ?? vehicle.licensePlate ?? "â€”",
+        pickUpAddress: invoice.pick_up_address ?? "", dropOffAddress: invoice.drop_off_address ?? "", notes: "", includeLineItems: true, documentTitle: "TOWING INVOICE", quantityLabel: "Miles", unitPriceLabel: "Rate / Mile",
+        lineItems: [{ type: "service", description: "Towing service", qty: Number(invoice.miles ?? 0), unitPrice: Number(invoice.rate ?? 0) }],
+        subtotal: Number(invoice.subtotal ?? 0), taxPercentage: Number(invoice.tax_percentage ?? 0), taxAmount: Number(invoice.tax_amount ?? 0), discountPercentage: Number(invoice.discount_percentage ?? 0), discountAmount: Number(invoice.discount ?? 0), total: Number(invoice.total ?? 0),
+      });
+      toast.success("Towing invoice PDF downloaded.");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Unable to download towing invoice."); }
+  };
+  const sendTowingInvoiceEmail = async (invoiceId: string | number) => {
+    try {
+      const response = await fetch("/backend-api/email/towing-invoice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ towing_invoice_id: invoiceId }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.success === false) throw new Error(result.message || result.error || "Unable to send towing invoice email.");
+      toast.success(result.message || "Towing invoice email sent successfully.");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Unable to send towing invoice email."); }
+  };
   const editingFileUrl = editing?.picture && config.fileUrlPrefix
     ? `${config.fileUrlPrefix}${encodeURIComponent(String(editing.picture))}`
     : undefined;
@@ -1757,13 +1806,33 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             <MoreHorizontal className="size-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
+                            {!config.hideViewAction && <DropdownMenuItem
                               onClick={() => setViewing(row)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Eye className="size-4" />
                               View
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
+                            {config.paymentType && (
+                              <DropdownMenuItem
+                                onClick={() => setPaying(row)}
+                                disabled={(row.payment_status ?? row.paymentStatus) === "completed" || Number(row.balance_amount ?? row.balanceAmount ?? row.total ?? 0) <= 0}
+                                className="gap-2 cursor-pointer text-xs"
+                              >
+                                <CreditCard className="size-4" />
+                                Pay
+                              </DropdownMenuItem>
+                            )}
+                            {config.resource === "towingInvoices" && <>
+                              <DropdownMenuItem onClick={() => void downloadTowingInvoice(row.id)} className="gap-2 cursor-pointer text-xs">
+                                <Download className="size-4" />
+                                Download PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => void sendTowingInvoiceEmail(row.id)} className="gap-2 cursor-pointer text-xs">
+                                <Mail className="size-4" />
+                                Send Email
+                              </DropdownMenuItem>
+                            </>}
                             {!config.hideEditAction && !isRoleReadOnly && (
                               <DropdownMenuItem
                                 onClick={() => openEdit(row)}
@@ -1909,6 +1978,16 @@ export function EntityCrudPage({ config }: { config: Config }) {
       />
 
       {/* ═══════════════════════════════════════════════════════════ */}
+      {config.paymentType && (
+        <InvoicePaymentDialog
+          invoice={paying as any}
+          invoiceType={config.paymentType}
+          open={Boolean(paying)}
+          onOpenChange={(isOpen) => !isOpen && setPaying(null)}
+          onPaymentCreated={loadApiRows}
+        />
+      )}
+
       {/*                   ADD / EDIT MODAL                         */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <Dialog open={open} onOpenChange={setOpen}>
