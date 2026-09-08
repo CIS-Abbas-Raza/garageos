@@ -61,7 +61,7 @@ const menuSections = [
     icon: Wrench,
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
-      // { href: '/vehicles', label: 'Vehicles', icon: Truck },
+      { href: '/all-vehicle', label: 'All Vehicles', icon: Truck },
       // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
       // { href: '/task-cards', label: 'Task Cards', icon: FileText },
       { href: '/assigned-tasks', label: 'Assigned Tasks', icon: ClipboardList },

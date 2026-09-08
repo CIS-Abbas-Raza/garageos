@@ -23,7 +23,7 @@ export default function InvoicePaymentsPage() {
             required: true,
           },
         ],
-        columns: ['invoice_number', 'amount', 'payment_method', 'payment_status', 'date'],
+        columns: ['invoice_number', 'invoice_type', 'amount', 'payment_method', 'payment_status', 'date'],
         empty: 'No payments recorded.',
       }}
     />

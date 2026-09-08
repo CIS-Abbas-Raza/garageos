@@ -1145,14 +1145,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
           : config.resource === "invoicePayments"
           ? records.map((record) => ({
               ...record,
-              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+              invoice_number: record.invoice_number ?? record.invoice?.invoice_number ?? record.towingInvoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
               amount: record.paid_amount,
               date: record.createdAt ? new Date(record.createdAt).toLocaleDateString() : "—",
             }))
           : config.resource === "sales"
           ? records.map((record) => ({
               ...record,
-              invoice_number: record.invoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
+              invoice_number: record.invoice_number ?? record.invoice?.invoice_number ?? record.towingInvoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
             }))
           : config.resource === "companyExpenses"
           ? records.map((record) => ({
@@ -1835,7 +1835,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             </>}
                             {!config.hideEditAction && !isRoleReadOnly && (
                               <DropdownMenuItem
-                                onClick={() => openEdit(row)}
+                                onClick={() => config.resource === "towingInvoices"
+                                  ? router.push(`/towing-invoices/edit/${encodeURIComponent(String(row.id))}`)
+                                  : openEdit(row)}
                                 className="gap-2 cursor-pointer text-xs"
                               >
                                 <Pencil className="size-4" />
