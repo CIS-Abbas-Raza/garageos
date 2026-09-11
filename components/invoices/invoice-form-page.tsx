@@ -831,17 +831,28 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
 
         const taskCard = taskCardResult.data
         if (mode === 'create') {
-          const taskLineItems = (Array.isArray(taskCard.tasks) ? taskCard.tasks : []).map((task: any) =>
-            normalizeLineItem({
-              type: task.type === 'parts' ? 'parts' : 'service',
-              description: task.description ?? '',
+          const quotationDetails = Array.isArray(taskCard.quotation?.details) ? taskCard.quotation.details : []
+          const normalizeDescription = (value: unknown) => String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
+          const taskLineItems = (Array.isArray(taskCard.tasks) ? taskCard.tasks : []).map((task: any) => {
+            const type = task.type === 'parts' ? 'parts' : 'service'
+            const description = task.description ?? ''
+            const matchingQuotationDetail = quotationDetails.find((detail: any) =>
+              (detail.type === 'parts' ? 'parts' : 'service') === type &&
+              normalizeDescription(detail.description) === normalizeDescription(description),
+            )
+
+            return normalizeLineItem({
+              type,
+              description,
               qty: Number(task.qty ?? 1) || 1,
-              unitPrice: 0,
-            }),
-          )
+              unitPrice: Number(matchingQuotationDetail?.unit_price ?? matchingQuotationDetail?.unitPrice ?? 0),
+            })
+          })
           if (taskLineItems.length) {
             setValue('lineItems', taskLineItems, { shouldDirty: false, shouldValidate: true })
           }
+          setValue('taxPercentage', Number(taskCard.quotation?.tax_percentage ?? taskCard.quotation?.taxPercentage ?? 0), { shouldDirty: false, shouldValidate: true })
+          setValue('discountPercentage', Number(taskCard.quotation?.discount_percentage ?? taskCard.quotation?.discountPercentage ?? 0), { shouldDirty: false, shouldValidate: true })
         }
         const companyId = taskCard.company_id
         if (companyId) {
