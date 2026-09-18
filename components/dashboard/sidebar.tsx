@@ -35,6 +35,7 @@ import {
   Wrench,
   Image,
   CalendarCheck,
+  X,
 } from 'lucide-react'
 
 const menuSections = [
@@ -204,6 +205,15 @@ export function DashboardSidebar() {
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <ChevronLeft className={`size-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(false)}
+            className="size-8 shrink-0 text-muted-foreground md:hidden"
+            aria-label="Close navigation"
+          >
+            <X className="size-4" />
           </Button>
         </div>
 

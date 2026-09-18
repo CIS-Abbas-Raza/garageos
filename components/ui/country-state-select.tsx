@@ -14,7 +14,7 @@ type Props = {
 
 export const CountryStateSelect: React.FC<Props> = ({ country, state, onCountryChange, onStateChange, required }) => {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       <div>
         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country</label>
         <select value={country} onChange={(e) => onCountryChange && onCountryChange(e.target.value)} className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm" required={required}>

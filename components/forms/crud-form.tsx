@@ -37,15 +37,15 @@ export function CrudForm<T extends FieldValues>({
   })
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-background border border-border rounded-lg shadow-lg max-w-md w-full mx-4">
-        <div className="flex items-center justify-between p-6 border-b border-border">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-background shadow-lg">
+        <div className="flex items-center justify-between border-b border-border p-4 sm:p-6">
           <h2 className="text-lg font-semibold">{title}</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 sm:p-6">
           {children}
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1" disabled={isSubmitting || isLoading}>

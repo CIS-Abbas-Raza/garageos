@@ -226,6 +226,15 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
+      {totalCounts && (
+        <RecordCountBadges counts={totalCounts.counts ?? [
+          { label: "Total", value: totalCounts.total ?? 0 },
+          ...(totalCounts.active !== undefined ? [{ label: totalCounts.activeLabel ?? "Active", value: totalCounts.active, color: "green" as const }] : []),
+          ...(totalCounts.inactive !== undefined ? [{ label: totalCounts.inactiveLabel ?? "Inactive", value: totalCounts.inactive }] : []),
+          ...(totalCounts.warning !== undefined ? [{ label: totalCounts.warningLabel ?? "Warning", value: totalCounts.warning, color: "red" as const }] : []),
+        ]} />
+      )}
+
       <div className={cn("rounded-xl border border-gray-100 bg-white shadow-sm", viewMode === "list" ? "overflow-x-auto" : "p-6 bg-gray-50/30")}>
         {isLoading ? (
           <div className="p-4">
@@ -360,16 +369,6 @@ export function DataTable<TData, TValue>({
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2 py-1">
         <div className="flex flex-wrap items-center gap-2">
-          {totalCounts && (
-            <div className="flex items-center gap-2 mr-4">
-              <RecordCountBadges counts={totalCounts.counts ?? [
-                { label: "Total", value: totalCounts.total ?? 0 },
-                ...(totalCounts.active !== undefined ? [{ label: totalCounts.activeLabel ?? "Active", value: totalCounts.active, color: "green" as const }] : []),
-                ...(totalCounts.inactive !== undefined ? [{ label: totalCounts.inactiveLabel ?? "Inactive", value: totalCounts.inactive }] : []),
-                ...(totalCounts.warning !== undefined ? [{ label: totalCounts.warningLabel ?? "Warning", value: totalCounts.warning, color: "red" as const }] : []),
-              ]} />
-            </div>
-          )}
           {footerLeft}
           {table.getSelectedRowModel().rows.length > 0 && (
             <span className="text-sm text-muted-foreground">

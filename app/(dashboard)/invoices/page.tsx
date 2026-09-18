@@ -273,14 +273,6 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
         )}
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <RecordCountBadges counts={[
-          { label: 'Total', value: rows.length },
-          { label: 'Pending', value: rows.filter((invoice) => ['pending', 'draft'].includes(String(invoice.invoice_status ?? invoice.status ?? 'draft').toLowerCase())).length, color: 'amber' },
-          { label: 'Approved', value: rows.filter((invoice) => String(invoice.invoice_status ?? invoice.status).toLowerCase() === 'approved').length, color: 'green' },
-        ]} />
-      </div>
-
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -301,6 +293,14 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
         </select>
+      </div>
+
+      <div className="mb-5">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Pending', value: rows.filter((invoice) => ['pending', 'draft'].includes(String(invoice.invoice_status ?? invoice.status ?? 'draft').toLowerCase())).length, color: 'amber' },
+          { label: 'Approved', value: rows.filter((invoice) => String(invoice.invoice_status ?? invoice.status).toLowerCase() === 'approved').length, color: 'green' },
+        ]} />
       </div>
 
       {rows.length === 0 ? (
