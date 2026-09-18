@@ -88,7 +88,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="flex h-16 items-center px-4 lg:px-6">
+      <div className="flex h-16 min-w-0 items-center px-3 sm:px-4 lg:px-6">
 
         {/* ── FAR LEFT: Hamburger toggle ── */}
         <Button
@@ -102,19 +102,19 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
         </Button>
 
         {/* Thin vertical divider */}
-        <div className="mx-2 h-6 w-px bg-border shrink-0" />
+        <div className="mx-1.5 h-6 w-px shrink-0 bg-border sm:mx-2" />
 
         {/* ── LEFT: Company + Branch selector pills ── */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex min-w-0 items-center gap-2 shrink-0">
 
           {/* SuperAdmin chooses the active company; all other roles use their login company_id. */}
           {isSuperAdmin && <DropdownMenu>
             <DropdownMenuTrigger
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-foreground outline-none hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-primary/30"
+              className="inline-flex h-9 max-w-[132px] items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-primary/30 sm:max-w-none sm:px-4"
               aria-label={isSuperAdmin ? 'Select the active company for the dashboard' : 'Current company'}
             >
               <Building2 className="size-3.5 text-muted-foreground shrink-0" />
-              <span className="max-w-[130px] truncate">{currentCompanyName}</span>
+              <span className="truncate sm:max-w-[130px]">{currentCompanyName}</span>
               <ChevronDown className="size-3 text-muted-foreground shrink-0" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
@@ -163,7 +163,7 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
               <Bell className="size-[18px]" />
               {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground ring-2 ring-background">{unreadCount > 9 ? '9+' : unreadCount}</span>}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-0">
+            <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-80 p-0">
               <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><p className="text-sm font-semibold">Notifications</p><p className="text-xs text-muted-foreground">{unreadCount} unread</p></div><button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline" onClick={() => markAllNotificationsAsRead(user?.id)}><CheckCheck className="size-3.5" /> Mark all</button></div>
               <div className="max-h-80 overflow-y-auto">{relevantNotifications.slice(0, 5).map((notification) => { const read = notification.read || notification.reads?.some((item) => item.userId === user?.id && item.isRead); return <button type="button" key={notification.id} onClick={() => markNotificationAsRead(notification.id, user?.id)} className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left hover:bg-muted/40"><span className={`mt-1 size-2 shrink-0 rounded-full ${read ? 'bg-muted' : 'bg-primary'}`} /><span className="min-w-0 flex-1"><span className={`block truncate text-xs ${read ? 'font-medium' : 'font-bold'}`}>{notification.title}</span><span className="mt-0.5 block line-clamp-2 text-xs text-muted-foreground">{notification.message}</span><span className="mt-1 block text-[10px] text-muted-foreground">{new Date(notification.createdAt).toLocaleString()}</span></span></button> })}{relevantNotifications.length === 0 && <p className="px-4 py-8 text-center text-xs text-muted-foreground">You are all caught up.</p>}</div>
               <div className="p-2"><Link href="/my-notifications" className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-primary hover:bg-primary/10">View All</Link></div>

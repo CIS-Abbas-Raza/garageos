@@ -225,15 +225,6 @@ export default function QuotationsPage() {
         </Button>}
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <RecordCountBadges counts={[
-          { label: 'Total', value: rows.length },
-          { label: 'Draft', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase() === 'draft').length, color: 'neutral' },
-          { label: 'Accepted', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'accepted').length, color: 'green' },
-          { label: 'Rejected', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'rejected').length, color: 'red' },
-        ]} />
-      </div>
-
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -256,6 +247,15 @@ export default function QuotationsPage() {
           <option value="rejected">Rejected</option>
           <option value="cancelled">Cancelled</option>
         </select>
+      </div>
+
+      <div className="mb-5">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Draft', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase() === 'draft').length, color: 'neutral' },
+          { label: 'Accepted', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'accepted').length, color: 'green' },
+          { label: 'Rejected', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'rejected').length, color: 'red' },
+        ]} />
       </div>
 
       {rows.length === 0 ? (

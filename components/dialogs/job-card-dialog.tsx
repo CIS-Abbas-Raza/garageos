@@ -89,8 +89,8 @@ export function JobCardDialog({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-card p-4 sm:p-6">
         <div className="flex items-center justify-between mb-6 sticky top-0 bg-card pb-4">
           <h2 className="text-xl font-semibold text-foreground">
             {jobCard ? 'Edit Job Card' : 'Add Job Card'}
@@ -141,7 +141,7 @@ export function JobCardDialog({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">
                 Estimated Hours

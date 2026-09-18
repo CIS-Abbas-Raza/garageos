@@ -308,7 +308,7 @@ export const generateQuotationPdf = async (payload: QuotationPdfPayload) => {
   doc.setDrawColor(0, 0, 0)
   doc.line(summaryX, rowY - 2, summaryX + summaryWidth, rowY - 2)
   doc.text('Total', summaryX, rowY + 16)
-  doc.text(formatMoney(isEnabled ? payload.total : 0), summaryX + summaryWidth, rowY + 16, { align: 'right' })
+  doc.text(`$${formatMoney(isEnabled ? payload.total : 0)}`, summaryX + summaryWidth, rowY + 16, { align: 'right' })
 
   y = rowY + 30
   if (payload.note?.trim()) {
@@ -1613,7 +1613,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
                   <div className="flex items-center justify-between gap-4 rounded-2xl bg-primary/5 px-4 py-4">
                     <span className="text-sm font-semibold text-foreground">Total</span>
-                    <span className="text-xl font-bold text-primary">{formatMoney(total)}</span>
+                    <span className="text-xl font-bold text-primary">${formatMoney(total)}</span>
                   </div>
                 </div>
               </div>

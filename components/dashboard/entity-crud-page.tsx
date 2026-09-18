@@ -13,9 +13,6 @@ import {
   Eye,
   EyeOff,
   FileImage,
-  LayoutGrid,
-  List,
-  Columns3,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -1237,6 +1234,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [sortKey, setSortKey] = useState(config.columns[0]);
   const [sortAsc, setSortAsc] = useState(true);
+  const listingColumns = useMemo(
+    () => config.columns.some((column) => ["createdAt", "created_at", "creation_date"].includes(column))
+      ? config.columns
+      : [...config.columns, "createdAt"],
+    [config.columns],
+  );
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const seededResources = useRef(new Set<string>());
   const isLineItemModule =
@@ -1682,21 +1685,20 @@ export function EntityCrudPage({ config }: { config: Config }) {
               <input value={dateTo} onChange={(event) => setDateTo(event.target.value)} type="date" aria-label="Created to" className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none" />
             </div>
           )}
-          {/* View mode toggle (visual only for now) */}
-          <div className="flex items-center gap-0.5 ml-auto border border-border rounded-lg p-0.5 bg-muted/40">
-            <button type="button" className="p-1.5 rounded bg-background text-primary shadow-sm" aria-label="List view">
-              <List className="size-4" />
-            </button>
-            <button type="button" className="p-1.5 rounded text-muted-foreground hover:text-foreground" aria-label="Grid view">
-              <LayoutGrid className="size-4" />
-            </button>
-            <button type="button" className="p-1.5 rounded text-muted-foreground hover:text-foreground" aria-label="Column view">
-              <Columns3 className="size-4" />
-            </button>
-          </div>
         </div>
 
         {/* ═══ DATA TABLE ═══ */}
+        <div className="mt-3">
+          <RecordCountBadges counts={[
+            { label: "Total", value: apiEnabled ? apiTotal : rows.length },
+            ...statusCounts.map(([value, count]) => ({
+              label: value === "1" ? "Active" : value === "0" ? "Inactive" : labelize(value),
+              value: count,
+              color: value === "1" ? "green" as const : value === "0" ? "neutral" as const : "blue" as const,
+            })),
+          ]} />
+        </div>
+
         <div className="mt-5 overflow-hidden rounded-xl border border-border bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
@@ -1705,7 +1707,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                   <th className="w-12 px-5 py-3">
                     <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                   </th>
-                  {config.columns.map((column) => (
+                  {listingColumns.map((column) => (
                     <th key={column} className="px-5 py-3">
                       <button
                         type="button"
@@ -1731,7 +1733,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 {paginated.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={config.columns.length + (config.hideRowActions ? 1 : 2)}
+                      colSpan={listingColumns.length + (config.hideRowActions ? 1 : 2)}
                       className="px-5 py-12 text-center text-sm text-muted-foreground"
                     >
                       {config.empty}
@@ -1743,7 +1745,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                       <td className="px-5 py-4">
                         <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
                       </td>
-                      {config.columns.map((column, colIdx) => (
+                      {listingColumns.map((column, colIdx) => (
                         <td key={column} className="px-5 py-4">
                           {isBadgeColumn(column) ? (
                             <span
@@ -1939,14 +1941,6 @@ export function EntityCrudPage({ config }: { config: Config }) {
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <RecordCountBadges counts={[
-            { label: "Total", value: apiEnabled ? apiTotal : rows.length },
-            ...statusCounts.map(([value, count]) => ({
-              label: value === "1" ? "Active" : value === "0" ? "Inactive" : labelize(value),
-              value: count,
-              color: value === "1" ? "green" as const : value === "0" ? "neutral" as const : "blue" as const,
-            })),
-          ]} />
           <div className="flex flex-wrap items-center gap-4 sm:ml-auto">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               Rows per page
