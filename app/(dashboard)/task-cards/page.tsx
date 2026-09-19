@@ -19,6 +19,7 @@ import { useBranch } from '@/lib/branch-context'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
+import { RecordCountBadges } from '@/components/common/record-count-badges'
 
 export default function TaskCardsListingPage() {
   const router = useRouter()
@@ -144,6 +145,14 @@ export default function TaskCardsListingPage() {
           <option value="1">Active</option>
           <option value="0">Inactive</option>
         </select>
+      </div>
+
+      <div className="mb-5">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Active', value: rows.filter((card) => card.status === 1 || card.status === '1').length, color: 'green' },
+          { label: 'Inactive', value: rows.filter((card) => card.status === 0 || card.status === '0').length, color: 'red' },
+        ]} />
       </div>
 
       {rows.length === 0 ? (

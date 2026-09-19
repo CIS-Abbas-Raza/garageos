@@ -218,7 +218,6 @@ export default function QuotationsPage() {
             Create, review, and edit quotations using the new full-page workflow.
           </p>
         </div>
-        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         {canManageQuotations && <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Quotation
@@ -235,6 +234,7 @@ export default function QuotationsPage() {
             className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
           />
         </div>
+        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value)}
