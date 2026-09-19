@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
@@ -324,7 +324,7 @@ export default function QuotationsPage() {
                       ${Number(quotation.total ?? 0).toLocaleString()}
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {new Date(quotation.creation_date ?? quotation.createdAt).toLocaleDateString()}
+                      {formatDisplayDate(quotation.creation_date ?? quotation.createdAt)}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end">

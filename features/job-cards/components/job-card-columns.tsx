@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Eye, MoreHorizontal, Pencil, Trash, CreditCard } from "lucide-react"
-import { format } from "date-fns"
+import { formatDisplayDate } from "@/lib/utils"
 
 export function createJobCardColumns(
   onView: (jobCard: JobCard) => void,
@@ -64,7 +64,7 @@ export function createJobCardColumns(
     {
       accessorKey: "createdAt",
       header: "Created Date",
-      cell: ({ row }) => <span className="text-gray-500">{format(new Date(row.original.createdAt), 'MMM d, yyyy')}</span>,
+      cell: ({ row }) => <span className="text-gray-500">{formatDisplayDate(row.original.createdAt)}</span>,
     },
     {
       id: "actions",

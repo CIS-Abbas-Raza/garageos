@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
@@ -382,7 +382,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                     <td className="px-5 py-4 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-muted-foreground" />
-                        <span>{new Date(invoice.createdAt ?? invoice.creation_date).toLocaleDateString()}</span>
+                        <span>{formatDisplayDate(invoice.createdAt ?? invoice.creation_date)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-right">

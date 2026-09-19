@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 import { useAuth } from '@/lib/auth-context'
@@ -204,7 +204,7 @@ export default function TaskCardsListingPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {new Date(card.createdAt).toLocaleDateString()}
+                      {formatDisplayDate(card.createdAt)}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end">
