@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatDisplayDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -607,6 +608,8 @@ const formatValue = (value: unknown) => {
   return String(value);
 };
 
+const isDateColumn = (column: string) => /(?:_date|_at|Date|At)$/.test(column);
+
 /* ──────────────────────── Line Items Sub-component ────────────────────── */
 function LineItems({
   resource,
@@ -1107,7 +1110,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
       if (config.vehicleScoped) queryParams.set("vehicle_id", selectedVehicle!);
       const requestQuery = queryParams.size ? `?${queryParams.toString()}` : "";
       const responseBody = await requestApi(requestQuery);
-      const records = Array.isArray(responseBody.data) ? responseBody.data : [];
+      const records = Array.isArray(responseBody)
+        ? responseBody
+        : Array.isArray(responseBody.data)
+          ? responseBody.data
+          : [];
       setApiTotal(Number(responseBody.total ?? records.length));
       setApiTotalPages(Number(responseBody.totalPages ?? 1));
       setApiStatusCounts(responseBody.statusCounts ?? {});
@@ -1778,6 +1785,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 />
                               ))}
                             </div>
+                          ) : isDateColumn(column) ? (
+                            <span className="text-foreground">
+                              {formatDisplayDate(row[column])}
+                            </span>
                           ) : colIdx === 0 ? (
                             /* First column: bold primary text + secondary below */
                             <div className="flex flex-col">

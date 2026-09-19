@@ -14,11 +14,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
+import { RecordCountBadges } from '@/components/common/record-count-badges'
 
 export default function TaskCardsListingPage() {
   const router = useRouter()
@@ -146,6 +147,14 @@ export default function TaskCardsListingPage() {
         </select>
       </div>
 
+      <div className="mb-5">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Active', value: rows.filter((card) => card.status === 1 || card.status === '1').length, color: 'green' },
+          { label: 'Inactive', value: rows.filter((card) => card.status === 0 || card.status === '0').length, color: 'red' },
+        ]} />
+      </div>
+
       {rows.length === 0 ? (
         <EmptyState
           title="No task cards yet"
@@ -204,7 +213,7 @@ export default function TaskCardsListingPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {new Date(card.createdAt).toLocaleDateString()}
+                      {formatDisplayDate(card.createdAt)}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end">

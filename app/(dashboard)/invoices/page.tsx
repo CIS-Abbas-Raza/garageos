@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGarageStore } from '@/lib/store/garage-store'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { getDashboardRole } from '@/lib/role-access'
@@ -264,7 +264,6 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
-        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         {canManageInvoices && (
           <Button onClick={() => router.push(invoiceType === 'towing' ? '/towing-invoices/create' : `/invoices/create${!showAll && taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
             <Plus className="size-4" />
@@ -283,6 +282,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
             className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
           />
         </div>
+        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value)}
@@ -382,7 +382,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                     <td className="px-5 py-4 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-muted-foreground" />
-                        <span>{new Date(invoice.createdAt ?? invoice.creation_date).toLocaleDateString()}</span>
+                        <span>{formatDisplayDate(invoice.createdAt ?? invoice.creation_date)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-right">

@@ -14,7 +14,7 @@ export default function EmailSettingsPage() {
       { key: 'email', label: 'Sender Email', type: 'email', required: true },
       { key: 'status', label: 'Status', type: 'select', required: true, options: [{ label: 'Active', value: '1' }, { label: 'Inactive', value: '0' }] },
     ],
-    columns: ['company_name', 'email', 'status'],
+    columns: ['company_name', 'email', 'status', 'createdAt', 'updatedAt'],
     empty: 'No email settings configured.',
   }} />
 }
