@@ -1069,7 +1069,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const requestApi = useCallback(async (path = "", init?: RequestInit) => {
     const isFormData = init?.body instanceof FormData;
-    const response = await fetch(`${config.apiEndpoint}${path}`, {
+    const scopedPath = config.companyScoped && selectedCompany && !path.includes("company_id=")
+      ? `${path}${path.includes("?") ? "&" : "?"}company_id=${encodeURIComponent(selectedCompany)}`
+      : path;
+    const response = await fetch(`${config.apiEndpoint}${scopedPath}`, {
       ...init,
       headers: isFormData
         ? init?.headers
@@ -1080,7 +1083,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       throw new Error(body.message || body.error || "Unable to complete the request.");
     }
     return body;
-  }, [config.apiEndpoint]);
+  }, [config.apiEndpoint, config.companyScoped, selectedCompany]);
 
   const loadApiRows = useCallback(async () => {
     if (!apiEnabled) return;

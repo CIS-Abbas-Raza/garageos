@@ -6,6 +6,7 @@ export default function RolesPage() {
       config={{
         resource: 'roles',
         apiEndpoint: '/backend-api/roles',
+        companyScoped: true,
         title: 'Roles',
         description: 'Define permission sets for advisors, mechanics, and administrators.',
         fields: [],
