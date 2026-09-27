@@ -17,16 +17,13 @@ import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
-import { useAuth } from '@/lib/auth-context'
-import { getDashboardRole } from '@/lib/role-access'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
 
 export default function TaskCardsListingPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const { user, isSuperAdmin } = useAuth()
-  const canManageTaskCards = getDashboardRole(user, isSuperAdmin) !== 'customer'
+  const canManageTaskCards = true
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [quotationId, setQuotationId] = useState<string | undefined>()
   const searchParams = useSearchParams()

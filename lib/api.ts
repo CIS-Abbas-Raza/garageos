@@ -17,13 +17,15 @@ export interface RoleAssignment {
   scopeId: string | null
 }
 
+export type RolePermissionMap = Record<string, Partial<Record<'view' | 'create' | 'update' | 'deactivate' | 'delete', boolean>>>
+
 export interface AuthUser {
   id: string
   userName: string
   email: string
   isPasswordChanged: boolean
   phoneNumber?: string | null
-  permissions: string[]
+  permissions: string[] | RolePermissionMap
   roles: RoleAssignment[]
   address?: string | null
   country?: string | null

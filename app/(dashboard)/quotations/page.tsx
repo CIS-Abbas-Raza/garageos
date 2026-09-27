@@ -18,8 +18,6 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
-import { useAuth } from '@/lib/auth-context'
-import { getDashboardRole } from '@/lib/role-access'
 import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Pagination } from '@/components/common/pagination'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
@@ -30,8 +28,7 @@ export default function QuotationsPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const { user, isSuperAdmin } = useAuth()
-  const canManageQuotations = getDashboardRole(user, isSuperAdmin) !== 'customer'
+  const canManageQuotations = true
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [vehicleId, setVehicleId] = useState<string | undefined>()
   const searchParams = useSearchParams()

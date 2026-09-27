@@ -71,7 +71,7 @@ import {
 import { useGarageStore } from "@/lib/store/garage-store";
 import { useBranch } from "@/lib/branch-context";
 import { useAuth } from "@/lib/auth-context";
-import { getDashboardRole, type DashboardRole } from "@/lib/role-access";
+import { useRolePermissions } from "@/lib/hooks/use-role-permissions";
 import { ConfirmDeleteModal } from "@/components/common/confirm-delete-modal";
 import { Pagination } from "@/components/common/pagination";
 import { RecordCountBadges } from "@/components/common/record-count-badges";
@@ -132,8 +132,6 @@ type Config = {
   hideStatusAction?: boolean;
   /** Hides the delete action. */
   hideDeleteAction?: boolean;
-  /** Makes row mutation actions unavailable for these roles. */
-  readOnlyForRoles?: DashboardRole[];
   /** Enables a date range filter for a record date field. */
   dateRangeField?: string;
   /** Hides the generic active/inactive status filter. */
@@ -226,6 +224,10 @@ const exactFields: Record<string, Field[]> = {
       required: true,
     },
     statusField,
+  ],
+  modules: [
+    { key: "name", label: "Name", required: true },
+    { key: "sub_modules", label: "Sub Modules", type: "dynamic-list", required: true, fullWidth: true },
   ],
   admin: [
     { key: "name", label: "Name", required: true },
@@ -1012,7 +1014,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const store = useGarageStore();
   const { selectedCompany } = useBranch();
   const { user } = useAuth();
-  const dashboardRole = getDashboardRole(user);
+  const { canSubModule } = useRolePermissions();
   const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
   const [selectedVehicle, setSelectedVehicle] = useState<string | undefined>();
 
@@ -1161,6 +1163,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ...record,
               invoice_number: record.invoice_number ?? record.invoice?.invoice_number ?? record.towingInvoice?.invoice_number ?? `Invoice #${record.invoice_id}`,
             }))
+          : config.resource === "modules"
+          ? records.map((record) => ({
+              ...record,
+              sub_modules: record.sub_modules ?? record.subModules?.map((item: { name?: string }) => item.name) ?? [],
+            }))
           : config.resource === "companyExpenses"
           ? records.map((record) => ({
               ...record,
@@ -1235,6 +1242,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
       "whatsappSettings",
       "emailSettings",
       "companyExpenses",
+      "modules",
     ].includes(schemaKey)
       ? [...fields, statusField]
       : fields;
@@ -1270,7 +1278,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             return [
               field.key,
               z.array(z.object({ value: z.string().min(1, "Entry cannot be empty") }))
-                .min(1, "At least one information entry is required"),
+                .min(1, `At least one ${field.label.toLowerCase()} entry is required`),
             ];
           }
           const isInsuranceField = [
@@ -1444,7 +1452,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     setEditing(null);
     form.reset({
       status: schemaKey === "appointments" ? "pending" : "1",
-      information: [{ value: "" }], // Pre-populate one row for repeatable package field
+      ...Object.fromEntries(fields.filter((field) => field.type === "dynamic-list").map((field) => [field.key, [{ value: "" }]])),
     });
     setLineItems([]);
     setOpen(true);
@@ -1452,11 +1460,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const openEdit = (row: Record<string, any>) => {
     setEditing(row);
-    // Ensure information conforms to FieldArray structure if it's stored as array of strings
-    let formattedInfo = row.information;
-    if (formattedInfo && Array.isArray(formattedInfo) && typeof formattedInfo[0] === "string") {
-      formattedInfo = formattedInfo.map(v => ({ value: v }));
-    }
+    const formattedDynamicLists = Object.fromEntries(
+      fields.filter((field) => field.type === "dynamic-list").map((field) => {
+        const values = row[field.key];
+        return [field.key, Array.isArray(values)
+          ? values.map((value) => typeof value === "string" ? { value } : value)
+          : [{ value: "" }]];
+      }),
+    );
     // If vehicle has nested insuredVehicle, merge its fields to top-level so form fields bind correctly
     const mergedRow = { ...row };
     if (schemaKey === "vehicles" && row.insuredVehicle) {
@@ -1478,7 +1489,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             : "0",
       }),
       status: String(row.status ?? "1"),
-      information: formattedInfo || [{ value: "" }],
+      ...formattedDynamicLists,
       ...(schemaKey === "packageSubscriptions" && {
         start_date: row.start_date ? String(row.start_date).slice(0, 16) : "",
         end_date: row.end_date ? String(row.end_date).slice(0, 16) : "",
@@ -1515,9 +1526,11 @@ export function EntityCrudPage({ config }: { config: Config }) {
         config.updateFields.map((field) => [field, data[field]]),
       );
     }
-    if (data.information && Array.isArray(data.information)) {
-      payload.information = data.information.map((item: any) => item.value);
-    }
+    fields.filter((field) => field.type === "dynamic-list").forEach((field) => {
+      if (Array.isArray(data[field.key])) {
+        payload[field.key] = data[field.key].map((item: any) => item.value);
+      }
+    });
     payload = { ...payload, ...(isLineItemModule ? { lineItems } : {}) };
     try {
       if (config.companyScoped) {
@@ -1599,7 +1612,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
   };
 
   const IconComponent = config.icon || iconMap[config.title] || ShieldCheck;
-  const isRoleReadOnly = config.readOnlyForRoles?.includes(dashboardRole) ?? false;
+  const canCreate = canSubModule(config.title, "create");
+  const canUpdate = canSubModule(config.title, "update");
+  const canDeactivate = canSubModule(config.title, "deactivate");
+  const canDelete = canSubModule(config.title, "delete");
 
   /* ══════════════════════════════════════════════════════════════ */
   /*                           RENDER                              */
@@ -1626,7 +1642,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            {!config.hideCreateButton && (
+            {!config.hideCreateButton && canCreate && (
               <Button
                 onClick={openCreate}
                 className="gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 h-10 shrink-0"
@@ -1771,7 +1787,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                   : "Active"
                                 : labelize(String(row[column] ?? "—"))}
                             </span>
-                          ) : column === "information" ? (
+                          ) : fields.some((field) => field.key === column && field.type === "dynamic-list") ? (
                             <span className="text-foreground font-medium">
                               {Array.isArray(row[column]) ? `${row[column].length} items` : row[column] ? "1 item" : "0 items"}
                             </span>
@@ -1849,7 +1865,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Send Email
                               </DropdownMenuItem>
                             </>}
-                            {!config.hideEditAction && !isRoleReadOnly && (
+                            {!config.hideEditAction && canUpdate && (
                               <DropdownMenuItem
                                 onClick={() => config.resource === "towingInvoices"
                                   ? router.push(`/towing-invoices/edit/${encodeURIComponent(String(row.id))}`)
@@ -1914,7 +1930,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Reset Password
                               </DropdownMenuItem>
                             )}
-                            {!config.hideStatusAction && !isRoleReadOnly && <DropdownMenuItem
+                            {!config.hideStatusAction && canDeactivate && <DropdownMenuItem
                               onClick={async () => {
                                 const updated = { ...row, status: String(row.status) === "0" ? "1" : "0" };
                                 try {
@@ -1937,7 +1953,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <CircleX className="size-4" />
                               Deactivate
                             </DropdownMenuItem>}
-                            {!config.hideDeleteAction && !isRoleReadOnly && <DropdownMenuItem
+                            {!config.hideDeleteAction && canDelete && <DropdownMenuItem
                               onClick={() => setDeleting(row)}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >

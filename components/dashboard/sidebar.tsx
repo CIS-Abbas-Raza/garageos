@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from '@/lib/auth-context'
 import { useBranch } from '@/lib/branch-context'
 import { canAccessDashboardPath, getDashboardRole } from '@/lib/role-access'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import {
   BarChart3,
   Bell,
@@ -25,7 +26,6 @@ import {
   LogOut,
   Package,
   Search,
-  Settings,
   ShieldCheck,
   Truck,
   UserCog,
@@ -42,19 +42,26 @@ const menuSections = [
   {
     label: 'Administration',
     icon: ShieldCheck,
+    superAdminOnly: true,
     items: [
       { href: '/admin', label: 'Admin', icon: ShieldCheck },
       { href: '/users', label: 'Users', icon: Users },
       { href: '/packages', label: 'Package', icon: ClipboardList },
-      { href: '/roles', label: 'Roles', icon: ShieldCheck },
+      { href: '/modules', label: 'Modules', icon: Boxes },
+      { href: '/companies', label: 'Companies', icon: Building2 },
+      { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
+      { href: '/sms-settings', label: 'SMS Setting', icon: Bell },
+      { href: '/whatsapp-settings', label: 'WhatsApp Setting', icon: Bell },
+      { href: '/email-settings', label: 'Email Setting (SendGrid)', icon: Bell },
     ],
   },
   {
     label: 'Company Management',
     icon: Building2,
     items: [
-      { href: '/companies', label: 'Companies', icon: Building2 },
       { href: '/company-users', label: 'Company Employees', icon: Users },
+      { href: '/roles', label: 'Role Management', icon: ShieldCheck },
+      { href: '/communication-logs', label: 'Communication Logs', icon: FileText },
     ],
   },
   {
@@ -74,23 +81,11 @@ const menuSections = [
     label: 'Finance & Billing',
     icon: CreditCard,
     items: [
-      { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
       { href: '/all-invoices', label: 'All Invoices', icon: FileText },
       { href: '/invoice-payments', label: 'Invoice Payments', icon: CreditCard },
       { href: '/sales', label: 'Sales', icon: BarChart3 },
       { href: '/company-accounts', label: 'Company Account', icon: CreditCard },
       { href: '/account-ledger', label: 'Account Ledger', icon: FileText },
-    ],
-  },
-  {
-    label: 'Other',
-    icon: Settings,
-    items: [
-      { href: '/notifications', label: 'Notifications', icon: Bell },
-      { href: '/sms-settings', label: 'SMS Setting', icon: Bell },
-      { href: '/whatsapp-settings', label: 'WhatsApp Setting', icon: Bell },
-      { href: '/email-settings', label: 'Email Setting (SendGrid)', icon: Bell },
-      { href: '/communication-logs', label: 'Communication Logs', icon: FileText },
     ],
   },
 ]
@@ -99,6 +94,7 @@ export function DashboardSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout, isSuperAdmin } = useAuth()
+  const { canSubModule } = useRolePermissions()
   const { selectedCompany } = useBranch()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -160,13 +156,15 @@ export function DashboardSidebar() {
   const displayName = user?.userName || 'Garage Admin'
   const initials = displayName.slice(0, 2).toUpperCase()
 
-  const role = getDashboardRole(user, isSuperAdmin)
+  const role = getDashboardRole(user)
   const sidebarLabel = isSuperAdmin ? 'Super Admin' : selectedCompanyName || 'Selected Company'
 
   // Filter sections by the active role, then by search query.
-  const filteredSections = menuSections.map((section) => {
+  const filteredSections = menuSections.filter((section) => !section.superAdminOnly || isSuperAdmin).map((section) => {
     const filteredItems = section.items.filter((item) =>
-      canAccessDashboardPath(role, item.href) && item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      canAccessDashboardPath(role, item.href)
+      && canSubModule(item.label, 'view')
+      && item.label.toLowerCase().includes(searchQuery.toLowerCase())
     )
     return { ...section, items: filteredItems }
   }).filter((section) => section.items.length > 0)
@@ -318,7 +316,7 @@ export function DashboardSidebar() {
             <DropdownMenuContent side="top" align="start" className="w-64">
               <div className="flex items-center gap-3 border-b border-border px-2 pb-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</span><div className="min-w-0"><p className="truncate text-xs font-semibold">{displayName}</p><p className="truncate text-[10px] text-muted-foreground">{displayEmail}</p></div></div>
               <DropdownMenuItem onClick={() => router.push('/settings/profile')} className="mt-2 cursor-pointer gap-2"><UserRoundCheck className="size-4 text-primary" /> Profile Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/my-notifications')} className="cursor-pointer gap-2"><Bell className="size-4 text-primary" /> Notifications</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/notifications')} className="cursor-pointer gap-2"><Bell className="size-4 text-primary" /> Notifications</DropdownMenuItem>
               <div className="my-2 border-t border-border" />
               <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive"><LogOut className="size-4" /> Log out</DropdownMenuItem>
             </DropdownMenuContent>

@@ -11,7 +11,8 @@ import {
   clearTokens,
   RoleScope,
 } from "./api"
-import type { AuthUser, RoleAssignment } from "./api"
+import type { AuthUser, RoleAssignment, RolePermissionMap } from "./api"
+import { isSuperAdminAssignment } from "./role-access"
 
 interface AuthContextType {
   user: AuthUser | null
@@ -31,6 +32,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const SUPER_ADMIN_ROLE: RoleAssignment = {
+  roleId: 'super-admin',
+  roleName: 'SuperAdmin',
+  roleTypeName: 'System',
+  scopeType: RoleScope.SYSTEM,
+  scopeId: null,
+}
+
+const normalizePortalUser = (user: AuthUser): AuthUser => ({
+  ...user,
+  roles: isSuperAdminAssignment(user) ? [SUPER_ADMIN_ROLE] : [],
+})
+
+const normalizePermissions = (permissions: unknown): RolePermissionMap =>
+  permissions && typeof permissions === 'object' && !Array.isArray(permissions)
+    ? permissions as RolePermissionMap
+    : {}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -46,8 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async () => {
     const result = await apiMe()
     if (result.success && result.user) {
-      setUser(result.user)
-      setRoleScope(computeScope(result.user.roles))
+      const portalUser = normalizePortalUser(result.user)
+      setUser(portalUser)
+      setRoleScope(computeScope(portalUser.roles))
     }
   }
 
@@ -57,8 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const result = await apiMe()
         if (result.success && result.user) {
-          setUser(result.user)
-          setRoleScope(computeScope(result.user.roles))
+          const portalUser = normalizePortalUser(result.user)
+          setUser(portalUser)
+          setRoleScope(computeScope(portalUser.roles))
         } else {
           clearTokens()
         }
@@ -92,14 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       address: result.user.address ?? null,
       country: result.user.country ?? null,
       profilePhoto: result.user.profile_photo ?? null,
-      permissions: [],
-      roles: [{
-        roleId: String(result.role || 'user'),
-        roleName: result.role || 'User',
-        roleTypeName: null,
-        scopeType: userRoleScope,
-        scopeId: result.company_id ? String(result.company_id) : null,
-      }],
+      permissions: normalizePermissions(result.permissions ?? result.user.permissions),
+      roles: [],
     }
 
     setTokens(result.token, result.token)
@@ -135,13 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       country: result.user.country ?? null,
       profilePhoto: result.user.profile_photo ?? null,
       permissions: ['all'],
-      roles: [{
-        roleId: 'super-admin',
-        roleName: result.role || 'Super Admin',
-        roleTypeName: 'System',
-        scopeType: RoleScope.SYSTEM,
-        scopeId: null,
-      }],
+      roles: [SUPER_ADMIN_ROLE],
     }
 
     setTokens(result.token, result.token)
@@ -171,14 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       address: result.user.address ?? null,
       country: result.user.country ?? null,
       profilePhoto: null,
-      permissions: [],
-      roles: [{
-        roleId: 'customer',
-        roleName: result.role || 'Customer',
-        roleTypeName: null,
-        scopeType: RoleScope.COMPANY,
-        scopeId: result.company_id ? String(result.company_id) : null,
-      }],
+      permissions: normalizePermissions(result.permissions ?? result.user.permissions),
+      roles: [],
     }
 
     setTokens(result.token, result.token)
@@ -211,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) throw new Error("You must be signed in to update your profile.")
     const result = await apiUpdateProfile(data)
     if (!result.success || !result.user) throw new Error(result.message ?? "Profile update failed.")
-    setUser(result.user)
+    setUser(normalizePortalUser(result.user))
   }
 
   const changePassword = async (newPassword: string) => {
@@ -221,11 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((current) => current ? { ...current, isPasswordChanged: true } : current)
   }
 
-  const isSuperAdmin =
-    user?.roles?.some((r) =>
-      r.roleTypeName === "System" ||
-      r.roleName?.replace(/[\s_-]/g, "").toLowerCase() === "superadmin",
-    ) ?? false
+  const isSuperAdmin = isSuperAdminAssignment(user)
 
   const requiresPasswordChange = !!user && !user.isPasswordChanged && !isSuperAdmin
 

@@ -18,8 +18,6 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
-import { useAuth } from '@/lib/auth-context'
-import { getDashboardRole } from '@/lib/role-access'
 import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Pagination } from '@/components/common/pagination'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
@@ -32,9 +30,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const { user, isSuperAdmin } = useAuth()
-  const role = getDashboardRole(user, isSuperAdmin)
-  const canManageInvoices = !['finance', 'staff', 'customer'].includes(role)
+  const canManageInvoices = true
   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])

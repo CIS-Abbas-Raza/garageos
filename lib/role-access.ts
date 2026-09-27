@@ -1,30 +1,16 @@
 import type { AuthUser } from './api'
 
-export type DashboardRole = 'superadmin' | 'owner' | 'staff' | 'mechanic' | 'finance' | 'customer' | 'unknown'
+export type DashboardRole = 'portal'
 
-const ROLE_PATHS: Record<DashboardRole, string[]> = {
-  superadmin: ['*'],
-  owner: ['/company-users', '/customers', '/vehicles', '/all-vehicle', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoices', '/all-invoices', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/communication-logs', '/notifications'],
-  staff: ['/customers', '/vehicles', '/all-vehicle', '/quotations', '/task-cards', '/assigned-tasks', '/appointments', '/reviews', '/invoices', '/all-invoices', '/notifications'],
-  mechanic: ['/assigned-tasks', '/notifications'],
-  finance: ['/invoices', '/all-invoices', '/invoice-payments', '/sales', '/company-accounts', '/account-ledger', '/notifications'],
-  customer: ['/customers', '/vehicles', '/quotations', '/task-cards', '/invoices', '/towing-invoices', '/all-invoices', '/notifications'],
-  unknown: [],
-}
+export const isSuperAdminAssignment = (user: AuthUser | null) =>
+  user?.roles?.some((role) =>
+    role.roleId === 'super-admin'
+    && role.roleName === 'SuperAdmin'
+    && role.roleTypeName === 'System'
+    && role.scopeType === 'SYSTEM'
+    && role.scopeId === null,
+  ) ?? false
 
-const ALWAYS_ALLOWED_PATHS = ['/dashboard', '/settings/profile', '/profile', '/my-notifications']
+export const getDashboardRole = (_user: AuthUser | null): DashboardRole => 'portal'
 
-export const getDashboardRole = (user: AuthUser | null, isSuperAdmin = false): DashboardRole => {
-  if (isSuperAdmin) return 'superadmin'
-  const roleName = user?.roles?.[0]?.roleName?.replace(/[\s_-]/g, '').toLowerCase()
-  if (roleName === 'owner' || roleName === 'staff' || roleName === 'mechanic' || roleName === 'finance' || roleName === 'customer') {
-    return roleName
-  }
-  return 'unknown'
-}
-
-export const canAccessDashboardPath = (role: DashboardRole, pathname: string) => {
-  if (ALWAYS_ALLOWED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) return true
-  const allowedPaths = ROLE_PATHS[role]
-  return allowedPaths.includes('*') || allowedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`))
-}
+export const canAccessDashboardPath = (_role: DashboardRole, _pathname: string) => true

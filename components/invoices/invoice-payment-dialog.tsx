@@ -53,22 +53,17 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
   const paidValue = Number(paidAmount || 0)
   const balanceAmount = Math.max(0, balanceBeforePayment - paidValue)
   const isOnline = paymentMethod !== 'cash'
-  const isCustomer = user?.roles.some((role) =>
-    [role.roleName, role.roleTypeName].some((value) => value?.trim().toLowerCase() === 'customer'),
-  ) ?? false
-
   useEffect(() => {
     if (!open || !invoice) return
     setStep('method')
-    setMethodGroup(isCustomer ? 'online' : 'cash')
-    setPaymentMethod(isCustomer ? 'online' : 'cash')
+    setMethodGroup('cash')
+    setPaymentMethod('cash')
     setPaidAmount('0')
     setPicture(null)
     setPictureError('')
-  }, [open, invoice, balanceBeforePayment, isCustomer])
+  }, [open, invoice, balanceBeforePayment])
 
   const selectMethodGroup = (value: 'cash' | 'online') => {
-    if (isCustomer && value === 'cash') return
     setMethodGroup(value)
     setPaymentMethod(value === 'cash' ? 'cash' : 'online')
   }
@@ -106,8 +101,8 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
       toast.error('Company and signed-in user are required to create a payment.')
       return
     }
-    const paymentDoneBy = isCustomer ? 'customer' : 'company'
-    const paymentStatus = isCustomer && isOnline ? 'pending' : 'verified'
+    const paymentDoneBy = 'company'
+    const paymentStatus = 'verified'
 
     try {
       const formData = new FormData()
@@ -153,8 +148,7 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
                   key={value}
                   type="button"
                   onClick={() => selectMethodGroup(value)}
-                  disabled={isCustomer && value === 'cash'}
-                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'} ${isCustomer && value === 'cash' ? 'cursor-not-allowed opacity-50' : ''}`}
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${methodGroup === value ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border hover:bg-muted/40'}`}
                 >
                   <Icon className="mt-0.5 size-5 text-primary" />
                   <span>

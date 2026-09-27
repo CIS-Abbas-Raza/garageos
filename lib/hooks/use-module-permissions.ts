@@ -11,11 +11,12 @@ export function useModulePermissions(resource: string) {
   const { user } = useAuth()
 
   // In Mock Mode, if no user or user has "all", they can do everything.
-  const hasAll = user?.permissions.includes("all")
+  const staticPermissions = Array.isArray(user?.permissions) ? user.permissions : []
+  const hasAll = staticPermissions.includes("all")
 
   const can = (action: string) => {
     if (hasAll) return true
-    return user?.permissions.includes(`${resource}.${action}`) ?? false
+    return staticPermissions.includes(`${resource}.${action}`)
   }
 
   return {
