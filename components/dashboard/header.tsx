@@ -1,13 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Bell, Building2, ChevronDown, Menu, LogOut, MapPin, UserRound, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
-import { useGarageStore } from '@/lib/store/garage-store'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -25,11 +23,78 @@ interface CompanyOption {
   name: string
 }
 
+interface BellNotification {
+  id: string
+  message: string
+  read: boolean
+  createdAt: string
+}
+
 export function DashboardHeader({ title }: DashboardHeaderProps) {
   const [companies, setCompanies] = useState<CompanyOption[]>([])
+  const [bellNotifications, setBellNotifications] = useState<BellNotification[]>([])
   const { selectedCompany, selectedBranch, setSelectedCompany, setSelectedBranch } = useBranch()
   const { user, logout, isSuperAdmin } = useAuth()
-  const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useGarageStore()
+
+  const loadNotifications = useCallback(async () => {
+    if (!user?.id) {
+      setBellNotifications([])
+      return
+    }
+
+    try {
+      const notificationScope = user.roleName?.trim().toLowerCase() === 'customer' ? 'customer' : 'system'
+      const response = await fetch(`/backend-api/notifications?user_id=${encodeURIComponent(user.id)}&scope=${notificationScope}&limit=3`)
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load notifications.')
+
+      const rows = Array.isArray(result.data) ? result.data : []
+      setBellNotifications(rows.map((item: Record<string, unknown>) => ({
+        id: String(item.id),
+        message: String(item.text ?? item.message ?? ''),
+        read: Number(item.read) === 1 || item.read === true,
+        createdAt: String(item.createdAt ?? new Date().toISOString()),
+      })).sort((a: BellNotification, b: BellNotification) => Number(a.read) - Number(b.read) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3))
+    } catch {
+      setBellNotifications([])
+    }
+  }, [user?.id, user?.roleName])
+
+  useEffect(() => {
+    void loadNotifications()
+  }, [loadNotifications])
+
+  const markBellNotificationAsRead = async (id: string) => {
+    setBellNotifications((current) => current.map((notification) => notification.id === id ? { ...notification, read: true } : notification))
+    try {
+      const response = await fetch(`/backend-api/notifications/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read: 1 }),
+      })
+      if (!response.ok) throw new Error('Unable to update notification.')
+    } catch {
+      void loadNotifications()
+    }
+  }
+
+  const markAllBellNotificationsAsRead = async () => {
+    if (!user?.id) return
+    try {
+      const response = await fetch('/backend-api/notifications/read-all', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          scope: user.roleName?.trim().toLowerCase() === 'customer' ? 'customer' : 'system',
+        }),
+      })
+      if (!response.ok) throw new Error('Unable to update notifications.')
+      setBellNotifications((current) => current.map((notification) => ({ ...notification, read: true })))
+    } catch {
+      void loadNotifications()
+    }
+  }
 
   useEffect(() => {
     if (!isSuperAdmin) {
@@ -80,11 +145,10 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
     { id: 'b2', name: 'Iqbal Branch' },
   ]
   const currentBranchName = branches.find(b => b.id === selectedBranch)?.name || branches[0].name
-  const companyId = selectedCompany ?? user?.roles.find((role) => role.scopeId)?.scopeId
-  const relevantNotifications = notifications
-    .filter((notification) => notification.status !== 0 && (!notification.recipientType || notification.recipientType === 'all' || (notification.recipientType === 'company' && notification.recipientId === companyId) || (notification.recipientType === 'user' && notification.recipientId === user?.id)))
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  const unreadCount = relevantNotifications.filter((notification) => !notification.read && !notification.reads?.some((read) => read.userId === user?.id && read.isRead)).length
+  const relevantNotifications = bellNotifications
+    .slice()
+    .sort((a, b) => Number(a.read) - Number(b.read) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const unreadCount = relevantNotifications.filter((notification) => !notification.read).length
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -158,20 +222,17 @@ export function DashboardHeader({ title }: DashboardHeaderProps) {
         <div className="ml-auto flex items-center gap-0.5 shrink-0">
 
           {/* Notification bell */}
-          <DropdownMenu>
+          <DropdownMenu onOpenChange={(open) => { if (open) void loadNotifications() }}>
             <DropdownMenuTrigger className="relative inline-flex size-9 items-center justify-center rounded-lg text-foreground outline-none hover:bg-muted/60" aria-label="Notifications">
               <Bell className="size-[18px]" />
-              {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground ring-2 ring-background">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              {unreadCount > 0 && <span className="absolute right-1 top-1 size-2.5 rounded-full bg-destructive ring-2 ring-background" aria-label="Unread notifications" />}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-80 p-0">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><p className="text-sm font-semibold">Notifications</p><p className="text-xs text-muted-foreground">{unreadCount} unread</p></div><button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline" onClick={() => markAllNotificationsAsRead(user?.id)}><CheckCheck className="size-3.5" /> Mark all</button></div>
-              <div className="max-h-80 overflow-y-auto">{relevantNotifications.slice(0, 5).map((notification) => { const read = notification.read || notification.reads?.some((item) => item.userId === user?.id && item.isRead); return <button type="button" key={notification.id} onClick={() => markNotificationAsRead(notification.id, user?.id)} className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left hover:bg-muted/40"><span className={`mt-1 size-2 shrink-0 rounded-full ${read ? 'bg-muted' : 'bg-primary'}`} /><span className="min-w-0 flex-1"><span className={`block truncate text-xs ${read ? 'font-medium' : 'font-bold'}`}>{notification.title}</span><span className="mt-0.5 block line-clamp-2 text-xs text-muted-foreground">{notification.message}</span><span className="mt-1 block text-[10px] text-muted-foreground">{new Date(notification.createdAt).toLocaleString()}</span></span></button> })}{relevantNotifications.length === 0 && <p className="px-4 py-8 text-center text-xs text-muted-foreground">You are all caught up.</p>}</div>
-              <div className="p-2"><Link href="/my-notifications" className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-primary hover:bg-primary/10">View All</Link></div>
+              <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><p className="text-sm font-semibold">Notifications</p><p className="text-xs text-muted-foreground">{unreadCount} unread</p></div><button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline" onClick={() => void markAllBellNotificationsAsRead()}><CheckCheck className="size-3.5" /> Mark Read</button></div>
+              <div className="max-h-80 overflow-y-auto">{relevantNotifications.map((notification) => { const read = notification.read; return <button type="button" key={notification.id} onClick={() => void markBellNotificationAsRead(notification.id)} className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left hover:bg-muted/40"><span className={`mt-1 size-2 shrink-0 rounded-full ${read ? 'bg-muted' : 'bg-primary'}`} /><span className="min-w-0 flex-1"><span className="block line-clamp-3 text-xs text-muted-foreground">{notification.message}</span><span className="mt-1 block text-[10px] text-muted-foreground">{new Date(notification.createdAt).toLocaleString()}</span></span></button> })}{relevantNotifications.length === 0 && <p className="px-4 py-8 text-center text-xs text-muted-foreground">You are all caught up.</p>}</div>
+              <div className="p-2"><Link href="/notifications" className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-primary hover:bg-primary/10">View All</Link></div>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Dark / light toggle */}
-          <ThemeToggle />
 
           {/* Logout */}
           <DropdownMenu>

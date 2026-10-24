@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowUpDown,
+  CheckCheck,
   ChevronDown,
   CircleX,
   Eye,
@@ -20,6 +21,7 @@ import {
   Trash2,
   X,
   ShieldCheck,
+  BarChart3,
   ClipboardList,
   Building2,
   Users,
@@ -38,6 +40,7 @@ import {
   Image as ImageIcon,
   KeyRound,
   Star,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -77,7 +80,7 @@ import { Pagination } from "@/components/common/pagination";
 import { RecordCountBadges } from "@/components/common/record-count-badges";
 import { DateRangeFilter, type DateRangeValue } from "@/components/common/date-range-filter";
 import { InvoicePaymentDialog } from "@/components/invoices/invoice-payment-dialog";
-import { generateInvoicePdf } from "@/components/invoices/invoice-form-page";
+import { generateInvoicePdf, generateVehicleHistoryPdf, normalizeCompanyLogoSource } from "@/components/invoices/invoice-form-page";
 
 /* ────────────────────────────── Types ────────────────────────────── */
 type FieldType =
@@ -94,6 +97,19 @@ type FieldType =
   | "star"
   | "file"
   | "dynamic-list";
+
+const isFullyPaidTowingInvoice = (row: Record<string, any>) =>
+  String(row.payment_status ?? row.paymentStatus ?? "").trim().toLowerCase() === "completed" &&
+  Number(row.balance_amount ?? row.balanceAmount) === 0;
+
+const formatTowingInvoiceAmount = (value: unknown) => {
+  if (value == null || value === "") return formatValue(value);
+  const amount = Number(value);
+  return Number.isFinite(amount)
+    ? `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : formatValue(value);
+};
+
 type Field = {
   key: string;
   label: string;
@@ -106,6 +122,7 @@ type Field = {
   /** Endpoint returning `{ success, data }` records for a select field. */
   optionsEndpoint?: string;
   required?: boolean;
+  maxLength?: number;
   readOnly?: boolean;
   multiple?: boolean;
   fullWidth?: boolean;
@@ -116,10 +133,14 @@ type Config = {
   apiEndpoint?: string;
   /** Loads and saves records for the active company only. */
   companyScoped?: boolean;
+  /** Loads records belonging to the signed-in user only. */
+  userScoped?: boolean;
   /** Sends the logged-in user's ID as `created_by` for newly created records. */
   assignCurrentUserId?: boolean;
   /** Hides the header action for resources created through another workflow. */
   hideCreateButton?: boolean;
+  /** Hides the page heading when a parent page provides its own header. */
+  hideHeader?: boolean;
   /** Navigates the header create action to a dedicated page, preserving URL filters. */
   createPath?: string;
   /** Hides edit, view, and delete actions for read-only listings. */
@@ -194,6 +215,8 @@ const iconMap: Record<string, any> = {
   "Users": Users,
   "Role Assignments": UserCog,
   "Demo Bookings": CalendarCheck,
+  "Demo Booking": CalendarCheck,
+  "Company Sales": BarChart3,
   "Vehicle Maintenance Pictures": ImageIcon,
   "SMS Setting": Bell,
   "WhatsApp Setting": Bell,
@@ -239,12 +262,12 @@ const exactFields: Record<string, Field[]> = {
   customers: [
     { key: "name", label: "Name", required: true },
     { key: "email", label: "Email", type: "email", required: true },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", type: "text", required: true, maxLength: 15 },
     { key: "address", label: "Address", required: true },
   ],
   // Users module — global system users (no role field; role is Company User specific)
   employees: [
-    { key: "profile_photo", label: "Profile Photo", type: "file" },
+    { key: "logo", label: "Profile Photo", type: "file" },
     { key: "name", label: "Full Name", required: true },
     { key: "country", label: "Country", type: "select", required: true, options: options(["United States"]) },
     { key: "state", label: "State", type: "select", required: true, options: options([
@@ -256,14 +279,14 @@ const exactFields: Record<string, Field[]> = {
   ],
   // Company Users module — users scoped to a specific company (includes role)
   companyUsers: [
-    { key: "profile_photo", label: "Profile Photo", type: "file" },
+    { key: "logo", label: "Profile Photo", type: "file" },
     { key: "name", label: "Full Name", required: true },
     { key: "country", label: "Country", type: "select", required: true, options: options(["United States"]) },
     { key: "state", label: "State", type: "select", required: true, options: options([
       'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'
     ]) },
     { key: "email", label: "Email", type: "email", required: true },
-    { key: "phone", label: "Phone", type: "number", required: true },
+    { key: "phone", label: "Phone", type: "text", required: true, maxLength: 15 },
     { key: "address", label: "Address", required: true },
     {
       key: "role_id",
@@ -319,7 +342,7 @@ const exactFields: Record<string, Field[]> = {
       key: "insurance_company_phone",
       label: "Insurance company phone/Adjuster",
       type: "text",
-      required: true,
+      required: false,
     },
   ],
   // ⚠️ SPEC FLAG: Appointments customer/vehicle fields are free-text rather than linked dropdowns.
@@ -329,11 +352,12 @@ const exactFields: Record<string, Field[]> = {
     {
       key: "customer_phone",
       label: "Customer phone",
-      type: "number",
+      type: "text",
       required: true,
+      maxLength: 15,
     },
-    { key: "VIN", label: "VIN", type: "number", required: true },
-    { key: "license_plate", label: "License plate", required: true },
+    { key: "VIN", label: "VIN", type: "text", required: true },
+    { key: "license_plate", label: "License plate", required: false },
     {
       key: "reservation_date",
       label: "Reservation date",
@@ -373,6 +397,21 @@ const exactFields: Record<string, Field[]> = {
     },
     { key: "start_date", label: "Start Date", type: "datetime-local", required: true },
     { key: "end_date", label: "End Date", type: "datetime-local", required: true },
+    {
+      key: "payment_status",
+      label: "Payment Status",
+      type: "select",
+      required: true,
+      options: options(["Pending", "Completed"]),
+    },
+    {
+      key: "package_type",
+      label: "Package Type",
+      type: "select",
+      required: true,
+      options: options(["Yearly", "Monthly"]),
+    },
+    { key: "amount", label: "Amount", type: "number", required: true },
   ],
   estimations: [
     { key: "quotation_number", label: "Quotation Number", required: true },
@@ -575,7 +614,7 @@ const exactFields: Record<string, Field[]> = {
     },
     {
       key: "sendgrid_api_key",
-      label: "SendGrid API Key",
+      label: "Resend API Key",
       type: "password",
       required: true,
     },
@@ -827,21 +866,48 @@ function FormFieldRenderer({
   isEditing?: boolean;
 }) {
   const [showPw, setShowPw] = useState(false);
+  const [localImagePreview, setLocalImagePreview] = useState<string | null>(null);
+  const fieldValue = form.watch(field.key);
+  const selectedFile = typeof File !== "undefined" && fieldValue instanceof File;
   const [endpointOptions, setEndpointOptions] = useState<{ label: string; value: string }[]>([]);
+  const { selectedCompany } = useBranch();
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setLocalImagePreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(fieldValue as File);
+    setLocalImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [fieldValue]);
 
   useEffect(() => {
     if (!field.optionsEndpoint) return;
+    if (field.optionsEndpoint === "/backend-api/roles" && !selectedCompany) {
+      setEndpointOptions([]);
+      return;
+    }
 
     const loadOptions = async () => {
       try {
-        const response = await fetch(field.optionsEndpoint!);
+        const optionsUrl = field.optionsEndpoint === "/backend-api/roles"
+          ? `${field.optionsEndpoint}?company_id=${encodeURIComponent(selectedCompany!)}&limit=100`
+          : field.optionsEndpoint;
+        const response = await fetch(optionsUrl);
         const body = await response.json();
         if (!response.ok || body.success === false || !Array.isArray(body.data)) return;
         setEndpointOptions(
-          body.data.map((record: { id: string | number; name?: string; email?: string }) => ({
+          body.data
+            .filter((record: { name?: string }) =>
+              resourceKey !== "companyUsers" || field.key !== "role_id" ||
+              !["owner", "customer"].includes(String(record.name ?? "").trim().toLowerCase()),
+            )
+            .map((record: { id: string | number; name?: string; email?: string }) => ({
             value: String(record.id),
             label: record.name ?? record.email ?? `User ${record.id}`,
-          })),
+            })),
         );
       } catch {
         setEndpointOptions([]);
@@ -849,7 +915,7 @@ function FormFieldRenderer({
     };
 
     void loadOptions();
-  }, [field.optionsEndpoint]);
+  }, [field.key, field.optionsEndpoint, resourceKey, selectedCompany]);
 
   if (field.type === "dynamic-list") {
     return <DynamicListField field={field} form={form} />;
@@ -859,6 +925,10 @@ function FormFieldRenderer({
   const resolvedType = isEditing && field.updateType ? field.updateType : (field.type ?? "text");
   const isOptional = isEditing && field.optionalOnUpdate;
   const selectOptions = field.optionsEndpoint ? endpointOptions : field.options ?? [];
+  const existingImageUrl = typeof fieldValue === "string" && /^(https?:\/\/|\/)/i.test(fieldValue)
+    ? fieldValue
+    : null;
+  const imagePreviewUrl = localImagePreview ?? existingImageUrl;
   const selectedOption = selectOptions.find(
     (option) => option.value === String(form.watch(field.key) ?? ""),
   );
@@ -880,8 +950,8 @@ function FormFieldRenderer({
             form.setValue(field.key, value, { shouldValidate: true })
           }
         >
-          <SelectTrigger id={`${resourceKey}-${field.key}`} className="h-10 w-full">
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`}>
+          <SelectTrigger id={`${resourceKey}-${field.key}`} className="!h-10 !w-full min-w-0">
+            <SelectValue placeholder={`Select ${field.label}`}>
               {selectedOption?.label}
             </SelectValue>
           </SelectTrigger>
@@ -912,7 +982,17 @@ function FormFieldRenderer({
         </label>
       ) : resolvedType === "file" ? (
         <div className="flex items-center gap-4 mt-1">
-          <label className="flex size-14 cursor-pointer items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-blue-500 transition-colors shrink-0">
+          {imagePreviewUrl && <span className="relative size-14 shrink-0">
+            <img src={imagePreviewUrl} alt={`${field.label} preview`} className="size-14 rounded-lg border border-slate-200 bg-white object-contain p-1" />
+            <button
+              type="button"
+              aria-label={`Remove ${field.label.toLowerCase()}`}
+              title={`Remove ${field.label.toLowerCase()}`}
+              onClick={() => form.setValue(field.key, null, { shouldDirty: true, shouldValidate: true })}
+              className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-red-50 hover:text-red-600"
+            ><X className="size-3" /></button>
+          </span>}
+          {!imagePreviewUrl && <label className="flex size-14 cursor-pointer items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-blue-500 transition-colors shrink-0">
             <div className="relative flex items-center justify-center">
               <ImageIcon className="size-6 text-slate-400" />
               <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-slate-200 shadow-sm flex items-center justify-center">
@@ -928,11 +1008,17 @@ function FormFieldRenderer({
                 form.setValue(field.key, e.target.files?.[0] ?? "")
               }
             />
-          </label>
+          </label>}
           <div className="flex flex-col gap-0.5">
-            {form.watch(field.key) ? (
+            {selectedFile ? (
               <span className="text-sm text-foreground font-medium truncate max-w-[200px]">
-                {form.watch(field.key) instanceof File ? form.watch(field.key).name : form.watch(field.key)}
+                {(fieldValue as File).name}
+              </span>
+            ) : imagePreviewUrl ? (
+              <span className="text-sm text-foreground font-medium">Current image</span>
+            ) : fieldValue ? (
+              <span className="text-sm text-foreground font-medium truncate max-w-[200px]">
+                {fieldValue}
               </span>
             ) : (
               <span className="text-sm text-slate-500 font-medium">JPEG, PNG, or WebP. Max 5MB.</span>
@@ -989,11 +1075,12 @@ function FormFieldRenderer({
           </button>
         </div>
       ) : (
-        <Input
-          id={`${resourceKey}-${field.key}`}
-          type={resolvedType}
-          readOnly={field.readOnly}
-          {...form.register(field.key)}
+          <Input
+            id={`${resourceKey}-${field.key}`}
+            type={resolvedType}
+            readOnly={field.readOnly}
+            maxLength={field.maxLength}
+            {...form.register(field.key)}
           className="h-10"
         />
       )}
@@ -1009,7 +1096,7 @@ function FormFieldRenderer({
 /* ══════════════════════════════════════════════════════════════════ */
 /*                       MAIN COMPONENT                             */
 /* ══════════════════════════════════════════════════════════════════ */
-export function EntityCrudPage({ config }: { config: Config }) {
+export function EntityCrudPage({ config, flush = false }: { config: Config; flush?: boolean }) {
   const router = useRouter();
   const store = useGarageStore();
   const { selectedCompany } = useBranch();
@@ -1089,6 +1176,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
   const loadApiRows = useCallback(async () => {
     if (!apiEnabled) return;
+    if (config.userScoped && !user?.id) {
+      setApiRows([]);
+      return;
+    }
     if (config.companyScoped && !selectedCompany) {
       setApiRows([]);
       return;
@@ -1104,13 +1195,20 @@ export function EntityCrudPage({ config }: { config: Config }) {
     try {
       const queryParams = new URLSearchParams();
       queryParams.set("page", String(page));
-      queryParams.set("limit", String(pageSize));
+      if (config.resource !== "notifications") queryParams.set("limit", String(pageSize));
       if (query.trim()) queryParams.set("search", query.trim());
       if (status !== "all") queryParams.set("status", status);
       queryParams.set("dateField", config.dateRangeField ?? "createdAt");
       if (dateFrom) queryParams.set("startDate", dateFrom);
       if (dateTo) queryParams.set("endDate", dateTo);
       if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
+      if (config.userScoped) queryParams.set("user_id", user!.id);
+      if (config.resource === "notifications" && user?.id) {
+        queryParams.set("scope", user.roleName?.trim().toLowerCase() === "customer" ? "customer" : "system");
+      }
+      if (["customers", "invoicePayments"].includes(config.resource) && user?.roleName?.trim().toLowerCase() === "customer") {
+        queryParams.set("customer_id", user.id);
+      }
       if (config.customerScoped) queryParams.set("customer_id", selectedCustomer!);
       if (config.vehicleScoped) queryParams.set("vehicle_id", selectedVehicle!);
       const requestQuery = queryParams.size ? `?${queryParams.toString()}` : "";
@@ -1138,6 +1236,8 @@ export function EntityCrudPage({ config }: { config: Config }) {
           ? records.map((record) => ({
               ...record,
               ...record.user,
+              id: record.id,
+              user_id: record.user?.id,
               company_user_id: record.id,
               company_id: record.company_id,
               role_id: String(record.role_id ?? record.role?.id ?? ""),
@@ -1150,6 +1250,12 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 record.information ??
                 record.packageInfos?.map((item: { information?: string }) => item.information) ??
                 [],
+            }))
+          : config.resource === "packageSubscriptions"
+          ? records.map((record) => ({
+              ...record,
+              package_name: record.package?.name ?? `Package #${record.package_id}`,
+              company_name: record.company?.name ?? `Company #${record.company_id}`,
             }))
           : config.resource === "invoicePayments"
           ? records.map((record) => ({
@@ -1178,6 +1284,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
               ...record,
               user_name: record.user?.name ?? `User #${record.user_id}`,
             }))
+          : config.resource === "companySales"
+          ? records.map((record) => ({
+              ...record,
+              company_name: record.company?.name ?? `Company #${record.company_id}`,
+              package_history_id: record.packageHistory?.id ?? record.package_history_id,
+              package_name: record.packageHistory?.package?.name ?? `Package #${record.packageHistory?.package_id ?? ""}`,
+              package_type: record.packageHistory?.package_type ?? "—",
+            }))
           : config.resource === "notifications"
           ? records.map((record) => ({
               ...record,
@@ -1194,12 +1308,166 @@ export function EntityCrudPage({ config }: { config: Config }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load records.");
     }
-  }, [apiEnabled, config.companyScoped, config.customerScoped, config.vehicleScoped, config.dateRangeField, config.resource, dateFrom, dateTo, page, pageSize, query, requestApi, selectedCompany, selectedCustomer, selectedVehicle, status]);
+  }, [apiEnabled, config.companyScoped, config.userScoped, config.customerScoped, config.vehicleScoped, config.dateRangeField, config.resource, dateFrom, dateTo, page, pageSize, query, requestApi, selectedCompany, selectedCustomer, selectedVehicle, status, user?.id, user?.roleName]);
 
   /* ── State ── */
+  const markAllUserNotificationsRead = async () => {
+    if (config.resource !== "notifications" || !user?.id) return;
+    try {
+      const response = await fetch("/backend-api/notifications/read-all", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          scope: user.roleName?.trim().toLowerCase() === "customer" ? "customer" : "system",
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.success === false) throw new Error(result.message || "Unable to mark notifications as read.");
+      toast.success("All notifications marked as read.");
+      await loadApiRows();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to mark notifications as read.");
+    }
+  };
+
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
   const [paying, setPaying] = useState<Record<string, any> | null>(null);
+  const downloadVehicleHistory = async (vehicle: Record<string, any>) => {
+    try {
+      const vehicleId = String(vehicle.id);
+      const taskCardsResponse = await fetch(`/backend-api/task-cards?vehicle_id=${encodeURIComponent(vehicleId)}`);
+      const taskCardsResult = await taskCardsResponse.json();
+      if (!taskCardsResponse.ok || taskCardsResult.success === false) throw new Error(taskCardsResult.message || "Unable to load vehicle task history.");
+
+      const taskCards = Array.isArray(taskCardsResult.data) ? taskCardsResult.data : [];
+      const invoiceResults = await Promise.all(taskCards.map(async (card: Record<string, any>) => {
+        const response = await fetch(`/backend-api/invoices?task_id=${encodeURIComponent(String(card.id))}`);
+        const result = await response.json();
+        if (!response.ok || result.success === false) throw new Error(result.message || "Unable to load invoice details.");
+        return Array.isArray(result.data) ? result.data : [];
+      }));
+      const invoices = invoiceResults.flat();
+      const invoicesByTaskCard = new Map<string, Record<string, any>[]>();
+      invoices.forEach((invoice: Record<string, any>) => {
+        const key = String(invoice.task_card_id);
+        invoicesByTaskCard.set(key, [...(invoicesByTaskCard.get(key) ?? []), invoice]);
+      });
+      const detailUsage = new Map<string, number>();
+      const completedTasks = taskCards.flatMap((card: Record<string, any>) => {
+        const cardInvoices = invoicesByTaskCard.get(String(card.id)) ?? [];
+        const tasks = Array.isArray(card.tasks) ? card.tasks : [];
+        return tasks
+          .filter((task: Record<string, any>) => ["completed", "compeleted"].includes(String(task.task_status ?? task.taskStatus ?? "").trim().toLowerCase()))
+          .map((task: Record<string, any>) => {
+            let matchedInvoice: Record<string, any> | undefined;
+            let detail: Record<string, any> | undefined;
+            for (const invoice of cardInvoices) {
+              const invoiceDetails = Array.isArray(invoice.details) ? invoice.details : [];
+              const detailIndex = invoiceDetails.findIndex((candidate: Record<string, any>, index: number) => {
+                const usageKey = `${invoice.id}:${index}`;
+                const unused = !detailUsage.has(usageKey);
+                const sameDescription = String(candidate.description ?? "").trim().toLowerCase() === String(task.description ?? "").trim().toLowerCase();
+                const sameType = String(candidate.type ?? "").trim().toLowerCase() === String(task.type ?? "").trim().toLowerCase();
+                return unused && sameDescription && sameType;
+              });
+              if (detailIndex >= 0) {
+                matchedInvoice = invoice;
+                detail = invoiceDetails[detailIndex];
+                detailUsage.set(`${invoice.id}:${detailIndex}`, 1);
+                break;
+              }
+            }
+            if (!detail) {
+              for (const invoice of cardInvoices) {
+                const invoiceDetails = Array.isArray(invoice.details) ? invoice.details : [];
+                const detailIndex = invoiceDetails.findIndex((candidate: Record<string, any>, index: number) => {
+                  return !detailUsage.has(`${invoice.id}:${index}`) &&
+                    String(candidate.type ?? "").trim().toLowerCase() === String(task.type ?? "").trim().toLowerCase();
+                });
+                if (detailIndex >= 0) {
+                  matchedInvoice = invoice;
+                  detail = invoiceDetails[detailIndex];
+                  detailUsage.set(`${invoice.id}:${detailIndex}`, 1);
+                  break;
+                }
+              }
+            }
+            matchedInvoice ??= cardInvoices[0];
+            const qty = Number(detail?.qty ?? task.qty ?? 0);
+            const unitPrice = Number(detail?.unit_price ?? detail?.unitPrice ?? 0);
+            const amount = Number(detail?.amount ?? detail?.line_amount ?? detail?.total ?? (qty * unitPrice));
+            return {
+              date: matchedInvoice?.creation_date ?? task.createdAt ?? card.createdAt ?? "",
+              invoiceNumber: matchedInvoice?.invoice_number ?? card.task_cards_number ?? `Task Card #${card.id}`,
+              type: String(task.type ?? detail?.type ?? "").toLowerCase() === "parts" ? "Parts" : "Service",
+              description: task.description ?? detail?.description ?? "—",
+              qty,
+              unitPrice,
+              amount: Number.isFinite(amount) ? amount : qty * unitPrice,
+            };
+          });
+      });
+
+      const firstCard = taskCards[0];
+      const cardVehicle = firstCard?.quotation?.vehicle ?? {};
+      const customerId = vehicle.customer_id ?? vehicle.customerId ?? cardVehicle.customer_id;
+      let customer = cardVehicle.customer ?? vehicle.customer ?? {};
+      if (customerId) {
+        const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`);
+        if (customerResponse.ok) {
+          const customerResult = await customerResponse.json();
+          if (customerResult.success !== false && customerResult.data) customer = { ...customer, ...customerResult.data };
+        }
+      }
+
+      const companyFromStore = store.companies.find((item) => String(item.id) === String(selectedCompany)) ?? store.companies[0];
+      let company: Record<string, any> = companyFromStore ? { ...companyFromStore } : {};
+      if (selectedCompany) {
+        const companyResponse = await fetch(`/backend-api/companies/${encodeURIComponent(selectedCompany)}`);
+        if (companyResponse.ok) {
+          const companyResult = await companyResponse.json();
+          if (companyResult.success !== false && companyResult.data) company = { ...company, ...companyResult.data };
+        }
+      }
+
+      const companyLogoUrl = normalizeCompanyLogoSource(
+        company.logo_url ?? company.logoUrl ?? company.logo ?? store.settings[String(company.id ?? selectedCompany)]?.logoUrl,
+      );
+      const vehicleInfo = { ...cardVehicle, ...vehicle };
+      const companyAddress = (
+        [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(", ") ||
+        store.settings[String(company.id ?? selectedCompany)]?.address ||
+        "—"
+      ).replace(/\bNew York\b,?\s*/gi, "").replace(/\s+,/g, ",").replace(/,\s*,/g, ", ").replace(/^,\s*|,\s*$/g, "").trim() || "—";
+      await generateVehicleHistoryPdf({
+        companyName: company.name ?? "Company",
+        companyEmail: company.email ?? store.settings[String(company.id ?? selectedCompany)]?.email ?? "—",
+        companyPhone: company.phone ?? store.settings[String(company.id ?? selectedCompany)]?.phoneNumber ?? "—",
+        companyAddress,
+        companyRegNo: company.registration_no ?? company.registrationNo ?? "—",
+        companyLogoUrl,
+        customerName: customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(" ") || "—",
+        customerEmail: customer.email ?? "—",
+        customerPhone: customer.phone ?? "—",
+        customerAddress: customer.address ?? "—",
+        vehicleMake: vehicleInfo.make ?? "—",
+        vehicleModel: vehicleInfo.model ?? "—",
+        vehicleYear: vehicleInfo.year ? String(vehicleInfo.year) : "—",
+        vin: vehicleInfo.vin ?? vehicleInfo.VIN ?? "—",
+        licensePlate: vehicleInfo.license_plate ?? vehicleInfo.licensePlate ?? "—",
+        vehicleId,
+        rows: completedTasks.map((historyRow: Record<string, any>) => ({
+          ...historyRow,
+          date: historyRow.date ? formatDisplayDate(historyRow.date) : "—",
+        })),
+      });
+      toast.success("Vehicle history PDF downloaded.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to download vehicle history.");
+    }
+  };
   const downloadTowingInvoice = async (invoiceId: string | number) => {
     try {
       const response = await fetch(`/backend-api/towing-invoices/${invoiceId}`);
@@ -1209,9 +1477,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
       const company = invoice.company ?? {};
       const vehicle = invoice.vehicle ?? {};
       const customer = vehicle.customer ?? {};
+      const companyLogoUrl = normalizeCompanyLogoSource(company.logo_url ?? company.logoUrl ?? company.logo);
       await generateInvoicePdf({
         companyName: company.name ?? "Company", companyEmail: company.email ?? "â€”", companyCountry: company.country ?? "â€”", companyPhone: company.phone ?? "â€”",
-        companyAddress: [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(", ") || "â€”", companyRegNo: company.registration_no ?? company.registrationNo ?? "â€”", companyLogoUrl: company.logo_url ?? company.logoUrl ?? company.logo,
+        companyAddress: [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(", ") || "â€”", companyRegNo: company.registration_no ?? company.registrationNo ?? "â€”", companyLogoUrl,
         invoiceNumber: invoice.invoice_number ?? `TOW-${invoice.id}`, creationDate: invoice.creation_date ?? "", dueDate: invoice.creation_date ?? "", paymentStatus: invoice.payment_status ?? "pending",
         customerName: customer.name ?? "â€”", customerEmail: customer.email ?? "â€”", customerPhone: customer.phone ?? "â€”", customerAddress: customer.address ?? "â€”",
         vehicleMake: vehicle.make ?? "â€”", vehicleModel: vehicle.model ?? "â€”", vehicleYear: vehicle.year ? String(vehicle.year) : "â€”", vin: vehicle.vin ?? vehicle.VIN ?? "â€”", licensePlate: vehicle.license_plate ?? vehicle.licensePlate ?? "â€”",
@@ -1235,6 +1504,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     : undefined;
   const formFields =
     !fields.some((field) => field.key === "status") &&
+    !(schemaKey === "packageSubscriptions" && Boolean(editing)) &&
     ![
       "packages",
       "invoicePayments",
@@ -1299,8 +1569,13 @@ export function EntityCrudPage({ config }: { config: Config }) {
             field.key,
             isRequired
               ? field.type === "number"
-                ? z.coerce.number({ message: `${field.label} is required` }).min(0, "Must be >= 0")
-                : field.type === "email"
+                ? z.preprocess(
+                    (value) => value === "" || value === undefined ? undefined : value,
+                    z.coerce.number({ message: `${field.label} is required` }).min(0, "Must be >= 0"),
+                  )
+                : field.type === "select"
+                  ? z.string({ message: `Select ${field.label}` }).min(1, `Select ${field.label}`)
+                  : field.type === "email"
                   ? z.string().email("Invalid email format")
                   : z.string().min(1, `${field.label} is required`)
               : z.any().optional(),
@@ -1311,13 +1586,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
 
       if (schemaKey === "vehicles") {
         schema = schema.superRefine((data: any, ctx: any) => {
-          const isInsured = data.insured === "1" || data.insured === true || data.insured === "Yes";
+          const isInsured = data.insured === true
+            || String(data.insured).toLowerCase() === "1"
+            || String(data.insured).toLowerCase() === "true"
+            || String(data.insured).toLowerCase() === "yes";
           if (isInsured) {
               const insuranceFields = [
                 { key: "policy_number", label: "Policy number" },
                 { key: "claim_number", label: "Claim number" },
                 { key: "insurance_company", label: "Insurance company" },
-                { key: "insurance_company_phone", label: "Insurance company phone/Adjuster" },
               ];
             for (const f of insuranceFields) {
               if (data[f.key] === undefined || data[f.key] === null || String(data[f.key]).trim() === "") {
@@ -1452,6 +1729,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
     setEditing(null);
     form.reset({
       status: schemaKey === "appointments" ? "pending" : "1",
+      ...(schemaKey === "vehicles" && { insured: "0" }),
       ...Object.fromEntries(fields.filter((field) => field.type === "dynamic-list").map((field) => [field.key, [{ value: "" }]])),
     });
     setLineItems([]);
@@ -1470,6 +1748,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
     );
     // If vehicle has nested insuredVehicle, merge its fields to top-level so form fields bind correctly
     const mergedRow = { ...row };
+    if (schemaKey === "appointments") {
+      mergedRow.VIN = row.VIN ?? row.vin ?? row.vehicle_vin ?? "";
+    }
     if (schemaKey === "vehicles" && row.insuredVehicle) {
       mergedRow.insurance_number = row.insuredVehicle.insurance_number ?? row.insuredVehicle.insuranceNumber;
       mergedRow.policy_number = row.insuredVehicle.policy_number ?? row.insuredVehicle.policyNumber;
@@ -1491,8 +1772,13 @@ export function EntityCrudPage({ config }: { config: Config }) {
       status: String(row.status ?? "1"),
       ...formattedDynamicLists,
       ...(schemaKey === "packageSubscriptions" && {
+        company_id: String(row.company_id ?? ""),
+        package_id: String(row.package_id ?? ""),
         start_date: row.start_date ? String(row.start_date).slice(0, 16) : "",
         end_date: row.end_date ? String(row.end_date).slice(0, 16) : "",
+      }),
+      ...(schemaKey === "emailSettings" && {
+        company_id: String(row.company_id ?? ""),
       }),
     });
     setLineItems(row.lineItems ?? []);
@@ -1555,6 +1841,16 @@ export function EntityCrudPage({ config }: { config: Config }) {
         const { id, createdAt, updatedAt, is_deleted, packageInfos, ...apiPayload } = payload;
         if (!apiPayload.password) delete apiPayload.password;
         const fileFields = fields.filter((field) => field.type === "file");
+        if (editing) {
+          fileFields.forEach((field) => {
+            const value = apiPayload[field.key];
+            if (typeof value === "string" && /^(https?:\/\/|\/)/i.test(value)) {
+              delete apiPayload[field.key];
+            } else if (value === null) {
+              apiPayload.remove_logo = "true";
+            }
+          });
+        }
         const hasFile = fileFields.some((field) => apiPayload[field.key] instanceof File);
         const body = hasFile
           ? (() => {
@@ -1616,16 +1912,21 @@ export function EntityCrudPage({ config }: { config: Config }) {
   const canUpdate = canSubModule(config.title, "update");
   const canDeactivate = canSubModule(config.title, "deactivate");
   const canDelete = canSubModule(config.title, "delete");
+  const canViewVehicles = canSubModule("Vehicles", "view");
+  const canViewQuotations = canSubModule("Quotation", "view");
+  const canViewTowingInvoices = canSubModule("Towing Invoice", "view");
+  const canCreateCashPayment = canSubModule("Cash Payment", "create");
+  const canCreateOnlinePayment = canSubModule("Online Payment", "create");
 
   /* ══════════════════════════════════════════════════════════════ */
   /*                           RENDER                              */
   /* ══════════════════════════════════════════════════════════════ */
   return (
-    <div className="p-6 lg:p-8 w-full">
-      <div className="mx-auto max-w-7xl">
+    <div className={flush ? "w-full" : "w-full p-6 lg:p-8"}>
+      <div className={flush ? "w-full" : "mx-auto max-w-7xl"}>
 
         {/* ═══ PAGE HEADER ═══ */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        {!config.hideHeader && <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
             {IconComponent && (
               <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -1642,6 +1943,15 @@ export function EntityCrudPage({ config }: { config: Config }) {
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            {config.resource === "notifications" && (
+              <Button
+                onClick={() => void markAllUserNotificationsRead()}
+                className="h-10 shrink-0 gap-2 rounded-lg bg-blue-600 px-5 font-semibold text-white hover:bg-blue-700"
+              >
+                <CheckCheck className="size-4" />
+                Mark All Read
+              </Button>
+            )}
             {!config.hideCreateButton && canCreate && (
               <Button
                 onClick={openCreate}
@@ -1658,7 +1968,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
               </Button>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* ═══ FILTER BAR ═══ */}
         <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
@@ -1812,7 +2122,9 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             /* First column: bold primary text + secondary below */
                             <div className="flex flex-col">
                               <span className="font-semibold text-foreground">
-                                {formatValue(row[column])}
+                                {config.resource === "towingInvoices" && (column === "total" || column === "balance_amount")
+                                  ? formatTowingInvoiceAmount(row[column])
+                                  : formatValue(row[column])}
                               </span>
                               {/* Show email or second field as secondary text if available */}
                               {row.email && column !== "email" && (
@@ -1822,8 +2134,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               )}
                             </div>
                           ) : (
-                            <span className="text-foreground">
-                              {formatValue(row[column])}
+                            <span className={`text-foreground ${config.resource === "towingInvoices" && (column === "total" || column === "balance_amount") ? "font-bold" : ""}`}>
+                              {config.resource === "towingInvoices" && (column === "total" || column === "balance_amount")
+                                ? formatTowingInvoiceAmount(row[column])
+                                : formatValue(row[column])}
                             </span>
                           )}
                         </td>
@@ -1845,10 +2159,10 @@ export function EntityCrudPage({ config }: { config: Config }) {
                               <Eye className="size-4" />
                               View
                             </DropdownMenuItem>}
-                            {config.paymentType && (
+                            {config.paymentType && (canCreateCashPayment || canCreateOnlinePayment) && (
                               <DropdownMenuItem
                                 onClick={() => setPaying(row)}
-                                disabled={(row.payment_status ?? row.paymentStatus) === "completed" || Number(row.balance_amount ?? row.balanceAmount ?? row.total ?? 0) <= 0}
+                                disabled={isFullyPaidTowingInvoice(row) || (row.payment_status ?? row.paymentStatus) === "completed" || Number(row.balance_amount ?? row.balanceAmount ?? row.total ?? 0) <= 0}
                                 className="gap-2 cursor-pointer text-xs"
                               >
                                 <CreditCard className="size-4" />
@@ -1870,13 +2184,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 onClick={() => config.resource === "towingInvoices"
                                   ? router.push(`/towing-invoices/edit/${encodeURIComponent(String(row.id))}`)
                                   : openEdit(row)}
+                                disabled={
+                                  (config.resource === "towingInvoices" && isFullyPaidTowingInvoice(row)) ||
+                                  (config.resource === "packageSubscriptions" && String(row.payment_status ?? row.paymentStatus ?? "").trim().toLowerCase() === "completed")
+                                }
                                 className="gap-2 cursor-pointer text-xs"
                               >
                                 <Pencil className="size-4" />
                                 Edit
                               </DropdownMenuItem>
                             )}
-                            {config.resource === "customers" && (
+                            {config.resource === "customers" && canViewVehicles && (
                               <DropdownMenuItem
                                 onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.id))}`)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
@@ -1885,7 +2203,16 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Vehicles
                               </DropdownMenuItem>
                             )}
-                            {(config.resource === "vehicles" || schemaKey === "vehicles") && (
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewQuotations && (
+                              <DropdownMenuItem
+                                onClick={() => void downloadVehicleHistory(row)}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <History className="size-4 text-blue-600" />
+                                Vehicle History
+                              </DropdownMenuItem>
+                            )}
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewQuotations && (
                               <DropdownMenuItem
                                 onClick={() => router.push(`/quotations?vehicle_id=${encodeURIComponent(String(row.id))}`)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
@@ -1894,7 +2221,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Quotation
                               </DropdownMenuItem>
                             )}
-                            {(config.resource === "vehicles" || schemaKey === "vehicles") && (
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewTowingInvoices && (
                               <DropdownMenuItem
                                 onClick={() => router.push(`/towing-invoices?vehicle_id=${encodeURIComponent(String(row.id))}`)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
@@ -1921,7 +2248,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                                 Invoice
                               </DropdownMenuItem>
                             )}
-                            {(config.resource === "companyUsers" || config.resource === "customers" || schemaKey === "customers" || config.title === "Customers") && (
+                            {canUpdate && (config.resource === "companyUsers" || config.resource === "customers" || schemaKey === "customers" || config.title === "Customers") && (
                               <DropdownMenuItem
                                 onClick={() => setResettingEmployee(row)}
                                 className="gap-2 cursor-pointer text-xs"
@@ -1955,6 +2282,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                             </DropdownMenuItem>}
                             {!config.hideDeleteAction && canDelete && <DropdownMenuItem
                               onClick={() => setDeleting(row)}
+                              disabled={config.resource === "towingInvoices" && isFullyPaidTowingInvoice(row)}
                               className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
                             >
                               <Trash2 className="size-4" />
@@ -2008,6 +2336,8 @@ export function EntityCrudPage({ config }: { config: Config }) {
         <InvoicePaymentDialog
           invoice={paying as any}
           invoiceType={config.paymentType}
+          cashPaymentAllowed={canCreateCashPayment}
+          onlinePaymentAllowed={canCreateOnlinePayment}
           open={Boolean(paying)}
           onOpenChange={(isOpen) => !isOpen && setPaying(null)}
           onPaymentCreated={loadApiRows}
@@ -2109,7 +2439,7 @@ export function EntityCrudPage({ config }: { config: Config }) {
                 )}
               </div>
               {/* Active Toggle (Mockup Style) */}
-              {!isExcluded && schemaKey !== "appointments" && (
+              {!isExcluded && schemaKey !== "appointments" && !(schemaKey === "packageSubscriptions" && editing) && (
                 <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Active</p>
@@ -2170,7 +2500,14 @@ export function EntityCrudPage({ config }: { config: Config }) {
               {/* Identity block */}
               {/* Merge insuredVehicle fields into view data for display */}
               {(() => {
-                const viewData = schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing;
+                const mergedViewData = schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing;
+                const viewData = schemaKey === "packageSubscriptions"
+                  ? {
+                      ...mergedViewData,
+                      company_id: mergedViewData.company_name ?? `Company #${mergedViewData.company_id}`,
+                      package_id: mergedViewData.package_name ?? `Package #${mergedViewData.package_id}`,
+                    }
+                  : mergedViewData;
                 return (
                   <> 
                     {identityFields.length > 0 && (
@@ -2194,17 +2531,17 @@ export function EntityCrudPage({ config }: { config: Config }) {
                           </p>
                           {field.type === "dynamic-list" ? (
                             <ul className="mt-1 list-disc list-inside text-sm font-semibold text-foreground space-y-1">
-                              {Array.isArray((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key]) ? (
-                                (schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key].map((item: string, i: number) => (
+                              {Array.isArray(viewData[field.key]) ? (
+                                viewData[field.key].map((item: string, i: number) => (
                                   <li key={i}>{item}</li>
                                 ))
                               ) : (
-                                <li>{formatValue((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key])}</li>
+                                <li>{formatValue(viewData[field.key])}</li>
                               )}
                             </ul>
                           ) : (
                             <p className="mt-1 text-sm font-semibold text-foreground">
-                              {formatValue((schemaKey === "vehicles" && viewing.insuredVehicle ? { ...viewing, ...viewing.insuredVehicle } : viewing)[field.key])}
+                              {formatValue(viewData[field.key])}
                             </p>
                           )}
                         </div>

@@ -6,7 +6,7 @@ export default function UsersPage() {
       config={{
         resource: 'employees',
         apiEndpoint: '/backend-api/users',
-        updateFields: ['name', 'country', 'state', 'email', 'phone', 'address', 'status'],
+        updateFields: ['logo', 'name', 'country', 'state', 'email', 'phone', 'address', 'status'],
         title: 'Users',
         description: 'Manage system users, their access and account details.',
         fields: [],

@@ -5,7 +5,7 @@ import { RootLayoutClient } from '@/components/root-layout-client'
 import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
-  title: 'GarageOS',
+  title: 'GarageWorkOs',
   description: 'The operating system for modern auto garages',
   generator: 'v0.app',
   icons: {
@@ -17,10 +17,6 @@ export const metadata: Metadata = {
       {
         url: '/icon-dark-32x32.png',
         media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
       },
     ],
     apple: '/apple-icon.png',

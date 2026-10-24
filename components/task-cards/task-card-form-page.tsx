@@ -10,7 +10,6 @@ import {
   Building2,
   Download,
   Edit3,
-  Pencil,
   Plus,
   Trash2,
   Truck,
@@ -38,24 +37,11 @@ type TaskCardFormPageProps = {
   taskCardId?: string
 }
 
-const statusOptions = [
-  { label: 'Pending', value: 'pending' },
-  { label: 'In Progress', value: 'Inprogress' },
-  { label: 'Completed', value: 'compeleted' },
-  { label: 'Cancelled', value: 'cancelled' },
-]
-
 const itemStatusOptions = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'Inprogress' },
   { label: 'Completed', value: 'compeleted' },
   { label: 'Cancelled', value: 'cancelled' },
-]
-
-const priorityOptions = [
-  { label: 'Low', value: 'low' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'High', value: 'high' },
 ]
 
 const formatDateInput = (value?: string | Date) => {
@@ -338,7 +324,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     void loadQuotationTasks()
   }, [mode, quotationId, filledQuotationId, setValue])
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'lineItems',
   })
@@ -589,12 +575,12 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
             <div className="flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Task Card Details</h2>
-                <p className="text-sm text-muted-foreground">Core work order information and status tracking.</p>
+                <p className="text-sm text-muted-foreground">Core work order information and assigned tasks.</p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => setValue('taskCardNumber', `TC-${Date.now()}`, { shouldDirty: true })}>
+              {mode === 'create' && <Button type="button" variant="outline" size="sm" onClick={() => setValue('taskCardNumber', `TC-${Date.now()}`, { shouldDirty: true })}>
                 <Edit3 className="size-4" />
                 Generate Number
-              </Button>
+              </Button>}
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -604,6 +590,8 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                   id="taskCardNumber"
                   placeholder="TC-0001"
                   {...register('taskCardNumber')}
+                  readOnly={mode === 'edit'}
+                  aria-readonly={mode === 'edit'}
                   className={cn(errors.taskCardNumber && 'border-destructive')}
                 />
                 {errors.taskCardNumber && <p className="text-xs font-medium text-destructive">{errors.taskCardNumber.message}</p>}
@@ -620,46 +608,6 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                   className={cn(errors.mileage && 'border-destructive')}
                 />
                 {errors.mileage && <p className="text-xs font-medium text-destructive">{errors.mileage.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Task Card Status</Label>
-                <Select
-                  value={watch('status') ?? 'pending'}
-                  onValueChange={(value) => setValue('status', value as TaskCardFormData['status'], { shouldDirty: true, shouldValidate: true })}
-                >
-                  <SelectTrigger className={cn('w-full', errors.status && 'border-destructive')}>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.status && <p className="text-xs font-medium text-destructive">{errors.status.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
-                <Select
-                  value={watch('priority') ?? 'medium'}
-                  onValueChange={(value) => setValue('priority', value as TaskCardFormData['priority'], { shouldDirty: true, shouldValidate: true })}
-                >
-                  <SelectTrigger className={cn('w-full', errors.priority && 'border-destructive')}>
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priorityOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.priority && <p className="text-xs font-medium text-destructive">{errors.priority.message}</p>}
               </div>
 
               <div className="space-y-2 md:col-span-2">
@@ -818,19 +766,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
                           {/* Actions */}
                           <td className="px-4 py-4">
                             <div className="flex items-center justify-end gap-1.5">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const current = watch(`lineItems.${index}`)
-                                  update(index, { ...current })
-                                }}
-                                aria-label={`Edit task ${index + 1}`}
-                              >
-                                <Pencil className="size-4" />
-                              </Button>
-                              <Button
+                                <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"

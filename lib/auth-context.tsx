@@ -104,15 +104,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const userRoleScope = result.company_id ? RoleScope.COMPANY : RoleScope.SYSTEM
+    const roleId = result.role_id ?? result.user.role_id
+    const roleName = result.role_name ?? result.roleName ?? result.role ?? result.user.role_name ?? result.user.roleName ?? result.user.role
     const loggedInUser: AuthUser = {
       id: String(result.user.id),
       userName: result.user.name || result.user.email,
       email: result.user.email,
       isPasswordChanged: true,
+      roleId: roleId == null ? undefined : String(roleId),
+      roleName: roleName ?? null,
       phoneNumber: result.user.phone ?? null,
       address: result.user.address ?? null,
       country: result.user.country ?? null,
-      profilePhoto: result.user.profile_photo ?? null,
+      state: result.user.state ?? null,
+      profilePhoto: result.user.logo ?? result.user.profile_photo ?? null,
       permissions: normalizePermissions(result.permissions ?? result.user.permissions),
       roles: [],
     }
@@ -176,6 +181,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userName: result.user.name || result.user.email,
       email: result.user.email,
       isPasswordChanged: true,
+      roleId: result.role_id == null ? undefined : String(result.role_id),
+      roleName: result.role_name ?? result.roleName ?? result.role ?? result.user.role_name ?? result.user.roleName ?? result.user.role ?? null,
       phoneNumber: result.user.phone ?? null,
       address: result.user.address ?? null,
       country: result.user.country ?? null,

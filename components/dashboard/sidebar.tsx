@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import NextImage from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,6 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,
   ClipboardList,
   CreditCard,
   FileText,
@@ -33,7 +33,6 @@ import {
   UserRoundCheck,
   Users,
   Wrench,
-  Image,
   CalendarCheck,
   X,
 } from 'lucide-react'
@@ -50,9 +49,11 @@ const menuSections = [
       { href: '/modules', label: 'Modules', icon: Boxes },
       { href: '/companies', label: 'Companies', icon: Building2 },
       { href: '/package-subscriptions', label: 'Package Subscriptions', icon: Package },
+      { href: '/company-sales', label: 'Company Sales', icon: BarChart3 },
+      { href: '/demo-bookings', label: 'Demo Booking', icon: CalendarCheck },
       { href: '/sms-settings', label: 'SMS Setting', icon: Bell },
       { href: '/whatsapp-settings', label: 'WhatsApp Setting', icon: Bell },
-      { href: '/email-settings', label: 'Email Setting (SendGrid)', icon: Bell },
+      { href: '/email-settings', label: 'Email Setting', icon: Bell },
     ],
   },
   {
@@ -100,6 +101,17 @@ export function DashboardSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCompanyName, setSelectedCompanyName] = useState('')
+  const [hoverMenu, setHoverMenu] = useState<{ label: string; top: number; left: number } | null>(null)
+  const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const closeHoverMenuSoon = () => {
+    if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current)
+    hoverCloseTimer.current = setTimeout(() => setHoverMenu(null), 180)
+  }
+
+  const keepHoverMenuOpen = () => {
+    if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current)
+  }
 
   // Determine active states to auto-expand parent sections
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
@@ -154,6 +166,9 @@ export function DashboardSidebar() {
 
   const displayEmail = user?.email || 'admin@garageos.com'
   const displayName = user?.userName || 'Garage Admin'
+  const profilePicture = user?.profilePhoto || null
+  const displayRole = isSuperAdmin ? 'Super Admin' : user?.roleName?.trim()
+  const isOwner = !isSuperAdmin && user?.roleName?.trim().toLowerCase() === 'owner'
   const initials = displayName.slice(0, 2).toUpperCase()
 
   const role = getDashboardRole(user)
@@ -180,30 +195,28 @@ export function DashboardSidebar() {
         />
       )}
       <aside
-        className={`no-print sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-300 max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${
+        className={`no-print sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${
           collapsed ? 'w-20' : 'w-72'
         } ${mobileOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'}`}
       >
         {/* LOGO ROW */}
-        <div className="flex items-start justify-between border-b border-sidebar-border px-5 py-5 max-md:px-3">
-          <Link href="/dashboard" className="flex min-w-0 items-start gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Wrench className="size-5" />
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-5 max-md:px-3">
+          <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
+            <span className="flex size-12 shrink-0 items-center justify-center">
+              <NextImage
+                src="/garageworkos-logo.png"
+                alt="GarageWorkOs"
+                width={96}
+                height={48}
+                priority
+                className="h-12 w-12 object-contain"
+              />
             </span>
             <span className={`${collapsed ? 'hidden' : 'flex'} min-w-0 flex-col`}>
-              <span className="truncate text-base font-bold text-foreground">GarageOS</span>
+              <span className="truncate text-base font-bold text-foreground">GarageWorkOs</span>
               <span className="truncate text-xs text-muted-foreground">{sidebarLabel}</span>
             </span>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            className="size-8 shrink-0 text-muted-foreground hidden md:flex"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <ChevronLeft className={`size-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -238,7 +251,7 @@ export function DashboardSidebar() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                 pathname === '/dashboard'
-                  ? 'bg-primary/10 text-primary font-bold border-l-2 border-primary rounded-l-none'
+                  ? 'bg-primary/10 text-primary font-bold'
                   : 'text-gray-800 font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               } ${collapsed ? 'justify-center px-2' : ''}`}
             >
@@ -258,6 +271,15 @@ export function DashboardSidebar() {
                         [section.label]: !isExpanded,
                       }))
                     }
+                    onMouseEnter={(event) => {
+                      if (!collapsed) return
+                      keepHoverMenuOpen()
+                      const bounds = event.currentTarget.getBoundingClientRect()
+                      setHoverMenu({ label: section.label, top: bounds.top, left: bounds.right })
+                    }}
+                    onMouseLeave={() => {
+                      if (collapsed) closeHoverMenuSoon()
+                    }}
                     className={`flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors ${
                       collapsed ? 'justify-center' : 'justify-between'
                     }`}
@@ -288,7 +310,7 @@ export function DashboardSidebar() {
                             onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[13px] transition-colors ${
                               isActive
-                                ? 'bg-primary/10 text-primary font-bold border-l-2 border-primary rounded-l-none'
+                                ? 'bg-primary/10 text-primary font-bold'
                                 : 'text-gray-700 font-medium hover:text-gray-900 hover:bg-sidebar-accent/50'
                             }`}
                           >
@@ -306,15 +328,53 @@ export function DashboardSidebar() {
           </div>
         </nav>
 
+        {collapsed && hoverMenu && (() => {
+          const section = filteredSections.find((item) => item.label === hoverMenu.label)
+          if (!section) return null
+          return (
+            <div
+              className="fixed z-[100] w-60 rounded-lg border border-border bg-sidebar p-2 shadow-xl"
+              style={{ top: hoverMenu.top, left: hoverMenu.left }}
+              onMouseEnter={keepHoverMenuOpen}
+              onMouseLeave={() => setHoverMenu(null)}
+            >
+              <p className="px-3 py-2 text-xs font-semibold text-muted-foreground">{section.label}</p>
+              <div className="flex flex-col gap-0.5">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => {
+                        setHoverMenu(null)
+                        setMobileOpen(false)
+                      }}
+                      className={`rounded-md px-3 py-2 text-[13px] transition-colors ${
+                        isActive
+                          ? 'bg-primary/10 font-bold text-primary'
+                          : 'text-gray-700 hover:bg-sidebar-accent/50 hover:text-gray-900'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* BOTTOM USER PANEL */}
         <div className="border-t border-sidebar-border p-3 mt-auto">
           <DropdownMenu>
             <DropdownMenuTrigger className={`flex w-full items-center gap-3 rounded-lg bg-sidebar-accent/40 p-2 text-left outline-none hover:bg-sidebar-accent ${collapsed ? 'justify-center' : ''}`} aria-label="Account menu">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</span>
-              <span className={`${collapsed ? 'hidden' : 'min-w-0'} flex-1`}><span className="block truncate text-xs font-semibold text-foreground">{displayName}</span><span className="block truncate text-[10px] text-muted-foreground">{displayEmail}</span></span>
+              <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-xs font-semibold text-primary">{profilePicture ? <img src={profilePicture} alt={`${displayName} profile`} className="size-full object-cover" /> : initials}</span>
+              <span className={`${collapsed ? 'hidden' : 'min-w-0'} flex-1`}><span className="block truncate text-xs font-semibold text-foreground">{displayName}</span><span className="block truncate text-[10px] text-muted-foreground">{displayEmail}</span>{displayRole && <span className="block truncate text-[10px] text-muted-foreground">{displayRole}</span>}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-64">
-              <div className="flex items-center gap-3 border-b border-border px-2 pb-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</span><div className="min-w-0"><p className="truncate text-xs font-semibold">{displayName}</p><p className="truncate text-[10px] text-muted-foreground">{displayEmail}</p></div></div>
+              <div className="flex items-center gap-3 border-b border-border px-2 pb-3"><span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-xs font-semibold text-primary">{profilePicture ? <img src={profilePicture} alt={`${displayName} profile`} className="size-full object-cover" /> : initials}</span><div className="min-w-0"><p className="truncate text-xs font-semibold">{displayName}</p><p className="truncate text-[10px] text-muted-foreground">{displayEmail}</p>{displayRole && <p className="truncate text-[10px] text-muted-foreground">{displayRole}</p>}</div></div>
+              {isOwner && <DropdownMenuItem onClick={() => router.push('/package-subscriptions-history')} className="mt-2 cursor-pointer gap-2"><Package className="size-4 text-primary" /> Company Settings</DropdownMenuItem>}
               <DropdownMenuItem onClick={() => router.push('/settings/profile')} className="mt-2 cursor-pointer gap-2"><UserRoundCheck className="size-4 text-primary" /> Profile Settings</DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push('/notifications')} className="cursor-pointer gap-2"><Bell className="size-4 text-primary" /> Notifications</DropdownMenuItem>
               <div className="my-2 border-t border-border" />

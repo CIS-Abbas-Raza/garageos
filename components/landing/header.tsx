@@ -14,7 +14,7 @@ export function LandingHeader() {
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-bold">
           <Wrench className="h-6 w-6 text-primary" />
-          <span>GarageOS</span>
+          <span>GarageWorkOs</span>
         </Link>
         <nav className="hidden gap-8 md:flex">
           <a href="#features" className="text-sm text-foreground/60 hover:text-foreground">

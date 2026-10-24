@@ -147,7 +147,7 @@ export function LandingHero() {
           </h1>
 
           <p className="hero-fade hero-fade-3 mx-auto mt-6 max-w-2xl text-balance text-base leading-7 text-muted-foreground md:text-lg">
-            GarageOS brings job cards, invoicing, customer records, and vehicle management together in one place for busy repair shops and service bays.
+            GarageWorkOs brings job cards, invoicing, customer records, and vehicle management together in one place for busy repair shops and service bays.
           </p>
 
           <div className="hero-fade hero-fade-4 mt-8 flex justify-center">

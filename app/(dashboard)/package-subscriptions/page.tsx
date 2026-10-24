@@ -9,7 +9,7 @@ export default function PackageSubscriptionsPage() {
         title: 'Package Subscriptions',
         description: 'Link companies to packages and track subscription periods.',
         fields: [],
-        columns: ['company_id', 'package_id', 'start_date', 'end_date', 'status'],
+        columns: ['company_name', 'package_name', 'package_type', 'amount', 'start_date', 'end_date', 'payment_status', 'status'],
         empty: 'No package subscriptions configured yet.'
       }}
     />

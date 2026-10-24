@@ -13,6 +13,10 @@ type Props = {
 }
 
 export const CountryStateSelect: React.FC<Props> = ({ country, state, onCountryChange, onStateChange, required }) => {
+  const savedState = state?.trim() ?? ''
+  const matchingState = US_STATES.find((item) => item.toLowerCase() === savedState.toLowerCase())
+  const selectedState = matchingState ?? savedState
+
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div>
@@ -23,8 +27,9 @@ export const CountryStateSelect: React.FC<Props> = ({ country, state, onCountryC
       </div>
       <div>
         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">State</label>
-        <select value={state ?? ''} onChange={(e) => onStateChange && onStateChange(e.target.value)} className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm" required={required}>
+        <select value={selectedState} onChange={(e) => onStateChange && onStateChange(e.target.value)} className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm" required={required}>
           <option value="">Select state</option>
+          {selectedState && !matchingState && <option value={selectedState}>{selectedState}</option>}
           {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>

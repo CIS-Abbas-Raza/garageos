@@ -3,28 +3,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { useGarageStore } from '@/lib/store/garage-store'
+import { useBranch } from '@/lib/branch-context'
 import type { DateRangeValue } from '@/components/common/date-range-filter'
 import { format } from 'date-fns'
+import { useAuth } from '@/lib/auth-context'
 
 const COLORS = ['#f59e0b', '#2563eb', '#16a34a'] // Pending (amber), In Progress (blue), Completed (green)
 
 export function TasksDoughnut({ dateRange }: { dateRange?: DateRangeValue }) {
-  const { jobCards, currentCompanyId } = useGarageStore()
+  const { jobCards } = useGarageStore()
+  const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const [apiData, setApiData] = useState<{ labels: string[]; values: number[] } | null>(null)
 
   useEffect(() => {
-    const cid = currentCompanyId
-    if (!cid) return
-    let companyParam: string | number = cid
-    if (typeof cid === 'string') {
-      const m = cid.match(/^c(\d+)$/i)
-      if (m) companyParam = Number(m[1])
-    }
+    if (!selectedCompany) return
 
     const fetchDoughnut = async () => {
       try {
-        const rangeQuery = dateRange ? `&startDate=${format(dateRange.startDate, 'yyyy-MM-dd')}&endDate=${format(dateRange.endDate, 'yyyy-MM-dd')}` : ''
-        const res = await fetch(`/backend-api/dashboard/tasks-doughnut?company_id=${encodeURIComponent(String(companyParam))}${rangeQuery}`)
+        const params = new URLSearchParams({ company_id: selectedCompany })
+        if (user?.roleName?.trim().toLowerCase() === 'customer' && user.id) {
+          params.set('customer_id', user.id)
+        }
+        if (dateRange) {
+          params.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd'))
+          params.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd'))
+        }
+        const res = await fetch(`/backend-api/dashboard/tasks-doughnut?${params.toString()}`)
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.success !== false) {
           setApiData(body.data?.doughnut ?? body.doughnut ?? null)
@@ -37,7 +42,7 @@ export function TasksDoughnut({ dateRange }: { dateRange?: DateRangeValue }) {
     }
 
     void fetchDoughnut()
-  }, [currentCompanyId, dateRange])
+  }, [selectedCompany, dateRange, user?.id, user?.roleName])
 
   const fallback = useMemo(() => {
     const totalPending = jobCards.filter((j) => j.status === 'pending').length

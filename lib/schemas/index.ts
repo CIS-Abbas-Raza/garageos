@@ -85,7 +85,7 @@ export const quotationSchema = z.object({
   vehicleId: z.string().min(1, 'Vehicle is required'),
   mileage: z.coerce.number().min(0, 'Mileage is required'),
   note: z.string().optional(),
-  status: z.enum(['draft', 'sent', 'accepted', 'rejected']),
+  status: z.enum(['Draft', 'Pending', 'Approved', 'Rejected', 'Cancelled']),
   creationDate: z.string().min(1, 'Creation date is required'),
   documentName: z.string().optional(),
   taxPercentage: z.coerce.number().min(0).max(100),
@@ -97,15 +97,17 @@ export const quotationSchema = z.object({
   lineItems: z.array(quotationLineItemSchema),
 })
 
-export const invoiceLineItemSchema = quotationLineItemSchema
+export const invoiceLineItemSchema = quotationLineItemSchema.extend({
+  id: z.union([z.string(), z.number()]).optional(),
+})
 
 export const invoiceSchema = z.object({
   invoiceNumber: z.string().min(1, 'Invoice number is required'),
   customerId: z.string().min(1, 'Customer is required'),
   vehicleId: z.string().min(1, 'Vehicle is required'),
   mileage: z.coerce.number().min(0, 'Mileage is required'),
-  status: z.enum(['draft', 'pending', 'approved']),
-  paymentStatus: z.enum(['pending', 'completed']),
+  status: z.enum(['Draft', 'Pending', 'Approved']),
+  paymentStatus: z.enum(['Pending', 'Completed']),
   creationDate: z.string().min(1, 'Creation date is required'),
   dueDate: z.string().min(1, 'Due date is required'),
   pickUpAddress: z.string().optional(),

@@ -13,7 +13,7 @@ const normalize = (value: string) => value.replace(/[^a-z0-9]/gi, '').toLowerCas
 const aliases: Record<string, string[]> = {
   companyusers: ['companyemployees'],
   rolemanagement: ['roles', 'rolesmanagment'],
-  allvehicle: ['vehicles'],
+  towinginvoices: ['towinginvoice'],
   customers: ['customer'],
   reviews: ['customerreview'],
   smssetting: ['smssettings'],
@@ -24,12 +24,14 @@ const aliases: Record<string, string[]> = {
 export const pathToSubModule: Record<string, string> = {
   '/admin': 'Admin', '/users': 'Users', '/packages': 'Package', '/modules': 'Modules',
   '/companies': 'Companies', '/package-subscriptions': 'Package Subscriptions',
+  '/demo-bookings': 'Demo Booking',
+  '/company-sales': 'Company Sales',
   '/sms-settings': 'SMS Setting', '/whatsapp-settings': 'WhatsApp Setting', '/email-settings': 'Email Setting (SendGrid)',
   '/company-users': 'Company Employees', '/roles': 'Role Management', '/communication-logs': 'Communication Logs',
   '/customers': 'Customers', '/all-vehicle': 'All Vehicles', '/assigned-tasks': 'Assigned Tasks',
   '/appointments': 'Appointments', '/reviews': 'Customer Review', '/all-invoices': 'All Invoices',
   '/invoice-payments': 'Invoice Payments', '/sales': 'Sales', '/company-accounts': 'Company Account',
-  '/account-ledger': 'Account Ledger', '/notifications': 'Notifications',
+  '/account-ledger': 'Account Ledger', '/notifications': 'Notifications', '/view-tasks': 'Task Cards',
 }
 
 export function useRolePermissions() {

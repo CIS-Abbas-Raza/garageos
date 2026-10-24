@@ -6,11 +6,11 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { format } from 'date-fns'
 import {
   Building2,
   Download,
   Edit3,
-  Pencil,
   Plus,
   Trash2,
   Truck,
@@ -38,14 +38,19 @@ type InvoiceFormPageProps = {
 }
 
 const statusOptions = [
-  { label: 'Draft', value: 'draft' },
-  { label: 'Pending', value: 'pending' },
-  { label: 'Approved', value: 'approved' },
+  { label: 'Draft', value: 'Draft' },
+  { label: 'Pending', value: 'Pending' },
+  { label: 'Approved', value: 'Approved' },
 ]
 
+const formatInvoiceStatus = (status?: string) => {
+  const normalized = String(status ?? 'draft').toLowerCase()
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+}
+
 const paymentStatusOptions = [
-  { label: 'Pending', value: 'pending' },
-  { label: 'Completed', value: 'completed' },
+  { label: 'Pending', value: 'Pending' },
+  { label: 'Completed', value: 'Completed' },
 ]
 
 const money = new Intl.NumberFormat('en-US', {
@@ -79,6 +84,13 @@ const formatPersonName = (firstName?: string, lastName?: string) => {
 const isValidImageSource = (value?: string) =>
   Boolean(value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:') || value.startsWith('/')))
 
+export const normalizeCompanyLogoSource = (value?: string) => {
+  if (!value?.trim()) return undefined
+  const source = value.trim()
+  if (isValidImageSource(source)) return source
+  return `/company_logo/${encodeURIComponent(source)}`
+}
+
 const PDF_MARGIN = 40
 const PDF_PAGE_WIDTH = 595.28
 const PDF_BODY_WIDTH = PDF_PAGE_WIDTH - PDF_MARGIN * 2
@@ -93,17 +105,22 @@ const safePdfText = (value: unknown, fallback = '—') => {
 
 const resolveImageDataUrl = async (src?: string) => {
   if (!isValidImageSource(src)) return undefined
-  if (src?.startsWith('data:')) return src
   try {
-    const response = await fetch(src as string)
+    const imageSource = /^https?:\/\//i.test(src as string)
+      ? new URL(src as string).pathname.startsWith('/company_logo/')
+        ? new URL(src as string).pathname
+        : src as string
+      : src as string
+    const response = await fetch(imageSource)
     if (!response.ok) return undefined
     const blob = await response.blob()
-    return await new Promise<string | undefined>((resolve) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : undefined)
-      reader.onerror = () => resolve(undefined)
-      reader.readAsDataURL(blob)
-    })
+    const bitmap = await createImageBitmap(blob)
+    const canvas = document.createElement('canvas')
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0)
+    bitmap.close()
+    return canvas.toDataURL('image/png')
   } catch {
     return undefined
   }
@@ -374,6 +391,134 @@ export const generateInvoicePdf = async (payload: InvoicePdfPayload) => {
   doc.save(`Invoice-${safePdfText(payload.invoiceNumber, 'Invoice').replace(/[^a-z0-9-_]+/gi, '-')}.pdf`)
 }
 
+export type VehicleHistoryPdfPayload = {
+  companyName: string
+  companyEmail: string
+  companyPhone: string
+  companyAddress: string
+  companyRegNo: string
+  companyLogoUrl?: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  customerAddress: string
+  vehicleMake: string
+  vehicleModel: string
+  vehicleYear: string
+  vin: string
+  licensePlate: string
+  vehicleId: string
+  rows: Array<{
+    date: string
+    invoiceNumber: string
+    type: string
+    description: string
+    qty: number
+    unitPrice: number
+    amount: number
+  }>
+}
+
+export const generateVehicleHistoryPdf = async (payload: VehicleHistoryPdfPayload) => {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' })
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = PDF_MARGIN
+  const contentWidth = pageWidth - margin * 2
+  const companyName = payload.companyName?.trim() || 'Company'
+  const logoDataUrl = await resolveImageDataUrl(payload.companyLogoUrl)
+  let y = margin
+
+  if (logoDataUrl) {
+    doc.addImage(logoDataUrl, 'PNG', margin, y, 60, 60, undefined, 'FAST')
+  } else {
+    doc.setDrawColor(0, 0, 0)
+    doc.setLineWidth(1)
+    doc.circle(margin + 30, y + 30, 28, 'S')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(17)
+    doc.text(createLogoFallback(companyName), margin + 30, y + 36, { align: 'center' })
+  }
+
+  const textStartX = margin + 78
+  doc.setTextColor(0, 0, 0)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.text(companyName, textStartX, y + 20)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  doc.text(`Email: ${safePdfText(payload.companyEmail)}  |  Phone: ${safePdfText(payload.companyPhone)}`, textStartX, y + 38)
+  doc.text(`Address: ${safePdfText(payload.companyAddress)}  |  Reg No: ${safePdfText(payload.companyRegNo)}`, textStartX, y + 51)
+
+  const metaX = pageWidth - margin
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.text('VEHICLE HISTORY', metaX, y + 20, { align: 'right' })
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.text(`Date: ${format(new Date(), 'yyyy-MM-dd')}`, metaX, y + 42, { align: 'right' })
+
+  doc.setDrawColor(0, 0, 0)
+  doc.setLineWidth(1)
+  doc.line(margin, y + 82, pageWidth - margin, y + 82)
+  y += 102
+
+  const colWidth = contentWidth / 2 - 10
+  const drawSection = (x: number, title: string, lines: string[]) => {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setCharSpace(1.2)
+    doc.text(title.toUpperCase(), x, y)
+    doc.setCharSpace(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    lines.forEach((line, index) => {
+      doc.text(doc.splitTextToSize(safePdfText(line), colWidth), x, y + 18 + index * 15)
+    })
+  }
+
+  drawSection(margin, 'Customer Detail', [
+    `Name: ${safePdfText(payload.customerName)}`,
+    `Email: ${safePdfText(payload.customerEmail)}`,
+    `Phone: ${safePdfText(payload.customerPhone)}`,
+    `Address: ${safePdfText(payload.customerAddress)}`,
+  ])
+  drawSection(margin + contentWidth / 2 + 10, 'Vehicle Detail', [
+    `Make: ${safePdfText(payload.vehicleMake)}`,
+    `Model: ${safePdfText(payload.vehicleModel)}`,
+    `Year: ${safePdfText(payload.vehicleYear)}`,
+    `VIN: ${safePdfText(payload.vin)}`,
+    `License Plate: ${safePdfText(payload.licensePlate)}`,
+  ])
+
+  y += 108
+  doc.line(margin, y, pageWidth - margin, y)
+  autoTable(doc, {
+    startY: y + 18,
+    head: [['Sno', 'Date', 'Invoice Number', 'Type', 'Description', 'Qty', 'Unit Price', 'Amount']],
+    body: payload.rows.map((row, index) => [
+      String(index + 1), safePdfText(row.date), safePdfText(row.invoiceNumber), safePdfText(row.type),
+      safePdfText(row.description), String(Number(row.qty ?? 0)), formatMoney(Number(row.unitPrice ?? 0)),
+      formatMoney(Number(row.amount ?? 0)),
+    ]),
+    margin: { left: margin, right: margin },
+    pageBreak: 'auto',
+    rowPageBreak: 'avoid',
+    showHead: 'everyPage',
+    theme: 'grid',
+    styles: { font: 'helvetica', fontSize: 7, cellPadding: 5, textColor: [0, 0, 0], lineColor: BORDER, lineWidth: 0.5, valign: 'middle' },
+    headStyles: { fillColor: BRAND_COLOR, textColor: 255, fontStyle: 'bold', halign: 'center' },
+    alternateRowStyles: { fillColor: [250, 251, 253] },
+    columnStyles: {
+      0: { cellWidth: 26, halign: 'center' }, 1: { cellWidth: 54 }, 2: { cellWidth: 74 },
+      3: { cellWidth: 45 }, 4: { cellWidth: 'auto' }, 5: { cellWidth: 30, halign: 'right' },
+      6: { cellWidth: 62, halign: 'right' }, 7: { cellWidth: 62, halign: 'right' },
+    },
+  })
+
+  const fileIdentifier = payload.vin && payload.vin !== '—' ? payload.vin : payload.vehicleId
+  doc.save(`Vehicle-History-${safePdfText(fileIdentifier, 'Vehicle').replace(/[^a-z0-9-_]+/gi, '-')}.pdf`)
+}
+
 const initialLineItem = (isTowing = false): InvoiceFormData['lineItems'][number] => ({
   type: 'service',
   description: isTowing ? 'Towing service' : '',
@@ -384,6 +529,7 @@ const initialLineItem = (isTowing = false): InvoiceFormData['lineItems'][number]
 
 const normalizeLineItem = (
   item?: Partial<InvoiceFormData['lineItems'][number]> & {
+    id?: string | number
     type?: 'service' | 'parts' | 'labour'
     quantity?: number
     unit_price?: number
@@ -394,6 +540,7 @@ const normalizeLineItem = (
   const unitPrice = Number(item?.unitPrice ?? item?.unit_price ?? 0)
   const amount = Number(item?.amount ?? item?.total ?? 0)
   return {
+    ...(item?.id !== undefined ? { id: item.id } : {}),
     type: item?.type === 'parts' ? 'parts' : 'service',
     description: item?.description ?? '',
     qty: Number.isFinite(qty) ? qty : 1,
@@ -638,8 +785,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
             customerId: customer?.id ? String(customer.id) : '',
             vehicleId: record.vehicle_id ? String(record.vehicle_id) : '',
             invoiceNumber: record.invoice_number ?? `TOW-${record.id}`,
-            status: record.invoice_status,
-            paymentStatus: record.payment_status,
+            status: formatInvoiceStatus(record.invoice_status) as InvoiceFormData['status'],
+            paymentStatus: formatInvoiceStatus(record.payment_status) as InvoiceFormData['paymentStatus'],
             creationDate: record.creation_date,
             dueDate: record.creation_date,
             mileage: Number(record.mileage ?? 0),
@@ -668,8 +815,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
           ...record,
           companyId: String(record.company_id),
           invoiceNumber: record.invoice_number ?? `INV-${record.id}`,
-          status: record.invoice_status,
-          paymentStatus: record.payment_status,
+          status: formatInvoiceStatus(record.invoice_status) as InvoiceFormData['status'],
+          paymentStatus: formatInvoiceStatus(record.payment_status) as InvoiceFormData['paymentStatus'],
           creationDate: record.creation_date,
           taxPercentage: Number(record.tax_percentage ?? 0),
           taxAmount: Number(record.tax_amount ?? 0),
@@ -706,7 +853,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     currentSettings?.logoUrl ??
     (currentCompany as { logoUrl?: string; logo?: string } | undefined)?.logoUrl ??
     (currentCompany as { logoUrl?: string; logo?: string } | undefined)?.logo
-  const companyLogoUrl = isValidImageSource(rawCompanyLogo) ? rawCompanyLogo : undefined
+  const companyLogoUrl = normalizeCompanyLogoSource(rawCompanyLogo)
   const companyInitials = createLogoFallback(currentCompany?.name ?? 'Company')
 
   const companyName = currentCompany?.name ?? 'Company'
@@ -735,8 +882,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
       vehicleId: defaultVehicle,
       mileage: Invoice?.mileage ?? 0,
       notes: Invoice?.notes ?? '',
-      status: Invoice?.status ?? 'draft',
-      paymentStatus: Invoice?.paymentStatus ?? 'pending',
+      status: formatInvoiceStatus(Invoice?.status),
+      paymentStatus: formatInvoiceStatus(Invoice?.paymentStatus) as InvoiceFormData['paymentStatus'],
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
       pickUpAddress: (Invoice as any)?.pickUpAddress ?? (Invoice as any)?.pick_up_address ?? '',
@@ -900,7 +1047,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     return () => { cancelled = true }
   }, [isTowing, mode, taskId, setValue])
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'lineItems',
   })
@@ -1047,7 +1194,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         dropOffAddress: values.dropOffAddress,
       } : {}),
       notes: values.notes ?? '',
-      paymentStatus: values.paymentStatus ?? 'pending',
+      paymentStatus: values.paymentStatus ?? 'Pending',
       includeLineItems,
       documentTitle: isTowing ? 'TOWING INVOICE' : 'INVOICE',
       quantityLabel: isTowing ? 'Miles' : 'Qty',
@@ -1100,8 +1247,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
       company_id: companyId,
       task_id: resolvedTaskId,
       invoice_number: values.invoiceNumber,
-      invoice_status: values.status,
-      payment_status: values.paymentStatus,
+      invoice_status: values.status.toLowerCase(),
+      payment_status: values.paymentStatus.toLowerCase(),
       subtotal: includeLineItems ? subtotal : 0,
       discount: includeLineItems ? discountAmount : 0,
       discount_percentage: includeLineItems ? values.discountPercentage : 0,
@@ -1127,8 +1274,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
       company_id: companyId,
       vehicle_id: Number(values.vehicleId),
       invoice_number: values.invoiceNumber,
-      invoice_status: values.status,
-      payment_status: values.paymentStatus,
+      invoice_status: values.status.toLowerCase(),
+      payment_status: values.paymentStatus.toLowerCase(),
       pick_up_address: values.pickUpAddress || null,
       drop_off_address: values.dropOffAddress || null,
       mileage: Number(values.mileage ?? 0),
@@ -1198,7 +1345,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         invoiceNumber={watch('invoiceNumber') || ''}
         creationDate={watch('creationDate') || ''}
         dueDate={watch('dueDate') || ''}
-        paymentStatus={watch('paymentStatus') || 'pending'}
+        paymentStatus={watch('paymentStatus') || 'Pending'}
         notes={watch('notes') || ''}
         customerName={customerDisplayName}
         customerEmail={customerEmail}
@@ -1316,10 +1463,12 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
                 <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
                 <p className="text-sm text-muted-foreground">Core Invoice information.</p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => setValue('invoiceNumber', `INV-${Date.now()}`, { shouldDirty: true })}>
-                <Edit3 className="size-4" />
-                Generate Number
-              </Button>
+              {!(isTowing && mode === 'edit') && (
+                <Button type="button" variant="outline" size="sm" onClick={() => setValue('invoiceNumber', `INV-${Date.now()}`, { shouldDirty: true })}>
+                  <Edit3 className="size-4" />
+                  Generate Number
+                </Button>
+              )}
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1328,6 +1477,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
                 <Input
                   id="invoiceNumber"
                   placeholder="INV-0001"
+                  readOnly={isTowing && mode === 'edit'}
                   {...register('invoiceNumber')}
                   className={cn(errors.invoiceNumber && 'border-destructive')}
                 />
@@ -1350,7 +1500,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
               <div className="space-y-2">
                 <Label htmlFor="status">Invoice Status</Label>
                 <Select
-                  value={watch('status') ?? 'draft'}
+                  value={watch('status') ?? 'Draft'}
                   onValueChange={(value) => setValue('status', value as InvoiceFormData['status'], { shouldDirty: true, shouldValidate: true })}
                 >
                   <SelectTrigger className={cn('w-full', errors.status && 'border-destructive')}>
@@ -1370,7 +1520,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
               <div className="space-y-2">
                 <Label htmlFor="paymentStatus">Payment Status</Label>
                 <Select
-                  value={watch('paymentStatus') ?? 'pending'}
+                  value={watch('paymentStatus') ?? 'Pending'}
                   onValueChange={(value) =>
                     setValue('paymentStatus', value as InvoiceFormData['paymentStatus'], { shouldDirty: true, shouldValidate: true })
                   }
@@ -1581,22 +1731,6 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-1.5">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={!isTowing && !includeLineItems}
-                                  onClick={() => {
-                                    const current = watch(`lineItems.${index}`)
-                                    update(index, {
-                                      ...current,
-                                      amount: rowAmount,
-                                    })
-                                  }}
-                                  aria-label={`Edit row ${index + 1}`}
-                                >
-                                  <Pencil className="size-4" />
-                                </Button>
                                 <Button
                                   type="button"
                                   variant="ghost"

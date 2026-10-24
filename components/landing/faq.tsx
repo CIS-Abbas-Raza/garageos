@@ -5,9 +5,9 @@ import { ChevronDown } from "lucide-react";
 
 const faqs = [
   {
-    question: "What is GarageOS?",
+    question: "What is GarageWorkOs?",
     answer:
-      "GarageOS is a comprehensive management system designed specifically for auto repair shops. It helps you manage jobs, customers, appointments, invoicing, and inventory all in one place.",
+      "GarageWorkOs is a comprehensive management system designed specifically for auto repair shops. It helps you manage jobs, customers, appointments, invoicing, and inventory all in one place.",
   },
   {
     question: "Is there a free trial?",

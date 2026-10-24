@@ -198,6 +198,49 @@
   display: none;
 }
 
+.hero-grid-background {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 72%);
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+}
+
+.hero-grid-background::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: radial-gradient(
+    520px circle at var(--hero-glow-x, 50%) var(--hero-glow-y, 30%),
+    rgba(37, 99, 235, 0.14),
+    transparent 78%
+  );
+  content: '';
+  opacity: var(--hero-glow-opacity, 0);
+  pointer-events: none;
+  transition: opacity 220ms ease-out;
+}
+
+.hero-grid-background > div {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes brand-loader {
+  0% {
+    transform: translateX(-110%);
+  }
+  50% {
+    transform: translateX(140%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
 @keyframes hero-fade-in {
   from {
     opacity: 0;

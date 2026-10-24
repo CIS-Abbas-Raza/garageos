@@ -5,7 +5,7 @@ import type { Vehicle } from "@/lib/types/store"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Eye, MoreHorizontal, Pencil, Trash, ClipboardList } from "lucide-react"
+import { Eye, MoreHorizontal, Pencil, Trash, ClipboardList, History } from "lucide-react"
 
 export function createVehicleColumns(
   onView: (vehicle: Vehicle) => void,
@@ -66,6 +66,9 @@ export function createVehicleColumns(
               )}
               <DropdownMenuItem onClick={() => window.location.href = '/quotations'} className="text-[13px] cursor-pointer gap-2 font-medium text-slate-700">
                 <ClipboardList className="h-4 w-4 text-blue-600" /> Quotation
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = `/quotations?vehicle_id=${encodeURIComponent(String(vehicle.id))}`} className="text-[13px] cursor-pointer gap-2 font-medium text-slate-700">
+                <History className="h-4 w-4 text-blue-600" /> History
               </DropdownMenuItem>
               {onDelete && (
                 <DropdownMenuItem onClick={() => onDelete(vehicle)} className="text-[13px] cursor-pointer text-red-600 focus:text-red-600 gap-2">

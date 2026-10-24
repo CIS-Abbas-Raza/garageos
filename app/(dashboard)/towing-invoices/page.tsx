@@ -9,7 +9,6 @@ export default function TowingInvoicesPage() {
         vehicleScoped: true,
         paymentType: 'towing',
         hideViewAction: true,
-        hideStatusAction: true,
         createPath: '/towing-invoices/create',
         title: 'Towing Invoices',
         description: 'Manage towing invoices generated for vehicle transports.',

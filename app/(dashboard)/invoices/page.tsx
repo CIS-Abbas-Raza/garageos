@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
-import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Search, Trash2, WalletCards, Mail, MessageCircle, Send } from 'lucide-react'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Search, Trash2, WalletCards, Mail, MessageCircle, Send, CircleX, Check } from 'lucide-react'
 import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
 import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
@@ -18,11 +18,26 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Pagination } from '@/components/common/pagination'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
 import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
 import { format } from 'date-fns'
+
+const hasZeroInvoiceBalance = (invoice: Record<string, any>) => {
+  const balance = invoice.balance_amount ?? invoice.balanceAmount
+  const hasBalanceData = balance != null || invoice.total != null
+  return hasBalanceData && Number(balance ?? Math.max(0, Number(invoice.total) - Number(invoice.paid_amount ?? invoice.amountPaid ?? 0))) <= 0
+}
+
+const isPaymentCompleted = (invoice: Record<string, any>) =>
+  String(invoice.payment_status ?? invoice.paymentStatus ?? '').toLowerCase() === 'completed'
+
+const isInvoiceSettled = (invoice: Record<string, any>) => isPaymentCompleted(invoice) || hasZeroInvoiceBalance(invoice)
+
+const isInvoiceFullySettled = (invoice: Record<string, any>) => isPaymentCompleted(invoice) && hasZeroInvoiceBalance(invoice)
 
 type InvoiceListingType = 'service' | 'towing'
 
@@ -30,7 +45,16 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const canManageInvoices = true
+  const { user } = useAuth()
+  const { canSubModule } = useRolePermissions()
+  const invoicePermissionModule = showAll ? 'All Invoices' : 'Invoice'
+  const canCreateInvoice = canSubModule(invoicePermissionModule, 'create')
+  const canUpdateInvoice = canSubModule(invoicePermissionModule, 'update')
+  const canDeactivateInvoice = canSubModule(invoicePermissionModule, 'deactivate')
+  const canDeleteInvoice = canSubModule(invoicePermissionModule, 'delete')
+  const canCreateCashPayment = canSubModule('Cash Payment', 'create')
+  const canCreateOnlinePayment = canSubModule('Online Payment', 'create')
+  const canManageInvoices = canCreateInvoice || canUpdateInvoice || canDeactivateInvoice || canDeleteInvoice
   const [invoices, setInvoices] = useState<Record<string, any>[]>([])
   const [payingInvoice, setPayingInvoice] = useState<(typeof invoices)[number] | null>(null)
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
@@ -63,6 +87,9 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
 
     try {
       const queryParams = new URLSearchParams({ company_id: String(selectedCompany) })
+      if (user?.roleName?.trim().toLowerCase() === 'customer' && user.id) {
+        queryParams.set('customer_id', user.id)
+      }
       if (!showAll && taskId) queryParams.set('task_id', taskId)
       if (dateRange) { queryParams.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); queryParams.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
       const query = `?${queryParams.toString()}`
@@ -81,7 +108,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to load invoices.')
     }
-  }, [selectedCompany, showAll, invoiceType, taskId, dateRange])
+  }, [selectedCompany, showAll, invoiceType, taskId, dateRange, user?.id, user?.roleName])
 
   useEffect(() => {
     void loadInvoices()
@@ -250,6 +277,24 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
     }
   }
 
+  const toggleInvoiceStatus = async (invoice: Record<string, any>) => {
+    const status = String(invoice.status ?? '1') === '0' ? 1 : 0
+    try {
+      const endpoint = invoiceType === 'towing' ? 'towing-invoices' : 'invoices'
+      const response = await fetch(`/backend-api/${endpoint}/${invoice.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to update invoice status.')
+      setInvoices((current) => current.map((item) => item.id === invoice.id ? { ...item, ...result.data, status } : item))
+      toast.success(`Invoice ${status === 1 ? 'activated' : 'deactivated'} successfully.`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to update invoice status.')
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -260,7 +305,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
             Create, review, and edit invoices using the full-page workflow.
           </p>
         </div>
-        {canManageInvoices && (
+        {canCreateInvoice && (
           <Button onClick={() => router.push(invoiceType === 'towing' ? '/towing-invoices/create' : `/invoices/create${!showAll && taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`)} className="w-full gap-2 sm:w-auto">
             <Plus className="size-4" />
             Add Invoice
@@ -303,7 +348,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
         <EmptyState
           title="No invoices yet"
           description="Create your first invoice to start tracking billing and payments."
-          action={canManageInvoices ? {
+          action={canCreateInvoice ? {
             label: 'Add Invoice',
             onClick: () => router.push(invoiceType === 'towing' ? '/towing-invoices/create' : `/invoices/create${!showAll && taskId ? `?task_id=${encodeURIComponent(taskId)}` : ''}`),
           } : undefined}
@@ -318,7 +363,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                   <th className="px-5 py-4 font-semibold">Customer</th>
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
-                  <th className="px-5 py-4 font-semibold">Payment</th>
+                  <th className="px-5 py-4 font-semibold">Payment Status</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
                   <th className="px-5 py-4 font-semibold">Balance</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
@@ -391,23 +436,38 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                             <MoreHorizontal className="size-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
+                            {(canCreateCashPayment || canCreateOnlinePayment) && <DropdownMenuItem
                               onClick={() => setPayingInvoice(invoice)}
-                              disabled={(invoice.payment_status ?? invoice.paymentStatus) === 'completed'}
+                              disabled={isInvoiceSettled(invoice)}
                               className={cn(
                                 'gap-2 cursor-pointer text-xs',
-                                (invoice.payment_status ?? invoice.paymentStatus) === 'completed' && 'cursor-not-allowed opacity-50',
+                                isInvoiceSettled(invoice) && 'cursor-not-allowed opacity-50',
                               )}
                             >
                               <WalletCards className="size-4" />
                               Pay
-                            </DropdownMenuItem>
-                            {canManageInvoices && <DropdownMenuItem
+                            </DropdownMenuItem>}
+                            {canUpdateInvoice && <DropdownMenuItem
                               onClick={() => router.push(invoiceType === 'towing' ? `/towing-invoices/edit/${invoice.id}` : `/invoices/edit/${invoice.id}`)}
-                              className="gap-2 cursor-pointer text-xs"
+                              disabled={isInvoiceSettled(invoice)}
+                              className={cn(
+                                'gap-2 cursor-pointer text-xs',
+                                isInvoiceSettled(invoice) && 'cursor-not-allowed opacity-50',
+                              )}
                             >
                               <Pencil className="size-4" />
                               Edit
+                            </DropdownMenuItem>}
+                            {canDeactivateInvoice && <DropdownMenuItem
+                              onClick={() => void toggleInvoiceStatus(invoice)}
+                              disabled={isInvoiceFullySettled(invoice) && String(invoice.status ?? '1') !== '0'}
+                              className={cn(
+                                'gap-2 cursor-pointer text-xs',
+                                isInvoiceFullySettled(invoice) && String(invoice.status ?? '1') !== '0' && 'cursor-not-allowed opacity-50',
+                              )}
+                            >
+                              {String(invoice.status ?? '1') === '0' ? <Check className="size-4" /> : <CircleX className="size-4" />}
+                              {String(invoice.status ?? '1') === '0' ? 'Activate' : 'Deactivate'}
                             </DropdownMenuItem>}
                             <DropdownMenuItem
                               onClick={() => void downloadInvoice(invoice.id)}
@@ -419,11 +479,15 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
                             {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
-                            {canManageInvoices && <DropdownMenuItem
+                            {canDeleteInvoice && <DropdownMenuItem
                               onClick={() => {
                                 setDeletingInvoice(invoice)
                               }}
-                              className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
+                              disabled={isInvoiceFullySettled(invoice)}
+                              className={cn(
+                                'gap-2 cursor-pointer text-destructive focus:text-destructive text-xs',
+                                isInvoiceFullySettled(invoice) && 'cursor-not-allowed opacity-50',
+                              )}
                             >
                               <Trash2 className="size-4" />
                               Delete
@@ -467,6 +531,8 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
       <InvoicePaymentDialog
         invoice={payingInvoice}
         invoiceType={invoiceType === 'towing' ? 'towing' : 'invoice'}
+        cashPaymentAllowed={canCreateCashPayment}
+        onlinePaymentAllowed={canCreateOnlinePayment}
         open={Boolean(payingInvoice)}
         onOpenChange={(open) => {
           if (!open) setPayingInvoice(null)

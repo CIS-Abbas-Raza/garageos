@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { canAccessDashboardPath, getDashboardRole } from '@/lib/role-access'
 import { pathToSubModule, useRolePermissions } from '@/lib/hooks/use-role-permissions'
+import { BrandLoader } from '@/components/brand-loader'
 
 export function RoleRouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -16,9 +17,10 @@ export function RoleRouteGuard({ children }: { children: React.ReactNode }) {
   const allowed = canAccessDashboardPath(role, pathname) && (!permissionName || canSubModule(permissionName, 'view'))
 
   useEffect(() => {
-    if (!allowed) router.replace('/dashboard')
-  }, [allowed, router])
+    if (isReady && !allowed) router.replace('/dashboard')
+  }, [allowed, isReady, router])
 
-  if (!isReady || !allowed) return null
+  if (!isReady) return <BrandLoader />
+  if (!allowed) return null
   return <>{children}</>
 }

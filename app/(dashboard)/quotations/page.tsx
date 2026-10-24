@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send, CircleX, Check } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -18,20 +18,32 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Pagination } from '@/components/common/pagination'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
 import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
 import { format } from 'date-fns'
 
+const getQuotationStatus = (quotation: Record<string, any>) =>
+  String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase()
+
+const quotationStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
+
 export default function QuotationsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const canManageQuotations = true
+  const { canSubModule } = useRolePermissions()
+  const canCreateQuotation = canSubModule('Quotation', 'create')
+  const canUpdateQuotation = canSubModule('Quotation', 'update')
+  const canDeactivateQuotation = canSubModule('Quotation', 'deactivate')
+  const canDeleteQuotation = canSubModule('Quotation', 'delete')
+  const canViewTaskCards = canSubModule('Task Cards', 'view')
+  const canManageQuotations = canCreateQuotation || canUpdateQuotation || canDeactivateQuotation || canDeleteQuotation
   const [rows, setRows] = useState<Record<string, any>[]>([])
-  const [vehicleId, setVehicleId] = useState<string | undefined>()
-  const searchParams = useSearchParams()
+  const vehicleId = searchParams.get('vehicle_id') ?? undefined
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
@@ -41,10 +53,6 @@ export default function QuotationsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
-
-  useEffect(() => {
-    setVehicleId(searchParams.get('vehicle_id') ?? undefined)
-  }, [searchParams])
 
   useEffect(() => {
     const loadQuotations = async () => {
@@ -92,7 +100,7 @@ export default function QuotationsPage() {
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
     return rows.filter((quotation) => {
-      const status = String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase()
+      const status = getQuotationStatus(quotation)
       const customerName = quotation.vehicle?.customer?.name ?? getCustomerName(quotation.customer_id ?? quotation.customerId)
       const vehicleName = quotation.vehicle?.name ||
         [quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
@@ -205,6 +213,23 @@ export default function QuotationsPage() {
     }
   }
 
+  const toggleQuotationStatus = async (quotation: Record<string, any>) => {
+    const status = String(quotation.status ?? '1') === '0' ? 1 : 0
+    try {
+      const response = await fetch(`/backend-api/quotations/${quotation.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to update quotation status.')
+      setRows((current) => current.map((row) => row.id === quotation.id ? { ...row, ...result.data, status } : row))
+      toast.success(`Quotation ${status === 1 ? 'activated' : 'deactivated'} successfully.`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to update quotation status.')
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -215,7 +240,7 @@ export default function QuotationsPage() {
             Create, review, and edit quotations using the new full-page workflow.
           </p>
         </div>
-        {canManageQuotations && <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
+        {canCreateQuotation && <Button onClick={() => router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Quotation
         </Button>}
@@ -249,9 +274,11 @@ export default function QuotationsPage() {
       <div className="mb-5">
         <RecordCountBadges counts={[
           { label: 'Total', value: rows.length },
-          { label: 'Draft', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase() === 'draft').length, color: 'neutral' },
-          { label: 'Accepted', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'accepted').length, color: 'green' },
-          { label: 'Rejected', value: rows.filter((quotation) => String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status).toLowerCase() === 'rejected').length, color: 'red' },
+          { label: 'Draft', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'draft').length, color: 'neutral' },
+          { label: 'Pending', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'pending').length, color: 'amber' },
+          { label: 'Approved', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'approved').length, color: 'green' },
+          { label: 'Rejected', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'rejected').length, color: 'red' },
+          { label: 'Cancelled', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'cancelled').length, color: 'blue' },
         ]} />
       </div>
 
@@ -259,7 +286,7 @@ export default function QuotationsPage() {
         <EmptyState
           title="No quotations yet"
           description="Create your first quotation to start tracking estimates and approvals."
-          action={canManageQuotations ? {
+          action={canCreateQuotation ? {
             label: 'Add Quotation',
             onClick: () => router.push(createQuotationPath),
           } : undefined}
@@ -281,6 +308,9 @@ export default function QuotationsPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedRows.map((quotation) => (
+                  (() => {
+                    const status = getQuotationStatus(quotation)
+                    return (
                   <tr key={quotation.id} className="bg-background transition-colors hover:bg-muted/20">
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
@@ -308,13 +338,14 @@ export default function QuotationsPage() {
                       <span
                         className={cn(
                           'inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize',
-                          (quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status) === 'accepted' && 'bg-emerald-500/10 text-emerald-700',
-                          (quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status) === 'draft' && 'bg-slate-500/10 text-slate-700',
-                          (quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status) === 'sent' && 'bg-blue-500/10 text-blue-700',
-                          (quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status) === 'rejected' && 'bg-destructive/10 text-destructive',
+                          status === 'draft' && 'bg-slate-500/10 text-slate-700',
+                          status === 'pending' && 'bg-amber-500/10 text-amber-700',
+                          status === 'approved' && 'bg-emerald-500/10 text-emerald-700',
+                          status === 'rejected' && 'bg-destructive/10 text-destructive',
+                          status === 'cancelled' && 'bg-blue-500/10 text-blue-700',
                         )}
                       >
-                        {quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft'}
+                        {quotationStatusLabel(status)}
                       </span>
                     </td>
                     <td className="px-5 py-4 font-semibold text-foreground">
@@ -340,24 +371,32 @@ export default function QuotationsPage() {
                               <Download className="size-4" />
                               Download Quotation
                             </DropdownMenuItem>
-                            {canManageQuotations && <DropdownMenuItem
+                            {canUpdateQuotation && <DropdownMenuItem
                               onClick={() => router.push(`/quotations/edit/${quotation.id}${vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''}`)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {canDeactivateQuotation && <DropdownMenuItem
+                              onClick={() => void toggleQuotationStatus(quotation)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              {String(quotation.status ?? '1') === '0' ? <Check className="size-4" /> : <CircleX className="size-4" />}
+                              {String(quotation.status ?? '1') === '0' ? 'Activate' : 'Deactivate'}
+                            </DropdownMenuItem>}
+                            {canViewTaskCards && <DropdownMenuItem
+                              disabled={getQuotationStatus(quotation) !== 'approved'}
                               onClick={() => router.push(`/task-cards?quotation_id=${encodeURIComponent(String(quotation.id))}`)}
                               className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
                             >
                               <FileText className="size-4 text-blue-600" />
                               Task Card
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
                             {canManageQuotations && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
-                            {canManageQuotations && <DropdownMenuItem
+                            {canDeleteQuotation && <DropdownMenuItem
                               onClick={() => {
                                 setDeletingQuotation(quotation)
                               }}
@@ -371,6 +410,8 @@ export default function QuotationsPage() {
                       </div>
                     </td>
                   </tr>
+                    )
+                  })()
                 ))}
                 {rows.length > 0 && filteredRows.length === 0 && (
                   <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No quotations match your filters.</td></tr>

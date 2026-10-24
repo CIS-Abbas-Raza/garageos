@@ -5,7 +5,7 @@ const testimonials = [
     name: "Marcus Johnson",
     role: "Owner, Thompson Auto Repair",
     content:
-      "GarageOS cut our administrative time in half. We've been able to take on 40% more jobs without hiring extra staff.",
+      "GarageWorkOs cut our administrative time in half. We've been able to take on 40% more jobs without hiring extra staff.",
     rating: 5,
   },
   {
@@ -33,7 +33,7 @@ export function LandingTestimonials() {
             Trusted by 3,200+ shops
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            See what our customers have to say about GarageOS
+            See what our customers have to say about GarageWorkOs
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-3">

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Building2, Eye, EyeOff, GraduationCap, UsersRound, Wrench } from 'lucide-react'
+import { Building2, Eye, EyeOff, GraduationCap, UsersRound } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -47,7 +47,7 @@ export function LoginPage({ customerLogin = false }: { customerLogin?: boolean }
       } else {
         await login(data.email, data.password)
       }
-      toast.success('Sign in successful! Welcome back to GarageOS.')
+      toast.success('Sign in successful! Welcome back to GarageWorkOs.')
       router.push('/dashboard')
     } catch (error: any) {
       toast.error(error?.message || 'Login failed. Please check your credentials.')
@@ -55,24 +55,18 @@ export function LoginPage({ customerLogin = false }: { customerLogin?: boolean }
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-2">
-      <section className="flex min-h-screen flex-col bg-background px-6 py-8 sm:px-10 lg:px-16 lg:py-12 xl:px-24">
-        <header className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3" aria-label="GarageOS home">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Wrench className="size-6" aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block text-xl font-bold tracking-tight">GarageOS</span>
-              <span className="block text-xs text-muted-foreground">Workshop Management System</span>
-            </span>
-          </Link>
-          <ThemeToggle />
-        </header>
-
-        <div className="flex flex-1 items-center py-14 lg:py-16">
+    <main className="h-dvh overflow-hidden bg-background text-foreground lg:grid lg:grid-cols-2">
+      <section className="flex h-dvh min-h-0 flex-col bg-background px-6 py-3 sm:px-10 sm:py-4 lg:px-16 lg:py-5 xl:px-24">
+        <div className="flex flex-1 items-center py-2 sm:py-3 lg:py-4">
           <div className="mx-auto w-full max-w-md">
-            <div className="mb-8">
+            <div className="mb-6">
+              <Link href="/" className="mb-5 flex w-fit items-center gap-3" aria-label="GarageWorkOs home">
+                <Image src="/garageworkos-logo.png" alt="" width={80} height={40} priority className="h-10 w-auto object-contain" />
+                <span>
+                  <span className="block whitespace-nowrap text-2xl font-bold tracking-tight" style={{ fontFamily: '"Segoe UI", sans-serif' }}><span className="text-[#2563eb]">GarageWork</span><span className="text-[#0b1220]">Os</span></span>
+                  <span className="block text-xs text-muted-foreground">Workshop Management System</span>
+                </span>
+              </Link>
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Welcome back</h1>
               <p className="mt-3 text-lg leading-7 text-muted-foreground">Sign in to access your {customerLogin ? 'customer' : 'workshop'} portal</p>
             </div>
@@ -124,7 +118,7 @@ export function LoginPage({ customerLogin = false }: { customerLogin?: boolean }
           </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground lg:text-left">© 2026 GarageOS. Built for better workshops.</p>
+        <p className="text-center text-xs text-muted-foreground lg:text-left">© 2026 GarageWorkOs. Built for better workshops.</p>
       </section>
 
       <aside className="relative hidden overflow-hidden bg-primary/5 px-10 py-12 lg:flex lg:flex-col lg:justify-center lg:px-16 xl:px-20">

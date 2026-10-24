@@ -3,26 +3,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts'
 import { useGarageStore } from '@/lib/store/garage-store'
-import type { DateRangeValue } from '@/components/common/date-range-filter'
-import { format } from 'date-fns'
+import { useBranch } from '@/lib/branch-context'
 
-export function RevenueChart({ dateRange }: { dateRange?: DateRangeValue }) {
-  const { invoices, expenses, currentCompanyId } = useGarageStore()
+export function RevenueChart() {
+  const { invoices, expenses } = useGarageStore()
+  const { selectedCompany } = useBranch()
   const [apiData, setApiData] = useState<{ labels: string[]; revenue: number[]; expenses: number[] } | null>(null)
 
   useEffect(() => {
-    const cid = currentCompanyId
-    if (!cid) return
-    let companyParam: string | number = cid
-    if (typeof cid === 'string') {
-      const m = cid.match(/^c(\d+)$/i)
-      if (m) companyParam = Number(m[1])
-    }
+    if (!selectedCompany) return
 
     const fetchOverview = async () => {
       try {
-        const rangeQuery = dateRange ? `&startDate=${format(dateRange.startDate, 'yyyy-MM-dd')}&endDate=${format(dateRange.endDate, 'yyyy-MM-dd')}` : ''
-        const res = await fetch(`/backend-api/dashboard/overview?company_id=${encodeURIComponent(String(companyParam))}${rangeQuery}`)
+        const params = new URLSearchParams({ company_id: selectedCompany })
+        const res = await fetch(`/backend-api/dashboard/overview?${params.toString()}`)
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.success !== false) {
           setApiData(body.data ?? body)
@@ -35,7 +29,7 @@ export function RevenueChart({ dateRange }: { dateRange?: DateRangeValue }) {
     }
 
     void fetchOverview()
-  }, [currentCompanyId, dateRange])
+  }, [selectedCompany])
 
   const revenueData = useMemo(() => {
     if (apiData) {

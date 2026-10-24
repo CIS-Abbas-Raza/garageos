@@ -6,6 +6,7 @@ import { BranchProvider } from '@/lib/branch-context'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { RoleRouteGuard } from '@/components/role-route-guard'
+import { BrandLoader } from '@/components/brand-loader'
 
 export default function DashboardLayout({
   children,
@@ -18,7 +19,7 @@ export default function DashboardLayout({
     setMounted(true)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted) return <BrandLoader />
 
   return (
     <AuthGuard>
@@ -27,7 +28,7 @@ export default function DashboardLayout({
           <div className="flex h-screen overflow-hidden bg-background">
             <DashboardSidebar />
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-              <DashboardHeader title="GarageOS" />
+              <DashboardHeader title="GarageWorkOs" />
               <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
                 {children}
               </main>

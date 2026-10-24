@@ -12,7 +12,6 @@ import {
   Edit3,
   Eye,
   FileText,
-  Pencil,
   Plus,
   Trash2,
   Truck,
@@ -41,10 +40,11 @@ type QuotationFormPageProps = {
 }
 
 const statusOptions = [
-  { label: 'Draft', value: 'draft' },
-  { label: 'Sent', value: 'sent' },
-  { label: 'Accepted', value: 'accepted' },
-  { label: 'Rejected', value: 'rejected' },
+  { label: 'Draft', value: 'Draft' },
+  { label: 'Pending', value: 'Pending' },
+  { label: 'Approved', value: 'Approved' },
+  { label: 'Rejected', value: 'Rejected' },
+  { label: 'Cancelled', value: 'Cancelled' },
 ]
 
 const money = new Intl.NumberFormat('en-US', {
@@ -85,17 +85,22 @@ const safePdfText = (value: unknown, fallback = '—') => {
 
 const resolveImageDataUrl = async (src?: string) => {
   if (!isValidImageSource(src)) return undefined
-  if (src?.startsWith('data:')) return src
   try {
-    const response = await fetch(src as string)
+    const imageSource = /^https?:\/\//i.test(src as string)
+      ? new URL(src as string).pathname.startsWith('/company_logo/')
+        ? new URL(src as string).pathname
+        : src as string
+      : src as string
+    const response = await fetch(imageSource)
     if (!response.ok) return undefined
     const blob = await response.blob()
-    return await new Promise<string | undefined>((resolve) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : undefined)
-      reader.onerror = () => resolve(undefined)
-      reader.readAsDataURL(blob)
-    })
+    const bitmap = await createImageBitmap(blob)
+    const canvas = document.createElement('canvas')
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0)
+    bitmap.close()
+    return canvas.toDataURL('image/png')
   } catch {
     return undefined
   }
@@ -561,24 +566,11 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
           throw new Error(result.message || 'Unable to load quotation.')
         }
         const record = result.data
-        const vehicleResponse = await fetch(`/backend-api/vehicles/${record.vehicle_id}`)
-        const vehicleResult = await vehicleResponse.json()
-        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
-          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
-        }
-
-        const vehicle = vehicleResult.data
-        const customerId = vehicle.customer_id ?? vehicle.customerId
+        const vehicle = record.vehicle
+        const linkedCustomer = vehicle?.customer
+        const customerId = vehicle?.customer_id ?? vehicle?.customerId ?? linkedCustomer?.id
         setApiVehicle(vehicle)
-
-        if (customerId) {
-          const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
-          const customerResult = await customerResponse.json()
-          if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
-            throw new Error(customerResult.message || 'Unable to load customer details.')
-          }
-          setApiCustomer(customerResult.data)
-        }
+        setApiCustomer(linkedCustomer)
 
         setApiQuotation({
           ...record,
@@ -705,7 +697,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       vehicleId: defaultVehicle,
       mileage: quotation?.mileage ?? 0,
       note: quotation?.note ?? quotation?.description ?? 'General vehicle service quotation',
-      status: quotation?.quotationStatus ?? quotation?.status ?? 'draft',
+      status: String(quotation?.quotationStatus ?? quotation?.status ?? 'Draft').toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) as QuotationFormData['status'],
       creationDate: formatDateInput(quotation?.creationDate ?? quotation?.createdAt),
       documentName: quotation?.documentName ?? '',
       taxPercentage: quotation?.taxPercentage ?? quotation?.tax_percentage ?? 0,
@@ -739,7 +731,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     if (quotation) reset(defaultValues)
   }, [quotation, defaultValues, reset])
 
-  const { fields, append, remove, replace, update } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'lineItems',
   })
@@ -823,6 +815,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   }, [customers, watchedCustomerId, setValue])
 
   useEffect(() => {
+    if (mode === 'edit') return
     if (!watchedVehicleId) {
       setApiVehicle(undefined)
       return
@@ -851,9 +844,10 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
     void loadVehicle()
     return () => { cancelled = true }
-  }, [watchedVehicleId, watchedCustomerId, setValue])
+  }, [mode, watchedVehicleId, watchedCustomerId, setValue])
 
   useEffect(() => {
+    if (mode === 'edit') return
     if (!watchedCustomerId) {
       setApiCustomer(undefined)
       return
@@ -875,7 +869,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
     void loadCustomer()
     return () => { cancelled = true }
-  }, [watchedCustomerId])
+  }, [mode, watchedCustomerId])
 
   const selectedCustomer = apiCustomer?.id && String(apiCustomer.id) === watchedCustomerId
     ? apiCustomer
@@ -1025,7 +1019,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       vehicle_id: values.vehicleId,
       mileage: Number(values.mileage ?? 0),
       note: values.note,
-      quotation_status: values.status,
+      quotation_status: values.status.toLowerCase(),
       subtotal: includeLineItems ? subtotal : 0,
       discount: includeLineItems ? discountAmount : 0,
       discount_percentage: includeLineItems ? values.discountPercentage : 0,
@@ -1224,10 +1218,10 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                 <h2 className="text-lg font-semibold text-foreground">Quotation Details</h2>
                 <p className="text-sm text-muted-foreground">Core quotation information and attached document.</p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => setValue('quotationNumber', `QT-${Date.now()}`, { shouldDirty: true })}>
-                <Edit3 className="size-4" />
-                Generate Number
-              </Button>
+              {mode === 'create' && <Button type="button" variant="outline" size="sm" onClick={() => setValue('quotationNumber', `QT-${Date.now()}`, { shouldDirty: true })}>
+                  <Edit3 className="size-4" />
+                  Generate Number
+                </Button>}
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1237,6 +1231,8 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   id="quotationNumber"
                   placeholder="QT-0001"
                   {...register('quotationNumber')}
+                  readOnly={mode === 'edit'}
+                  aria-readonly={mode === 'edit'}
                   className={cn(errors.quotationNumber && 'border-destructive')}
                 />
                 {errors.quotationNumber && <p className="text-xs font-medium text-destructive">{errors.quotationNumber.message}</p>}
@@ -1258,7 +1254,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="status">Quotation Status</Label>
                 <Select
-                  value={watch('status') ?? 'draft'}
+                  value={watch('status') ?? 'Draft'}
                   onValueChange={(value) => setValue('status', value as QuotationFormData['status'], { shouldDirty: true, shouldValidate: true })}
                 >
                   <SelectTrigger className={cn('w-full', errors.status && 'border-destructive')}>
@@ -1518,23 +1514,6 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-1.5">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={!includeLineItems}
-                                  onClick={() => {
-                                    if (!includeLineItems) return
-                                    const current = watch(`lineItems.${index}`)
-                                    update(index, {
-                                      ...current,
-                                      amount: rowAmount,
-                                    })
-                                  }}
-                                  aria-label={`Edit row ${index + 1}`}
-                                >
-                                  <Pencil className="size-4" />
-                                </Button>
                                 <Button
                                   type="button"
                                   variant="ghost"

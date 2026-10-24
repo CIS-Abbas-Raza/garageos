@@ -30,12 +30,14 @@ type PaymentMethod = 'cash' | 'card' | 'bank_transfer' | 'online'
 type InvoicePaymentDialogProps = {
   invoice: PayableInvoice | null
   invoiceType?: 'invoice' | 'towing'
+  cashPaymentAllowed?: boolean
+  onlinePaymentAllowed?: boolean
   open: boolean
   onOpenChange: (open: boolean) => void
   onPaymentCreated?: () => void | Promise<void>
 }
 
-export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, onOpenChange, onPaymentCreated }: InvoicePaymentDialogProps) {
+export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPaymentAllowed = true, onlinePaymentAllowed = true, open, onOpenChange, onPaymentCreated }: InvoicePaymentDialogProps) {
   const { user } = useAuth()
   const [step, setStep] = useState<'method' | 'form'>('method')
   const [methodGroup, setMethodGroup] = useState<'cash' | 'online'>('cash')
@@ -53,17 +55,20 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
   const paidValue = Number(paidAmount || 0)
   const balanceAmount = Math.max(0, balanceBeforePayment - paidValue)
   const isOnline = paymentMethod !== 'cash'
+  const defaultPaymentMethod = cashPaymentAllowed ? 'cash' : 'online'
   useEffect(() => {
     if (!open || !invoice) return
     setStep('method')
-    setMethodGroup('cash')
-    setPaymentMethod('cash')
+    setMethodGroup(defaultPaymentMethod)
+    setPaymentMethod(defaultPaymentMethod)
     setPaidAmount('0')
     setPicture(null)
     setPictureError('')
-  }, [open, invoice, balanceBeforePayment])
+  }, [open, invoice, balanceBeforePayment, defaultPaymentMethod])
 
   const selectMethodGroup = (value: 'cash' | 'online') => {
+    if (value === 'cash' && !cashPaymentAllowed) return
+    if (value === 'online' && !onlinePaymentAllowed) return
     setMethodGroup(value)
     setPaymentMethod(value === 'cash' ? 'cash' : 'online')
   }
@@ -83,6 +88,10 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
 
   const handleSubmit = async () => {
     if (!invoice) return
+    if ((paymentMethod === 'cash' && !cashPaymentAllowed) || (paymentMethod !== 'cash' && !onlinePaymentAllowed)) {
+      toast.error('This payment method is not allowed for your role.')
+      return
+    }
     if (!paidValue || paidValue <= 0) {
       toast.error('Paid amount must be greater than 0.')
       return
@@ -101,8 +110,9 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
       toast.error('Company and signed-in user are required to create a payment.')
       return
     }
-    const paymentDoneBy = 'company'
-    const paymentStatus = 'verified'
+    const isCustomer = user.roleName?.trim().toLowerCase() === 'customer'
+    const paymentDoneBy = isCustomer ? 'customer' : 'company'
+    const paymentStatus = isCustomer ? 'pending' : 'verified'
 
     try {
       const formData = new FormData()
@@ -143,7 +153,7 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', open, o
               {([
                 { value: 'cash', label: 'Cash', icon: Banknote, description: 'No slip required' },
                 { value: 'online', label: 'Online', icon: CreditCard, description: 'Slip required' },
-              ] as const).map(({ value, label, icon: Icon, description }) => (
+              ] as const).filter(({ value }) => value === 'cash' ? cashPaymentAllowed : onlinePaymentAllowed).map(({ value, label, icon: Icon, description }) => (
                 <button
                   key={value}
                   type="button"

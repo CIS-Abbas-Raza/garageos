@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Image, Search, Star } from 'lucide-react'
+import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Search, Star, Mail, ListChecks } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
@@ -16,6 +16,7 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
 
@@ -23,13 +24,20 @@ export default function TaskCardsListingPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
-  const canManageTaskCards = true
+  const { canSubModule } = useRolePermissions()
+  const canCreateTaskCard = canSubModule('Task Cards', 'create')
+  const canUpdateTaskCard = canSubModule('Task Cards', 'update')
+  const canDeleteTaskCard = canSubModule('Task Cards', 'delete')
+  const canViewTasks = canSubModule('Task Cards', 'view')
+  const canViewInvoices = canSubModule('Invoice', 'view')
+  const canViewCustomerReviews = canSubModule('Customer Review', 'view')
   const [rows, setRows] = useState<Record<string, any>[]>([])
   const [quotationId, setQuotationId] = useState<string | undefined>()
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [reviewTarget, setReviewTarget] = useState<Record<string, any> | null>(null)
+  const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
 
   useEffect(() => {
     setQuotationId(searchParams.get('quotation_id') ?? undefined)
@@ -95,6 +103,32 @@ export default function TaskCardsListingPage() {
     return vehicle ? (vehicle.vin ?? vehicle.VIN ?? '—') : '—'
   }
 
+  function getTaskCardProgress(card: Record<string, any>) {
+    const tasks = Array.isArray(card.tasks) ? card.tasks : []
+    if (!tasks.length) return 0
+    const completedTasks = tasks.filter((task) => ['completed', 'compeleted'].includes(String(task.task_status ?? task.taskStatus ?? '').trim().toLowerCase())).length
+    return Math.round((completedTasks / tasks.length) * 100)
+  }
+
+  const sendTaskCardEmail = async (card: Record<string, any>) => {
+    if (getTaskCardProgress(card) < 100) return
+    setSendingEmailId(card.id)
+    try {
+      const response = await fetch('/backend-api/send-email/car-ready', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_card_id: card.id }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || result.error || 'Unable to send task card email.')
+      toast.success(result.message || 'Car-ready email sent successfully.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to send task card email.')
+    } finally {
+      setSendingEmailId(null)
+    }
+  }
+
   const handleDelete = async (id: number, title?: string) => {
     try {
       const response = await fetch(`/backend-api/task-cards/${id}`, { method: 'DELETE' })
@@ -117,7 +151,7 @@ export default function TaskCardsListingPage() {
             Track and assign work orders from start through completion.
           </p>
         </div>
-        {canManageTaskCards && <Button onClick={() => router.push(taskCardPath('create'))} className="w-full gap-2 sm:w-auto">
+        {canCreateTaskCard && <Button onClick={() => router.push(taskCardPath('create'))} className="w-full gap-2 sm:w-auto">
           <Plus className="size-4" />
           Add Task Card
         </Button>}
@@ -156,7 +190,7 @@ export default function TaskCardsListingPage() {
         <EmptyState
           title="No task cards yet"
           description="Create your first task card to start assigning service and parts tasks."
-          action={canManageTaskCards ? {
+          action={canCreateTaskCard ? {
             label: 'Add Task Card',
             onClick: () => router.push(taskCardPath('create')),
           } : undefined}
@@ -164,13 +198,14 @@ export default function TaskCardsListingPage() {
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-[960px] w-full text-left text-sm">
+            <table className="min-w-[1040px] w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-5 py-4 font-semibold">Task Card #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
+                  <th className="px-5 py-4 font-semibold">Progress</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
                   <th className="px-5 py-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -209,6 +244,7 @@ export default function TaskCardsListingPage() {
                         {card.status === 1 || card.status === '1' ? 'Active' : 'Inactive'}
                       </span>
                     </td>
+                    <td className="px-5 py-4 font-medium text-foreground">{getTaskCardProgress(card)}%</td>
                     <td className="px-5 py-4 text-muted-foreground">
                       {formatDisplayDate(card.createdAt)}
                     </td>
@@ -222,35 +258,43 @@ export default function TaskCardsListingPage() {
                             <MoreHorizontal className="size-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
-                            {canManageTaskCards && <DropdownMenuItem
+                            {canViewTasks && <DropdownMenuItem
+                              onClick={() => router.push(`/view-tasks?task_id=${encodeURIComponent(String(card.id))}`)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <ListChecks className="size-4" />
+                              View Tasks
+                            </DropdownMenuItem>}
+                            {canUpdateTaskCard && <DropdownMenuItem
                               onClick={() => router.push(taskCardPath('edit', card.id))}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {canUpdateTaskCard && <DropdownMenuItem
+                              onClick={() => void sendTaskCardEmail(card)}
+                              disabled={getTaskCardProgress(card) < 100 || sendingEmailId === card.id}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Mail className="size-4" />
+                              {sendingEmailId === card.id ? 'Sending Email...' : 'Send Email'}
+                            </DropdownMenuItem>}
+                            {canViewInvoices && <DropdownMenuItem
                               onClick={() => router.push(`/invoices?task_id=${encodeURIComponent(String(card.id))}`)}
                               className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
                             >
                               <Receipt className="size-4 text-emerald-600" />
                               Invoice
-                            </DropdownMenuItem>
-                            {canManageTaskCards && <DropdownMenuItem
-                              onClick={() => router.push(`/task-cards/${card.id}/vehicle-pictures`)}
-                              className="gap-2 cursor-pointer text-xs"
-                            >
-                              <Image className="size-4 text-primary" />
-                              Vehicle Pictures
                             </DropdownMenuItem>}
-                            <DropdownMenuItem
+                            {canViewCustomerReviews && <DropdownMenuItem
                               onClick={() => setReviewTarget(card)}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Star className="size-4 text-amber-500" />
                               Customer Review
-                            </DropdownMenuItem>
-                            {canManageTaskCards && <DropdownMenuItem
+                            </DropdownMenuItem>}
+                            {canDeleteTaskCard && <DropdownMenuItem
                               onClick={() => handleDelete(card.id, (card as any).task_cards_number || (card as any).taskCardNumber || card.title)}
                               className="gap-2 cursor-pointer text-xs text-destructive hover:bg-destructive/10"
                             >
@@ -264,7 +308,7 @@ export default function TaskCardsListingPage() {
                   </tr>
                 ))}
                 {rows.length > 0 && filteredRows.length === 0 && (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No task cards match your filters.</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No task cards match your filters.</td></tr>
                 )}
               </tbody>
             </table>

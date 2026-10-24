@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
+import { useAuth } from '@/lib/auth-context'
 
 type Assignment = Record<string, any>
 
@@ -30,6 +32,10 @@ const statusLabel: Record<string, string> = {
 
 export function AssignedTasksPage() {
   const { selectedCompany } = useBranch()
+  const { user, isLoading: isAuthLoading } = useAuth()
+  const { canSubModule } = useRolePermissions()
+  const canUpdateAssignedTasks = canSubModule('Assigned Tasks', 'update')
+  const isOwner = user?.roleName?.trim().toLowerCase() === 'owner'
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
@@ -40,6 +46,7 @@ export function AssignedTasksPage() {
 
   useEffect(() => {
     const loadAssignments = async () => {
+      if (isAuthLoading) return
       if (!selectedCompany) {
         setAssignments([])
         setIsLoading(false)
@@ -48,7 +55,11 @@ export function AssignedTasksPage() {
 
       setIsLoading(true)
       try {
-        const response = await fetch(`/backend-api/task-assignments?company_id=${encodeURIComponent(selectedCompany)}`)
+        const params = new URLSearchParams({ company_id: selectedCompany })
+        if (user?.roleName?.trim().toLowerCase() === 'customer' && user.id) {
+          params.set('user_id', user.id)
+        }
+        const response = await fetch(`/backend-api/task-assignments?${params.toString()}`)
         const result = await response.json()
         if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load assigned tasks.')
         setAssignments(Array.isArray(result.data) ? result.data : [])
@@ -60,7 +71,7 @@ export function AssignedTasksPage() {
     }
 
     void loadAssignments()
-  }, [selectedCompany])
+  }, [isAuthLoading, selectedCompany, user?.id, user?.roleName])
 
   const filteredAssignments = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -71,8 +82,8 @@ export function AssignedTasksPage() {
       const assignee = assignment.user?.name ?? assignment.user?.email ?? `User #${assignment.user_id}`
       const taskStatus = task.task_status ?? 'pending'
       const searchableValues = [
-        vehicle.name,
-        vehicle.license_plate,
+        vehicle.make,
+        vehicle.vin ?? vehicle.VIN,
         task.taskCard?.task_cards_number,
         task.task_card_id,
         task.description,
@@ -89,8 +100,15 @@ export function AssignedTasksPage() {
     setTaskStatus(assignment.task?.task_status ?? 'pending')
   }
 
+  const canEditAssignment = (assignment: Assignment) =>
+    isOwner || String(assignment.user_id) === String(user?.id)
+
   const saveStatus = async () => {
     if (!editingAssignment) return
+    if (!canEditAssignment(editingAssignment)) {
+      toast.error('You can only update tasks assigned to you.')
+      return
+    }
     setIsSaving(true)
     try {
       const response = await fetch(`/backend-api/task-assignments/${editingAssignment.id}`, {
@@ -154,12 +172,12 @@ export function AssignedTasksPage() {
             <table className="min-w-[820px] w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="px-5 py-4 font-semibold">Vehicle Name</th>
-                  <th className="px-5 py-4 font-semibold">License Plate</th>
+                  <th className="px-5 py-4 font-semibold">Make</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Task Card #</th>
                   <th className="px-5 py-4 font-semibold">Assigned To</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
-                  <th className="px-5 py-4 font-semibold text-right">Action</th>
+                  {canUpdateAssignedTasks && <th className="px-5 py-4 font-semibold text-right">Action</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -170,10 +188,10 @@ export function AssignedTasksPage() {
                       <td className="px-5 py-4 font-medium text-foreground">
                         <div className="flex items-center gap-2">
                           <CarFront className="size-4 text-primary" />
-                          <span>{assignment.task?.taskCard?.quotation?.vehicle?.name ?? 'â€”'}</span>
+                          <span>{assignment.task?.taskCard?.quotation?.vehicle?.make ?? '—'}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-muted-foreground">{assignment.task?.taskCard?.quotation?.vehicle?.license_plate ?? 'â€”'}</td>
+                      <td className="px-5 py-4 text-muted-foreground">{assignment.task?.taskCard?.quotation?.vehicle?.vin ?? assignment.task?.taskCard?.quotation?.vehicle?.VIN ?? '—'}</td>
                       <td className="px-5 py-4 text-muted-foreground">{assignment.task?.taskCard?.task_cards_number ?? assignment.task?.task_card_id ?? '—'}</td>
                       <td className="px-5 py-4 text-foreground">
                         <div className="flex items-center gap-2">
@@ -186,17 +204,17 @@ export function AssignedTasksPage() {
                           {statusLabel[taskStatus] ?? taskStatus}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right">
+                      {canUpdateAssignedTasks && <td className="px-5 py-4 text-right">
                         <Button variant="outline" size="sm" className="gap-2" onClick={() => openStatusModal(assignment)}>
                           <Pencil className="size-4" />
                           Update Status
                         </Button>
-                      </td>
+                      </td>}
                     </tr>
                   )
                 })}
                 {assignments.length > 0 && filteredAssignments.length === 0 && (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No assigned tasks match your filters.</td></tr>
+                  <tr><td colSpan={canUpdateAssignedTasks ? 6 : 5} className="px-5 py-10 text-center text-muted-foreground">No assigned tasks match your filters.</td></tr>
                 )}
               </tbody>
             </table>
@@ -204,7 +222,7 @@ export function AssignedTasksPage() {
         </div>
       )}
 
-      <Dialog open={Boolean(editingAssignment)} onOpenChange={(open) => !open && setEditingAssignment(null)}>
+      <Dialog open={canUpdateAssignedTasks && Boolean(editingAssignment)} onOpenChange={(open) => !open && setEditingAssignment(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Update Task Status</DialogTitle>
@@ -222,16 +240,17 @@ export function AssignedTasksPage() {
           </div>
           <div className="space-y-2 py-2">
             <Label htmlFor="assigned-task-status">Task Status</Label>
-            <Select value={taskStatus} onValueChange={setTaskStatus}>
+            <Select value={taskStatus} onValueChange={setTaskStatus} disabled={Boolean(editingAssignment && !canEditAssignment(editingAssignment))}>
               <SelectTrigger id="assigned-task-status" className="w-full"><SelectValue placeholder="Select task status" /></SelectTrigger>
               <SelectContent>
                 {Object.entries(statusLabel).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
               </SelectContent>
             </Select>
+            {editingAssignment && !canEditAssignment(editingAssignment) && <p className="text-xs text-muted-foreground">You can only update tasks assigned to you.</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setEditingAssignment(null)}>Cancel</Button>
-            <Button type="button" onClick={saveStatus} disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Status'}</Button>
+            <Button type="button" onClick={saveStatus} disabled={isSaving || Boolean(editingAssignment && !canEditAssignment(editingAssignment))}>{isSaving ? 'Saving...' : 'Save Status'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

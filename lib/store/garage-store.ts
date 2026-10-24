@@ -154,7 +154,7 @@ const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9
 export const defaultCompanies: Types.Company[] = [
   {
     id: 'c1',
-    name: 'GarageOS Auto Workshop',
+    name: 'GarageWorkOs Auto Workshop',
     email: 'contact@garageos.com',
     phone: '+1 555-0192',
     address: '123 Main Street, Suite 100',
