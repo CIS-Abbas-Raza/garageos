@@ -68,6 +68,46 @@ function getAccessToken(): string | null {
   return null
 }
 
+const AUTH_FETCH_INTERCEPTOR_FLAG = "__garageWorkOsAuthFetchInstalled"
+
+/** Attach the saved login token to API requests across the app. */
+export function installAuthFetchInterceptor() {
+  if (typeof window === "undefined") return
+  const windowWithInterceptor = window as Window & { __garageWorkOsAuthFetchInstalled?: boolean }
+  if (windowWithInterceptor[AUTH_FETCH_INTERCEPTOR_FLAG]) return
+
+  const originalFetch = window.fetch.bind(window)
+  window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+    const rawUrl = input instanceof Request ? input.url : String(input)
+    let url: URL
+    try {
+      url = new URL(rawUrl, window.location.origin)
+    } catch {
+      return originalFetch(input, init)
+    }
+
+    if (url.origin !== window.location.origin || !url.pathname.startsWith('/backend-api/')) {
+      return originalFetch(input, init)
+    }
+
+    const method = (init?.method || (input instanceof Request ? input.method : 'GET')).toUpperCase()
+    const isPublicWebsitePackageList = method === 'GET'
+      && url.pathname === '/backend-api/packages'
+      && url.searchParams.get('limit') === '100'
+    const headers = new Headers(input instanceof Request ? input.headers : undefined)
+    new Headers(init?.headers).forEach((value, key) => headers.set(key, value))
+    if (isPublicWebsitePackageList) {
+      return originalFetch(input, { ...init, cache: 'no-store', headers })
+    }
+
+    const token = getAccessToken()
+    if (token) headers.set('Authorization', `Bearer ${token}`)
+    return originalFetch(input, { ...init, cache: 'no-store', headers })
+  }
+
+  windowWithInterceptor[AUTH_FETCH_INTERCEPTOR_FLAG] = true
+}
+
 export function setTokens(accessToken: string, refreshToken: string) {
   if (typeof window !== "undefined") {
     localStorage.setItem("accessToken", accessToken)
