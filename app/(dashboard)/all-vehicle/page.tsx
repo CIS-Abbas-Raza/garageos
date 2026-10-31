@@ -8,11 +8,11 @@ export default function AllVehiclesPage() {
         apiEndpoint: '/backend-api/vehicles',
         companyScoped: true,
         hideCreateButton: true,
-        hideRowActions: true,
+        hideRowActions: false,
         title: 'All Vehicles',
         description: 'Vehicles belonging to customers of the company selected in the sidebar.',
         fields: [],
-        columns: ['make', 'model', 'year', 'VIN', 'license_plate', 'insured', 'status'],
+        columns: ['make', 'customer_name', 'model', 'year', 'VIN', 'license_plate', 'insured', 'status'],
         empty: 'No vehicles found for the selected company.',
       }}
     />

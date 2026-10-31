@@ -81,7 +81,7 @@ export function MyNotificationsPage() {
 
   const unreadCount = notifications.filter((notification) => !notification.read).length
 
-  return <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+  return <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
     <div className="mb-6 flex items-end justify-between gap-4">
       <div>
         <p className="text-sm font-medium text-primary">Inbox</p>
@@ -90,7 +90,7 @@ export function MyNotificationsPage() {
       </div>
       {unreadCount > 0 && <button type="button" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline" onClick={() => void markAllAsRead()}><CheckCheck className="size-4" /> Mark all as read</button>}
     </div>
-    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       {isLoading ? <p className="p-10 text-center text-sm text-muted-foreground">Loading notifications...</p>
         : notifications.length === 0 ? <div className="p-10 text-center"><Bell className="mx-auto size-8 text-muted-foreground" /><p className="mt-3 font-semibold">You are all caught up</p></div>
           : <div className="divide-y divide-border">{notifications.map((notification) => <button type="button" key={notification.id} onClick={() => !notification.read && void markAsRead(notification.id)} className={`flex w-full items-start gap-4 p-5 text-left transition-colors hover:bg-muted/30 ${!notification.read ? 'bg-primary/[0.03]' : ''}`}><span className="min-w-0 flex-1"><span className="flex items-center justify-between gap-3"><span className={`text-sm ${!notification.read ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>{notification.text}</span><span className="shrink-0 text-xs text-muted-foreground">{new Date(notification.createdAt).toLocaleString()}</span></span></span>{!notification.read && <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />}</button>)}</div>}

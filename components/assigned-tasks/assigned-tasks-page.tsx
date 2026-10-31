@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
 import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { useAuth } from '@/lib/auth-context'
@@ -62,7 +62,7 @@ export function AssignedTasksPage() {
         const response = await fetch(`/backend-api/task-assignments?${params.toString()}`)
         const result = await response.json()
         if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load assigned tasks.')
-        setAssignments(Array.isArray(result.data) ? result.data : [])
+        setAssignments(Array.isArray(result.data) ? result.data.slice().sort((a, b) => Number(b.id) - Number(a.id)) : [])
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Unable to load assigned tasks.')
       } finally {
@@ -133,11 +133,11 @@ export function AssignedTasksPage() {
   }
 
   if (isLoading) {
-    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground sm:px-6 lg:px-8">Loading assigned tasks...</div>
+    return <div className="mx-auto max-w-[1440px] px-4 py-8 text-sm text-muted-foreground sm:px-5 lg:px-6">Loading assigned tasks...</div>
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
       <div className="mb-6">
         <p className="text-sm font-medium text-primary">Garage Operations</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">Assigned Tasks</h1>
@@ -167,24 +167,27 @@ export function AssignedTasksPage() {
       {assignments.length === 0 ? (
         <EmptyState title="No assigned tasks" description="Tasks assigned to company users will appear here." />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-[820px] w-full text-left text-sm">
+            <table className="min-w-[920px] w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
+                  <th className="px-5 py-4 font-semibold">S.No</th>
                   <th className="px-5 py-4 font-semibold">Make</th>
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Task Card #</th>
                   <th className="px-5 py-4 font-semibold">Assigned To</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
-                  {canUpdateAssignedTasks && <th className="px-5 py-4 font-semibold text-right">Action</th>}
+                  <th className="px-5 py-4 font-semibold">Created At</th>
+                  {canUpdateAssignedTasks && <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Action</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredAssignments.map((assignment) => {
+                {filteredAssignments.map((assignment, rowIndex) => {
                   const taskStatus = assignment.task?.task_status ?? 'pending'
                   return (
-                    <tr key={assignment.id} className="bg-background transition-colors hover:bg-muted/20">
+                    <tr key={assignment.id} className="group bg-background transition-colors hover:bg-muted/20">
+                      <td className="px-5 py-4 text-muted-foreground">{rowIndex + 1}</td>
                       <td className="px-5 py-4 font-medium text-foreground">
                         <div className="flex items-center gap-2">
                           <CarFront className="size-4 text-primary" />
@@ -204,7 +207,8 @@ export function AssignedTasksPage() {
                           {statusLabel[taskStatus] ?? taskStatus}
                         </span>
                       </td>
-                      {canUpdateAssignedTasks && <td className="px-5 py-4 text-right">
+                      <td className="px-5 py-4 text-muted-foreground">{formatDisplayDate(assignment.createdAt ?? assignment.created_at)}</td>
+                      {canUpdateAssignedTasks && <td className="sticky right-0 z-10 border-l border-border bg-background px-5 py-4 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-muted">
                         <Button variant="outline" size="sm" className="gap-2" onClick={() => openStatusModal(assignment)}>
                           <Pencil className="size-4" />
                           Update Status
@@ -214,7 +218,7 @@ export function AssignedTasksPage() {
                   )
                 })}
                 {assignments.length > 0 && filteredAssignments.length === 0 && (
-                  <tr><td colSpan={canUpdateAssignedTasks ? 6 : 5} className="px-5 py-10 text-center text-muted-foreground">No assigned tasks match your filters.</td></tr>
+                  <tr><td colSpan={canUpdateAssignedTasks ? 8 : 7} className="px-5 py-10 text-center text-muted-foreground">No assigned tasks match your filters.</td></tr>
                 )}
               </tbody>
             </table>

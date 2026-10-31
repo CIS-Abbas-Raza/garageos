@@ -123,8 +123,16 @@ export function DataTable<TData, TValue>({
       }
     : internalPagination
 
+  const newestFirstData = [...data].sort((a, b) => {
+    const left = Number((a as any).id)
+    const right = Number((b as any).id)
+    return Number.isFinite(left) && Number.isFinite(right)
+      ? right - left
+      : String((b as any).id ?? '').localeCompare(String((a as any).id ?? ''), undefined, { numeric: true, sensitivity: 'base' })
+  })
+
   const table = useReactTable({
-    data,
+    data: newestFirstData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: serverPagination ? undefined : getPaginationRowModel(),
@@ -245,7 +253,8 @@ export function DataTable<TData, TValue>({
             <TableHeader className="bg-[#FAFAFA] whitespace-nowrap">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent border-gray-100">
-                  {headerGroup.headers.map((header) => {
+                  <TableHead className="h-12 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">S.No</TableHead>
+                  {headerGroup.headers.filter((header) => header.column.id !== "select").map((header) => {
                     const align = (header.column.columnDef.meta as any)?.align || "left"
                     return (
                       <TableHead
@@ -282,9 +291,10 @@ export function DataTable<TData, TValue>({
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
+                table.getRowModel().rows.map((row, rowIndex) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="group bg-white hover:bg-[#FAFAFA]">
-                    {row.getVisibleCells().map((cell) => {
+                    <TableCell className="px-6 py-4 text-gray-500">{(pagination.pageIndex * pagination.pageSize) + rowIndex + 1}</TableCell>
+                    {row.getVisibleCells().filter((cell) => cell.column.id !== "select").map((cell) => {
                       const align = (cell.column.columnDef.meta as any)?.align || "left"
                       return (
                         <TableCell

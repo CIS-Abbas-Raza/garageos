@@ -24,6 +24,9 @@ export interface AuthUser {
   userName: string
   email: string
   isPasswordChanged: boolean
+  companyId?: number | string | null
+  PackageId?: number | string | null
+  PackageName?: string | null
   roleId?: string
   roleName?: string | null
   phoneNumber?: string | null

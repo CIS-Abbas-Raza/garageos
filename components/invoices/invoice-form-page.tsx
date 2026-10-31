@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { jsPDF } from 'jspdf'
@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { BrandLoader } from '@/components/brand-loader'
 import { useAuth } from '@/lib/auth-context'
 import { useBranch } from '@/lib/branch-context'
 import { Button } from '@/components/ui/button'
@@ -25,7 +26,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { invoiceSchema, type InvoiceFormData } from '@/lib/schemas'
+import { invoiceSchema, towingInvoiceSchema, type InvoiceFormData } from '@/lib/schemas'
 import { useGarageStore, defaultCompanies } from '@/lib/store/garage-store'
 import { cn } from '@/lib/utils'
 
@@ -719,6 +720,9 @@ function InvoicePrintView({
 export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: InvoiceFormPageProps) {
   const isTowing = variant === 'towing'
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const routeTaskId = searchParams.get('task_id') ?? undefined
+  const towingVehicleId = searchParams.get('vehicle_id') ?? undefined
   const { selectedCompany } = useBranch()
   const { user } = useAuth()
   const {
@@ -728,21 +732,26 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     invoices,
     settings,
   } = useGarageStore()
-  const [taskId, setTaskId] = useState<string | undefined>()
+  const [taskId, setTaskId] = useState<string | undefined>(routeTaskId)
   const [apiInvoice, setApiInvoice] = useState<any>()
   const [apiCompany, setApiCompany] = useState<any>()
   const [apiVehicle, setApiVehicle] = useState<any>()
   const [apiCustomer, setApiCustomer] = useState<any>()
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(mode === 'edit')
+  const [isTowingCompanyLoaded, setIsTowingCompanyLoaded] = useState(!isTowing)
+  const [isTowingVehicleLoaded, setIsTowingVehicleLoaded] = useState(!(isTowing && mode === 'create' && towingVehicleId))
+  const [linkedRecordsLoaded, setLinkedRecordsLoaded] = useState(false)
+  const [linkedRecordsError, setLinkedRecordsError] = useState<string | null>(null)
 
   useEffect(() => {
-    setTaskId(new URLSearchParams(window.location.search).get('task_id') ?? undefined)
-  }, [])
-
-  useEffect(() => {
-    if (!isTowing || !selectedCompany) return
+    if (!isTowing) return
+    if (!selectedCompany) {
+      setIsTowingCompanyLoaded(true)
+      return
+    }
 
     let cancelled = false
+    setIsTowingCompanyLoaded(false)
     const loadSelectedCompany = async () => {
       try {
         const response = await fetch(`/backend-api/companies/${encodeURIComponent(String(selectedCompany))}`)
@@ -755,6 +764,8 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         if (!cancelled) {
           toast.error(error instanceof Error ? error.message : 'Unable to load company details.')
         }
+      } finally {
+        if (!cancelled) setIsTowingCompanyLoaded(true)
       }
     }
 
@@ -810,6 +821,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         }
         const subtotal = Number(record.subtotal ?? 0)
         const discount = Number(record.discount ?? 0)
+        if (!record.task_card_id) throw new Error('Invoice is not linked to a task card.')
         setTaskId(String(record.task_card_id))
         setApiInvoice({
           ...record,
@@ -882,12 +894,12 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
       vehicleId: defaultVehicle,
       mileage: Invoice?.mileage ?? 0,
       notes: Invoice?.notes ?? '',
-      status: formatInvoiceStatus(Invoice?.status),
-      paymentStatus: formatInvoiceStatus(Invoice?.paymentStatus) as InvoiceFormData['paymentStatus'],
+      status: Invoice?.status ? formatInvoiceStatus(Invoice.status) : isTowing ? 'Approved' : 'Draft',
+      paymentStatus: Invoice?.paymentStatus ? formatInvoiceStatus(Invoice.paymentStatus) as InvoiceFormData['paymentStatus'] : 'Pending',
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
       pickUpAddress: (Invoice as any)?.pickUpAddress ?? (Invoice as any)?.pick_up_address ?? '',
-      dropOffAddress: (Invoice as any)?.dropOffAddress ?? (Invoice as any)?.drop_off_address ?? '',
+      dropOffAddress: (Invoice as any)?.dropOffAddress ?? (Invoice as any)?.drop_off_address ?? (isTowing && companyAddress !== '—' ? companyAddress : ''),
       documentName: Invoice?.documentName ?? '',
       taxPercentage: Invoice?.taxPercentage ?? 0,
       discountPercentage: Invoice?.discountPercentage ?? (Invoice as any)?.discount_percentage ?? 0,
@@ -899,7 +911,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         ? Invoice.lineItems.map((item: any) => normalizeLineItem(item))
         : [initialLineItem(isTowing)],
     }
-  }, [Invoice, customers, vehicles, isTowing])
+  }, [Invoice, customers, vehicles, isTowing, companyAddress])
 
   const {
     register,
@@ -911,7 +923,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     watch,
     formState: { errors, isSubmitting },
   } = useForm<InvoiceFormData>({
-    resolver: zodResolver(invoiceSchema) as any,
+    resolver: zodResolver(isTowing ? towingInvoiceSchema : invoiceSchema) as any,
     defaultValues,
     mode: 'onChange',
   })
@@ -921,15 +933,22 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
   }, [Invoice, defaultValues, reset])
 
   useEffect(() => {
-    if (!isTowing) return
+    if (!isTowing || mode !== 'create' || companyAddress === '—' || getValues('dropOffAddress')) return
+    setValue('dropOffAddress', companyAddress, { shouldDirty: false, shouldValidate: true })
+  }, [isTowing, mode, companyAddress, getValues, setValue])
 
-    const vehicleId = new URLSearchParams(window.location.search).get('vehicle_id')
-    if (!vehicleId) return
+  useEffect(() => {
+    if (!isTowing) return
+    if (!towingVehicleId || mode !== 'create') {
+      setIsTowingVehicleLoaded(true)
+      return
+    }
 
     let cancelled = false
+    setIsTowingVehicleLoaded(false)
     const loadTowingVehicleAndCustomer = async () => {
       try {
-        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(vehicleId)}`)
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(towingVehicleId)}`)
         const vehicleResult = await vehicleResponse.json()
         if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
           throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
@@ -938,10 +957,10 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
 
         const vehicle = vehicleResult.data
         setApiVehicle(vehicle)
-        setValue('vehicleId', String(vehicle.id ?? vehicleId), { shouldDirty: false, shouldValidate: true })
+        setValue('vehicleId', String(vehicle.id ?? towingVehicleId), { shouldDirty: false, shouldValidate: true })
 
-        const customerId = vehicle.customer_id ?? vehicle.customerId
-        if (!customerId) return
+        const customerId = vehicle.customer_id ?? vehicle.customerId ?? vehicle.customer?.id
+        if (!customerId) throw new Error('The selected vehicle is not linked to a customer.')
 
         const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
         const customerResult = await customerResponse.json()
@@ -956,18 +975,22 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         if (!cancelled) {
           toast.error(error instanceof Error ? error.message : 'Unable to load towing vehicle details.')
         }
+      } finally {
+        if (!cancelled) setIsTowingVehicleLoaded(true)
       }
     }
 
     void loadTowingVehicleAndCustomer()
     return () => { cancelled = true }
-  }, [isTowing, setValue])
+  }, [isTowing, mode, towingVehicleId, setValue])
 
   useEffect(() => {
     if (isTowing || !taskId) return
 
     let cancelled = false
     const loadLinkedRecords = async () => {
+      setLinkedRecordsLoaded(false)
+      setLinkedRecordsError(null)
       try {
         const taskCardResponse = await fetch(`/backend-api/task-cards/${taskId}`)
         const taskCardResult = await taskCardResponse.json()
@@ -1012,9 +1035,9 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         }
 
         const vehicleId = taskCard.quotation?.vehicle_id
-        if (!vehicleId) return
+        if (!vehicleId) throw new Error('Task card is not linked to a vehicle.')
 
-        const vehicleResponse = await fetch(`/backend-api/vehicles/${vehicleId}`)
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(String(vehicleId))}`)
         const vehicleResult = await vehicleResponse.json()
         if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
           throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
@@ -1022,24 +1045,29 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         if (cancelled) return
 
         const vehicle = vehicleResult.data
-        setApiVehicle(vehicle)
-        const customerId = vehicle.customer_id ?? vehicle.customerId
-        if (customerId) {
-          const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
-          const customerResult = await customerResponse.json()
-          if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
-            throw new Error(customerResult.message || 'Unable to load customer details.')
-          }
-          if (cancelled) return
-          setApiCustomer(customerResult.data)
-          setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
+        const customerId = vehicle.customer_id ?? vehicle.customerId ?? vehicle.customer?.id
+        if (!customerId) throw new Error('The selected vehicle is not linked to a customer.')
+        const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
+        const customerResult = await customerResponse.json()
+        if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+          throw new Error(customerResult.message || 'Unable to load customer details.')
         }
+        if (cancelled) return
+        setApiVehicle(vehicle)
+        setApiCustomer(customerResult.data)
+        setValue('customerId', String(customerResult.data.id), { shouldDirty: false, shouldValidate: true })
         setValue('vehicleId', String(vehicleId), { shouldDirty: false, shouldValidate: true })
         if (taskCard.quotation?.mileage !== undefined && taskCard.quotation?.mileage !== null) {
           setValue('mileage', Number(taskCard.quotation.mileage), { shouldDirty: false, shouldValidate: true })
         }
       } catch (error) {
-        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load linked invoice records.')
+        if (!cancelled) {
+          const message = error instanceof Error ? error.message : 'Unable to load linked invoice records.'
+          setLinkedRecordsError(message)
+          toast.error(message)
+        }
+      } finally {
+        if (!cancelled) setLinkedRecordsLoaded(true)
       }
     }
 
@@ -1312,8 +1340,24 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     }
   }
 
-  if (mode === 'edit' && isInvoiceLoading) {
-    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">Loading invoice...</div>
+  if ((mode === 'edit' && isInvoiceLoading) || (isTowing && (!isTowingCompanyLoaded || !isTowingVehicleLoaded))) {
+    return <BrandLoader />
+  }
+
+  if (!isTowing && taskId && !linkedRecordsLoaded) {
+    return <BrandLoader />
+  }
+
+  if (!isTowing && linkedRecordsError) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <EmptyState
+          title="Unable to load invoice details"
+          description={linkedRecordsError}
+          action={{ label: 'Back to Invoices', onClick: () => router.push('/invoices') }}
+        />
+      </div>
+    )
   }
 
   if (mode === 'edit' && invoiceId && !Invoice) {
@@ -1473,11 +1517,15 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="invoiceNumber">Invoice Number</Label>
+                <Label htmlFor="invoiceNumber">
+                  Invoice Number {isTowing && <span className="text-destructive">*</span>}
+                </Label>
                 <Input
                   id="invoiceNumber"
                   placeholder="INV-0001"
                   readOnly={isTowing && mode === 'edit'}
+                  aria-required={isTowing}
+                  aria-invalid={Boolean(errors.invoiceNumber)}
                   {...register('invoiceNumber')}
                   className={cn(errors.invoiceNumber && 'border-destructive')}
                 />
@@ -1542,13 +1590,15 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
               {isTowing ? (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="pickUpAddress">Pickup Address</Label>
-                    <Input id="pickUpAddress" placeholder="Enter pickup address" {...register('pickUpAddress')} />
+                    <Label htmlFor="pickUpAddress">Pickup Address <span className="text-destructive">*</span></Label>
+                    <Input id="pickUpAddress" aria-required="true" aria-invalid={Boolean(errors.pickUpAddress)} placeholder="Enter pickup address" {...register('pickUpAddress')} className={cn(errors.pickUpAddress && 'border-destructive')} />
+                    {errors.pickUpAddress && <p className="text-xs font-medium text-destructive">{errors.pickUpAddress.message}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="dropOffAddress">Drop Off Address</Label>
-                    <Input id="dropOffAddress" placeholder="Enter drop off address" {...register('dropOffAddress')} />
+                    <Label htmlFor="dropOffAddress">Drop Off Address <span className="text-destructive">*</span></Label>
+                    <Input id="dropOffAddress" aria-required="true" aria-invalid={Boolean(errors.dropOffAddress)} placeholder="Enter drop off address" {...register('dropOffAddress')} className={cn(errors.dropOffAddress && 'border-destructive')} />
+                    {errors.dropOffAddress && <p className="text-xs font-medium text-destructive">{errors.dropOffAddress.message}</p>}
                   </div>
                 </>
               ) : (
@@ -1640,7 +1690,9 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
                       <th className="w-36 px-4 py-3 font-semibold">Type</th>
                       <th className="px-4 py-3 font-semibold">Description</th>
                       <th className="w-24 px-4 py-3 font-semibold">{isTowing ? 'Miles' : 'Qty'}</th>
-                      <th className="w-36 px-4 py-3 font-semibold">{isTowing ? 'Rate / Mile' : 'Unit Price'}</th>
+                      <th className="w-36 px-4 py-3 font-semibold">
+                        {isTowing ? <>Rate / Mile <span className="text-destructive">*</span></> : 'Unit Price'}
+                      </th>
                       <th className="w-36 px-4 py-3 font-semibold">Amount</th>
                       <th className="w-24 px-4 py-3 font-semibold text-right">Actions</th>
                     </tr>
@@ -1710,8 +1762,10 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
                             <td className="px-4 py-4">
                               <Input
                                 type="number"
-                                min={0}
+                                min={isTowing ? 0.01 : 0}
                                 step="0.01"
+                                aria-required={isTowing}
+                                aria-invalid={Boolean(errors.lineItems?.[index]?.unitPrice)}
                                 disabled={!isTowing && !includeLineItems}
                                 {...register(`lineItems.${index}.unitPrice` as const, { valueAsNumber: true })}
                                 className={cn(errors.lineItems?.[index]?.unitPrice && 'border-destructive')}

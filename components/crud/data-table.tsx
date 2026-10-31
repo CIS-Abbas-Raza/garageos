@@ -52,6 +52,12 @@ export function DataTable<T extends { id: string }>({
       const value = item[field]
       return value && String(value).toLowerCase().includes(searchLower)
     })
+  }).sort((a, b) => {
+    const left = Number(a.id)
+    const right = Number(b.id)
+    return Number.isFinite(left) && Number.isFinite(right)
+      ? right - left
+      : String(b.id).localeCompare(String(a.id), undefined, { numeric: true, sensitivity: 'base' })
   })
 
   return (
@@ -88,7 +94,7 @@ export function DataTable<T extends { id: string }>({
                     {column.label}
                   </TableHead>
                 ))}
-                <TableHead className="w-20">Actions</TableHead>
+                <TableHead className="sticky right-0 z-20 w-20 border-l bg-background text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,7 +107,7 @@ export function DataTable<T extends { id: string }>({
                         : String(item[column.key])}
                     </TableCell>
                   ))}
-                  <TableCell>
+                  <TableCell className="sticky right-0 z-10 border-l bg-background shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"

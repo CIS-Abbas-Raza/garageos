@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Pencil, FileText, User, CarFront, MoreHorizontal, Trash2, Receipt, Search, Star, Mail, ListChecks } from 'lucide-react'
+import { Plus, Pencil, MoreHorizontal, Trash2, Receipt, Search, Star, Mail, ListChecks } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -37,7 +38,29 @@ export default function TaskCardsListingPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [reviewTarget, setReviewTarget] = useState<Record<string, any> | null>(null)
+  const [deletingTaskCard, setDeletingTaskCard] = useState<{ id: number; title?: string } | null>(null)
   const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
+  const [emailEnabled, setEmailEnabled] = useState(false)
+
+  useEffect(() => {
+    if (!selectedCompany) {
+      setEmailEnabled(false)
+      return
+    }
+
+    const checkEmailSettings = async () => {
+      try {
+        const response = await fetch(`/backend-api/sendgrid-settings?company_id=${encodeURIComponent(selectedCompany)}&status=1`)
+        const body = await response.json()
+        const settings = Array.isArray(body) ? body : body.data
+        setEmailEnabled(response.ok && Array.isArray(settings) && settings.length > 0)
+      } catch {
+        setEmailEnabled(false)
+      }
+    }
+
+    void checkEmailSettings()
+  }, [selectedCompany])
 
   useEffect(() => {
     setQuotationId(searchParams.get('quotation_id') ?? undefined)
@@ -56,7 +79,7 @@ export default function TaskCardsListingPage() {
         const response = await fetch(`/backend-api/task-cards${query}`)
         const result = await response.json()
         if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load task cards.')
-        setRows(Array.isArray(result.data) ? result.data : [])
+        setRows(Array.isArray(result.data) ? result.data.slice().sort((a, b) => Number(b.id) - Number(a.id)) : [])
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Unable to load task cards.')
       }
@@ -129,20 +152,20 @@ export default function TaskCardsListingPage() {
     }
   }
 
-  const handleDelete = async (id: number, title?: string) => {
-    try {
-      const response = await fetch(`/backend-api/task-cards/${id}`, { method: 'DELETE' })
-      const result = await response.json().catch(() => ({}))
-      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete task card.')
-      setRows((current) => current.filter((card) => card.id !== id))
-      toast.success(`Task card ${title || id} deleted.`)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Unable to delete task card.')
-    }
+  const handleDelete = (id: number, title?: string) => {
+    setDeletingTaskCard({ id, title })
+  }
+
+  const confirmDeleteTaskCard = async () => {
+    if (!deletingTaskCard) return
+    const response = await fetch(`/backend-api/task-cards/${deletingTaskCard.id}`, { method: 'DELETE' })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete task card.')
+    setRows((current) => current.filter((card) => card.id !== deletingTaskCard.id))
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-primary">Garage Operations</p>
@@ -196,42 +219,33 @@ export default function TaskCardsListingPage() {
           } : undefined}
         />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-[1040px] w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
+                  <th className="px-5 py-4 font-semibold">S.No</th>
                   <th className="px-5 py-4 font-semibold">Task Card #</th>
                   <th className="px-5 py-4 font-semibold">Customer</th>
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Progress</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
-                  <th className="px-5 py-4 font-semibold text-right">Actions</th>
+                  <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((card) => (
-                  <tr key={card.id} className="bg-background transition-colors hover:bg-muted/20">
+                {filteredRows.map((card, rowIndex) => (
+                  <tr key={card.id} className="group bg-background transition-colors hover:bg-muted/20">
+                    <td className="px-5 py-4 text-muted-foreground">{rowIndex + 1}</td>
                     <td className="px-5 py-4 font-semibold text-foreground">
-                      <div className="flex items-center gap-2">
-                        <FileText className="size-4 text-primary" />
-                        <span>{(card as any).task_cards_number || (card as any).taskCardNumber || card.title || card.id}</span>
-                      </div>
+                      {(card as any).task_cards_number || (card as any).taskCardNumber || card.title || card.id}
                     </td>
                     <td className="px-5 py-4 text-foreground">
-                      <div className="flex items-center gap-2">
-                        <User className="size-4 text-muted-foreground" />
-                        <span>{card.quotation?.vehicle?.customer?.name ?? getCustomerName(card.customerId)}</span>
-                      </div>
+                      {card.quotation?.vehicle?.customer?.name ?? getCustomerName(card.customerId)}
                     </td>
                     <td className="px-5 py-4 text-foreground">
-                      <div className="flex items-center gap-2">
-                        <CarFront className="size-4 text-muted-foreground" />
-                        <span>
-                          {card.quotation?.vehicle?.vin ?? card.quotation?.vehicle?.VIN ?? getVehicleVin(card.vehicleId)}
-                        </span>
-                      </div>
+                      {card.quotation?.vehicle?.vin ?? card.quotation?.vehicle?.VIN ?? getVehicleVin(card.vehicleId)}
                     </td>
                     <td className="px-5 py-4">
                       <span
@@ -248,7 +262,7 @@ export default function TaskCardsListingPage() {
                     <td className="px-5 py-4 text-muted-foreground">
                       {formatDisplayDate(card.createdAt)}
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="sticky right-0 z-10 border-l border-border bg-background px-5 py-4 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-muted">
                       <div className="flex items-center justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger
@@ -272,7 +286,7 @@ export default function TaskCardsListingPage() {
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>}
-                            {canUpdateTaskCard && <DropdownMenuItem
+                            {canUpdateTaskCard && emailEnabled && <DropdownMenuItem
                               onClick={() => void sendTaskCardEmail(card)}
                               disabled={getTaskCardProgress(card) < 100 || sendingEmailId === card.id}
                               className="gap-2 cursor-pointer text-xs"
@@ -319,6 +333,15 @@ export default function TaskCardsListingPage() {
         taskCardId={reviewTarget?.id}
         companyId={selectedCompany ?? reviewTarget?.company_id}
         onOpenChange={(open) => !open && setReviewTarget(null)}
+      />
+      <ConfirmDeleteModal
+        open={Boolean(deletingTaskCard)}
+        onOpenChange={(open) => !open && setDeletingTaskCard(null)}
+        title="Delete task card?"
+        message={`Are you sure you want to delete this task card${deletingTaskCard?.title ? ` (${deletingTaskCard.title})` : ''}? This action cannot be undone.`}
+        successMessage={`Task card ${deletingTaskCard?.title || deletingTaskCard?.id || ''} deleted.`}
+        errorMessage="Unable to delete task card."
+        onConfirm={confirmDeleteTaskCard}
       />
     </div>
   )

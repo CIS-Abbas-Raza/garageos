@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/empty-state'
 import { generateInvoicePdf, type InvoicePdfPayload } from '@/components/invoices/invoice-form-page'
-import { CarFront, Calendar, Download, FileText, Pencil, Plus, User, MoreHorizontal, Search, Trash2, WalletCards, Mail, MessageCircle, Send, CircleX, Check } from 'lucide-react'
+import { CarFront, Calendar, Download, FileText, Pencil, Plus, MoreHorizontal, Search, Trash2, WalletCards, Mail, MessageCircle, Send, CircleX, Check } from 'lucide-react'
 import { InvoicePaymentDialog } from '@/components/invoices/invoice-payment-dialog'
 import { Button } from '@/components/ui/button'
 import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
@@ -138,7 +138,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
         .sort((a, b) => {
           const left = new Date(b.createdAt ?? b.creation_date).getTime()
           const right = new Date(a.createdAt ?? a.creation_date).getTime()
-          return left - right
+          return (Number.isNaN(left) ? 0 : left) - (Number.isNaN(right) ? 0 : right) || Number(b.id) - Number(a.id)
         }),
     [invoices],
   )
@@ -296,7 +296,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-primary">Garage Operations</p>
@@ -354,12 +354,14 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
           } : undefined}
         />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-[1040px] w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
+                  <th className="px-5 py-4 font-semibold">S.No</th>
                   <th className="px-5 py-4 font-semibold">Invoice #</th>
+                  {showAll && <th className="px-5 py-4 font-semibold">Type</th>}
                   <th className="px-5 py-4 font-semibold">Customer</th>
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
@@ -367,23 +369,22 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                   <th className="px-5 py-4 font-semibold">Total</th>
                   <th className="px-5 py-4 font-semibold">Balance</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
-                  <th className="px-5 py-4 font-semibold text-right">Actions</th>
+                  <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {paginatedRows.map((invoice) => (
-                  <tr key={invoice.id} className="bg-background transition-colors hover:bg-muted/20">
+                {paginatedRows.map((invoice, rowIndex) => (
+                  <tr key={invoice.id} className="group bg-background transition-colors hover:bg-muted/20">
+                    <td className="px-5 py-4 text-muted-foreground">{(page - 1) * pageSize + rowIndex + 1}</td>
                     <td className="px-5 py-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <FileText className="size-4 text-primary" />
                         <span>{invoice.invoice_number ?? invoice.invoiceNumber ?? invoice.id}</span>
                       </div>
                     </td>
+                    {showAll && <td className="px-5 py-4 text-foreground">{invoiceType === 'towing' ? 'Towing Invoice' : 'Service Invoice'}</td>}
                     <td className="px-5 py-4 text-foreground">
-                      <div className="flex items-center gap-2">
-                        <User className="size-4 text-muted-foreground" />
-                        <span>{invoice.vehicle?.customer?.name ?? invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)}</span>
-                      </div>
+                      {invoice.vehicle?.customer?.name ?? invoice.taskCard?.quotation?.vehicle?.customer?.name ?? getCustomerName(invoice.customerId)}
                     </td>
                     <td className="px-5 py-4 text-foreground">
                       <div className="flex items-center gap-2">
@@ -426,7 +427,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                         <span>{formatDisplayDate(invoice.createdAt ?? invoice.creation_date)}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="sticky right-0 z-10 border-l border-border bg-background px-5 py-4 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-muted">
                       <div className="flex items-center justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger
@@ -474,7 +475,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Download className="size-4" />
-                              Download PDF
+                              Download Invoice
                             </DropdownMenuItem>
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
                             {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
@@ -499,7 +500,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                   </tr>
                 ))}
                 {rows.length > 0 && filteredRows.length === 0 && (
-                  <tr><td colSpan={9} className="px-5 py-10 text-center text-muted-foreground">No invoices match your filters.</td></tr>
+                  <tr><td colSpan={showAll ? 11 : 10} className="px-5 py-10 text-center text-muted-foreground">No invoices match your filters.</td></tr>
                 )}
               </tbody>
             </table>

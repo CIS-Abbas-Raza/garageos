@@ -9,7 +9,7 @@ export default function PackageSubscriptionsHistoryPage() {
   const [activeTab, setActiveTab] = useState<'company' | 'history'>('company')
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
       <div className="mb-5">
         <p className="text-sm font-medium text-primary">Company</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">Company Account</h1>

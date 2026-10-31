@@ -120,7 +120,7 @@ export function RoleManagementPage() {
       const response = await fetch(`/backend-api/roles?company_id=${encodeURIComponent(selectedCompany)}`)
       const body = await response.json()
       if (!response.ok || body.success === false) throw new Error(body.message || 'Unable to load roles.')
-      const nextRoles = Array.isArray(body.data) ? body.data : []
+      const nextRoles = (Array.isArray(body.data) ? body.data : []).slice().sort((a: Role, b: Role) => b.id - a.id)
       setRoles(nextRoles)
       setSelectedRoleId((current) =>
         nextRoles.some((role: Role) => String(role.id) === current)
@@ -153,7 +153,7 @@ export function RoleManagementPage() {
       const [rolesBody, modulesBody] = await Promise.all([rolesResponse.json(), modulesResponse.json()])
       if (!rolesResponse.ok || rolesBody.success === false) throw new Error(rolesBody.message || 'Unable to load roles.')
       if (!modulesResponse.ok || modulesBody.success === false) throw new Error(modulesBody.message || 'Unable to load modules.')
-      const nextRoles = rolesBody.data ?? []
+      const nextRoles = (rolesBody.data ?? []).slice().sort((a: Role, b: Role) => b.id - a.id)
       const nextModules = modulesBody.data ?? []
       setRoles(nextRoles)
       setModules(nextModules)
@@ -285,7 +285,7 @@ export function RoleManagementPage() {
       const savedRole = body.data as Role
       setRoles((current) => editingRole
         ? current.map((role) => role.id === savedRole.id ? savedRole : role)
-        : [...current, savedRole],
+        : [savedRole, ...current],
       )
       setSelectedRoleId(String(savedRole.id))
       setRoleDialogOpen(false)
@@ -354,15 +354,16 @@ export function RoleManagementPage() {
             <div className="mx-6 mb-6 overflow-hidden rounded-lg border border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-5 py-3 font-semibold">Role Name</th><th className="px-5 py-3 font-semibold">Status</th><th className="px-5 py-3 text-right font-semibold">Actions</th></tr></thead>
+                  <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-5 py-3 font-semibold">S.No</th><th className="px-5 py-3 font-semibold">Role Name</th><th className="px-5 py-3 font-semibold">Status</th><th className="sticky right-0 z-20 border-l border-slate-200 bg-slate-50 px-5 py-3 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
-                    {roles.map((role) => {
+                    {roles.map((role, rowIndex) => {
                       const isActive = String(role.status ?? '1') !== '0'
                       const isProtectedRole = isReservedRoleName(role.name)
-                      return <tr key={role.id} className="hover:bg-slate-50/70">
+                      return <tr key={role.id} className="group hover:bg-slate-50">
+                        <td className="px-5 py-4 text-slate-500">{rowIndex + 1}</td>
                         <td className="px-5 py-4 font-medium text-slate-900">{role.name}</td>
                         <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{isActive ? 'Active' : 'Inactive'}</span></td>
-                        <td className="px-5 py-3 text-right">
+                        <td className="sticky right-0 z-10 border-l border-slate-200 bg-white px-5 py-3 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] group-hover:bg-slate-50">
                           <DropdownMenu>
                             <DropdownMenuTrigger disabled={isProtectedRole} className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40" aria-label={`Actions for ${role.name}`}><MoreHorizontal className="size-4" /></DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44">

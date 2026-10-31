@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowUpDown,
+  CarFront,
   CheckCheck,
   ChevronDown,
   CircleX,
@@ -322,7 +323,7 @@ const exactFields: Record<string, Field[]> = {
       label: "Registration No.",
       type: "number",      // number on Create
       updateType: "text",  // text on Update (spec requirement)
-      required: true,
+      required: false,
     },
   ],
   // ⚠️ SPEC FLAG: Vehicles has no customer/owner link field — a vehicle with no customer
@@ -1227,7 +1228,12 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
               ...record,
               company_name: record.company?.name ?? `Company #${record.company_id}`,
             }))
-          : config.resource === "companies"
+        : config.resource === "vehicles"
+          ? records.map((record) => ({
+              ...record,
+              customer_name: record.customer?.name ?? `Customer #${record.customer_id}`,
+            }))
+        : config.resource === "companies"
           ? records.map((record) => ({
               ...record,
               owner_name: record.owner?.name ?? `User #${record.owner_id}`,
@@ -1282,7 +1288,9 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
           : config.resource === "communicationLogs"
           ? records.map((record) => ({
               ...record,
-              user_name: record.user?.name ?? `User #${record.user_id}`,
+              user_name: record.scope === "customer"
+                ? record.customer?.name ?? `Customer #${record.user_id}`
+                : record.user?.name ?? `User #${record.user_id}`,
             }))
           : config.resource === "companySales"
           ? records.map((record) => ({
@@ -1520,8 +1528,8 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
   const [deleting, setDeleting] = useState<Record<string, any> | null>(null);
   const [resettingEmployee, setResettingEmployee] = useState<Record<string, any> | null>(null);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [sortKey, setSortKey] = useState(config.columns[0]);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortKey, setSortKey] = useState("id");
+  const [sortAsc, setSortAsc] = useState(false);
   const listingColumns = useMemo(
     () => config.columns.some((column) => ["createdAt", "created_at", "creation_date"].includes(column))
       ? config.columns
@@ -1677,11 +1685,16 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
             (!config.dateRangeField || !dateFrom || new Date(row[config.dateRangeField]).getTime() >= new Date(`${dateFrom}T00:00:00`).getTime()) &&
             (!config.dateRangeField || !dateTo || new Date(row[config.dateRangeField]).getTime() <= new Date(`${dateTo}T23:59:59.999`).getTime()),
         )
-        .sort(
-          (a, b) =>
-            String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? "")) *
-            (sortAsc ? 1 : -1),
-        ),
+        .sort((a, b) => {
+          const left = a[sortKey];
+          const right = b[sortKey];
+          const leftNumber = Number(left);
+          const rightNumber = Number(right);
+          const comparison = sortKey === "id" && Number.isFinite(leftNumber) && Number.isFinite(rightNumber)
+            ? leftNumber - rightNumber
+            : String(left ?? "").localeCompare(String(right ?? ""), undefined, { numeric: true, sensitivity: "base" });
+          return comparison * (sortAsc ? 1 : -1);
+        }),
     [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField],
   );
 
@@ -1891,6 +1904,9 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
 
   const getBadgeColor = (column: string, value: string) => {
     const v = String(value).toLowerCase();
+    if (config.resource === "communicationLogs" && column === "scope" && v === "customer") {
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    }
     if (column === "status" || column === "active" || column === "insured") {
       return v === "1" || v === "active" || v === "true" || v === "yes"
         ? "bg-green-100 text-green-800 border-green-200"
@@ -1908,10 +1924,11 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
   };
 
   const IconComponent = config.icon || iconMap[config.title] || ShieldCheck;
-  const canCreate = canSubModule(config.title, "create");
-  const canUpdate = canSubModule(config.title, "update");
-  const canDeactivate = canSubModule(config.title, "deactivate");
-  const canDelete = canSubModule(config.title, "delete");
+  const permissionModule = config.resource === "vehicles" ? "Vehicles" : config.title;
+  const canCreate = canSubModule(permissionModule, "create");
+  const canUpdate = canSubModule(permissionModule, "update");
+  const canDeactivate = canSubModule(permissionModule, "deactivate");
+  const canDelete = canSubModule(permissionModule, "delete");
   const canViewVehicles = canSubModule("Vehicles", "view");
   const canViewQuotations = canSubModule("Quotation", "view");
   const canViewTowingInvoices = canSubModule("Towing Invoice", "view");
@@ -1923,7 +1940,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
   /* ══════════════════════════════════════════════════════════════ */
   return (
     <div className={flush ? "w-full" : "w-full p-6 lg:p-8"}>
-      <div className={flush ? "w-full" : "mx-auto max-w-7xl"}>
+      <div className={flush ? "w-full" : "mx-auto max-w-[1440px]"}>
 
         {/* ═══ PAGE HEADER ═══ */}
         {!config.hideHeader && <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -1998,7 +2015,12 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
               className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none cursor-pointer"
             >
               <option value="all">All Status</option>
-              {schemaKey === "appointments" ? (
+              {config.resource === "communicationLogs" ? (
+                <>
+                  <option value="1">Sent</option>
+                  <option value="0">Not Sent</option>
+                </>
+              ) : schemaKey === "appointments" ? (
                 <>
                   <option value="pending">Pending</option>
                   <option value="confirmed">Confirmed</option>
@@ -2028,20 +2050,22 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
           <RecordCountBadges counts={[
             { label: "Total", value: apiEnabled ? apiTotal : rows.length },
             ...statusCounts.map(([value, count]) => ({
-              label: value === "1" ? "Active" : value === "0" ? "Inactive" : labelize(value),
+              label: config.resource === "communicationLogs"
+                ? value === "1" ? "Sent" : value === "0" ? "Not Sent" : labelize(value)
+                : value === "1" ? "Active" : value === "0" ? "Inactive" : labelize(value),
               value: count,
               color: value === "1" ? "green" as const : value === "0" ? "neutral" as const : "blue" as const,
             })),
           ]} />
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-white">
+        <div className="mt-5 -mx-2 overflow-hidden rounded-xl border border-border bg-white lg:-mx-3">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-[#FAFAFA]">
-                  <th className="w-12 px-5 py-3">
-                    <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
+                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    S.No
                   </th>
                   {listingColumns.map((column) => (
                     <th key={column} className="px-5 py-3">
@@ -2053,13 +2077,17 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                         }}
                         className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        {labelize(column)}
+                        {config.resource === "communicationLogs" && column === "scope"
+                          ? "Type"
+                          : config.resource === "vehicles" && column === "customer_name"
+                            ? "Customer"
+                            : labelize(column)}
                         <ChevronDown className={`size-3 transition-transform ${sortKey === column && !sortAsc ? "rotate-180" : ""}`} />
                       </button>
                     </th>
                   ))}
                   {!config.hideRowActions && (
-                    <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <th className="sticky right-0 z-20 border-l border-border bg-[#FAFAFA] px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">
                       Actions
                     </th>
                   )}
@@ -2076,14 +2104,19 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((row) => (
-                    <tr key={row.id} className="bg-white hover:bg-[#FAFAFA] transition-colors">
-                      <td className="px-5 py-4">
-                        <input type="checkbox" className="rounded border-border text-primary bg-background focus:ring-primary size-4" />
+                  paginated.map((row, rowIndex) => (
+                    <tr key={row.id} className="group bg-white hover:bg-[#FAFAFA] transition-colors">
+                      <td className="px-5 py-4 text-muted-foreground">
+                        {(page - 1) * pageSize + rowIndex + 1}
                       </td>
                       {listingColumns.map((column, colIdx) => (
                         <td key={column} className="px-5 py-4">
-                          {isBadgeColumn(column) ? (
+                          {config.resource === "vehicles" && column === "make" ? (
+                            <div className="flex items-center gap-2 font-semibold text-foreground">
+                              <CarFront className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                              <span>{formatValue(row[column])}</span>
+                            </div>
+                          ) : isBadgeColumn(column) ? (
                             <span
                               className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase border ${getBadgeColor(column, row[column])}`}
                             >
@@ -2093,8 +2126,10 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                                   : "No"
                                 : column === "active" || (column === "status" && schemaKey !== "appointments")
                                 ? String(row[column]) === "0" || row[column] === false
-                                  ? "Inactive"
-                                  : "Active"
+                                  ? config.resource === "communicationLogs" ? "Not Sent" : "Inactive"
+                                  : config.resource === "communicationLogs" ? "Sent" : "Active"
+                                : config.resource === "communicationLogs" && column === "scope"
+                                ? String(row[column]).toLowerCase() === "system" ? "Employee" : "Customer"
                                 : labelize(String(row[column] ?? "—"))}
                             </span>
                           ) : fields.some((field) => field.key === column && field.type === "dynamic-list") ? (
@@ -2143,7 +2178,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                         </td>
                       ))}
                       {/* Actions column */}
-                      {!config.hideRowActions && <td className="px-5 py-4 text-right">
+                      {!config.hideRowActions && <td className="sticky right-0 z-10 border-l border-border bg-white px-5 py-4 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-[#FAFAFA]">
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
@@ -2172,7 +2207,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                             {config.resource === "towingInvoices" && <>
                               <DropdownMenuItem onClick={() => void downloadTowingInvoice(row.id)} className="gap-2 cursor-pointer text-xs">
                                 <Download className="size-4" />
-                                Download PDF
+                                Download Invoice
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => void sendTowingInvoiceEmail(row.id)} className="gap-2 cursor-pointer text-xs">
                                 <Mail className="size-4" />
@@ -2203,7 +2238,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                                 Vehicles
                               </DropdownMenuItem>
                             )}
-                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewQuotations && (
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewQuotations && Number(user?.PackageId) !== 1 && (
                               <DropdownMenuItem
                                 onClick={() => void downloadVehicleHistory(row)}
                                 className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
@@ -2228,6 +2263,15 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                               >
                                 <FileText className="size-4 text-blue-600" />
                                 Towing Invoice
+                              </DropdownMenuItem>
+                            )}
+                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewVehicles && (row.customer_id ?? row.customer?.id) && (
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.customer_id ?? row.customer?.id))}`)}
+                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                              >
+                                <Truck className="size-4 text-blue-600" />
+                                Customer Vehicles
                               </DropdownMenuItem>
                             )}
                             {(config.resource === "estimations" || schemaKey === "estimations" || config.title === "Quotations") && (
@@ -2489,7 +2533,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
         <DialogContent className={isExcluded ? "max-w-2xl p-0 gap-0 bg-background border-border" : "flex max-h-[90vh] sm:max-w-[650px] flex-col gap-0 overflow-hidden p-0 bg-white border border-slate-200 rounded-xl shadow-xl"}>
           <DialogHeader className={isExcluded ? "border-b border-border px-6 py-5 pr-14" : "shrink-0 px-6 pt-6 pb-4 space-y-1 pr-14"}>
             <DialogTitle className={isExcluded ? "text-lg font-bold text-foreground" : "text-xl font-bold text-slate-900"}>
-              {singularize(config.title)} Details
+              {config.resource === "vehicles" && config.title === "All Vehicles" ? "Vehicle Details" : `${singularize(config.title)} Details`}
             </DialogTitle>
             <DialogDescription className={isExcluded ? "text-xs text-muted-foreground mt-1" : "text-sm text-slate-500 font-normal mt-1"}>
               Viewing details for this {singularize(config.title).toLowerCase()} record.
@@ -2523,7 +2567,27 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                       </div>
                     )}
               {/* Fields grid */}
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    {config.resource === "communicationLogs" ? (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {[
+                          ["Type", String(viewing.scope).toLowerCase() === "system" ? "Employee" : "Customer"],
+                          ["Channel", viewing.channel],
+                          ["Name", viewing.user_name],
+                          ["Send To", viewing.send_to],
+                          ["Status", String(viewing.status) === "1" ? "Sent" : "Not Sent"],
+                        ].map(([label, value]) => (
+                          <div key={label} className="border-b border-border/50 pb-2">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+                            <p className="mt-1 text-sm font-semibold text-foreground">{formatValue(value)}</p>
+                          </div>
+                        ))}
+                        <div className="sm:col-span-2 rounded-lg border border-border bg-muted/30 p-4">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Text</p>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-foreground">{formatValue(viewing.text)}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 sm:grid-cols-2">
                       {fields.map((field) => (
                         <div key={field.key} className="border-b border-border/50 pb-2">
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -2541,12 +2605,15 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                             </ul>
                           ) : (
                             <p className="mt-1 text-sm font-semibold text-foreground">
-                              {formatValue(viewData[field.key])}
+                              {schemaKey === "vehicles" && field.key === "insured"
+                                ? [1, "1", true].includes(viewData[field.key]) ? "Yes" : "No"
+                                : formatValue(viewData[field.key])}
                             </p>
                           )}
                         </div>
                       ))}
-                    </div>
+                      </div>
+                    )}
                   </>
                 );
               })()}

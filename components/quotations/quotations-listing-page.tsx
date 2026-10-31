@@ -1,0 +1,600 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Plus, Pencil, FileText, MoreHorizontal, Trash2, Download, Mail, MessageCircle, Search, Send, CircleX, Check } from 'lucide-react'
+import { toast } from 'sonner'
+
+import { EmptyState } from '@/components/empty-state'
+import { generateQuotationPdf, type QuotationPdfPayload } from '@/components/quotations/quotation-form-page'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { SendCustomerMessageDialog, type CommunicationChannel } from '@/components/communications/send-customer-message-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useGarageStore } from '@/lib/store/garage-store'
+import { cn, formatDisplayDate } from '@/lib/utils'
+import { useBranch } from '@/lib/branch-context'
+import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
+import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
+import { Pagination } from '@/components/common/pagination'
+import { RecordCountBadges } from '@/components/common/record-count-badges'
+import { DateRangeFilter, type DateRangeValue } from '@/components/common/date-range-filter'
+import { format } from 'date-fns'
+
+const getQuotationStatus = (quotation: Record<string, any>) =>
+  String(quotation.quotation_status ?? quotation.quotationStatus ?? quotation.status ?? 'draft').toLowerCase()
+
+const quotationStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
+const hasQuotationDetails = (quotation: Record<string, any>) =>
+  Array.isArray(quotation.details) && quotation.details.length > 0
+const getQuotationDocuments = (quotation: Record<string, any>) =>
+  Array.isArray(quotation.documents) ? quotation.documents : []
+const isDocumentOnlyQuotation = (quotation: Record<string, any>) =>
+  !hasQuotationDetails(quotation) && getQuotationDocuments(quotation).length > 0
+
+export function QuotationsListingPage({ allQuotations = false }: { allQuotations?: boolean }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { customers, vehicles } = useGarageStore()
+  const { selectedCompany } = useBranch()
+  const { canSubModule } = useRolePermissions()
+  const canCreateQuotation = canSubModule('Quotation', 'create')
+  const canUpdateQuotation = canSubModule('Quotation', 'update')
+  const canDeactivateQuotation = canSubModule('Quotation', 'deactivate')
+  const canDeleteQuotation = canSubModule('Quotation', 'delete')
+  const canViewTaskCards = canSubModule('Task Cards', 'view')
+  const canManageQuotations = canCreateQuotation || canUpdateQuotation || canDeactivateQuotation || canDeleteQuotation
+  const [rows, setRows] = useState<Record<string, any>[]>([])
+  const vehicleId = searchParams.get('vehicle_id') ?? undefined
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [activeChannels, setActiveChannels] = useState<CommunicationChannel[]>([])
+  const [messageTarget, setMessageTarget] = useState<{ channel: CommunicationChannel; customerId?: string | number; companyId?: string | number } | null>(null)
+  const [sendingEmailId, setSendingEmailId] = useState<string | number | null>(null)
+  const [deletingQuotation, setDeletingQuotation] = useState<Record<string, any> | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [customerOptions, setCustomerOptions] = useState<Record<string, any>[]>([])
+  const [selectedCustomerId, setSelectedCustomerId] = useState('')
+  const [customerOptionsLoading, setCustomerOptionsLoading] = useState(false)
+  const [vehicleOptions, setVehicleOptions] = useState<Record<string, any>[]>([])
+  const [vehicleOptionsLoading, setVehicleOptionsLoading] = useState(false)
+  const [selectedVehicleId, setSelectedVehicleId] = useState('')
+
+  useEffect(() => {
+    if (!allQuotations || !createDialogOpen) return
+    if (!selectedCompany) {
+      setCustomerOptions([])
+      setCustomerOptionsLoading(false)
+      return
+    }
+
+    let cancelled = false
+    const loadCustomers = async () => {
+      setCustomerOptionsLoading(true)
+      try {
+        const response = await fetch(`/backend-api/customers?company_id=${encodeURIComponent(selectedCompany)}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load customers.')
+        const records = Array.isArray(result) ? result : result.data
+        if (!cancelled) setCustomerOptions(Array.isArray(records) ? records : [])
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load customers.')
+      } finally {
+        if (!cancelled) setCustomerOptionsLoading(false)
+      }
+    }
+
+    void loadCustomers()
+    return () => { cancelled = true }
+  }, [allQuotations, createDialogOpen, selectedCompany])
+
+  useEffect(() => {
+    if (!allQuotations || !createDialogOpen || !selectedCustomerId || !selectedCompany) {
+      setVehicleOptions([])
+      setVehicleOptionsLoading(false)
+      return
+    }
+
+    let cancelled = false
+    const loadVehicles = async () => {
+      setVehicleOptionsLoading(true)
+      try {
+        const params = new URLSearchParams({ customer_id: selectedCustomerId, company_id: selectedCompany })
+        const response = await fetch(`/backend-api/vehicles?${params.toString()}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load customer vehicles.')
+        const records = Array.isArray(result) ? result : result.data
+        if (!cancelled) setVehicleOptions(Array.isArray(records) ? records : [])
+      } catch (error) {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : 'Unable to load customer vehicles.')
+      } finally {
+        if (!cancelled) setVehicleOptionsLoading(false)
+      }
+    }
+
+    void loadVehicles()
+    return () => { cancelled = true }
+  }, [allQuotations, createDialogOpen, selectedCustomerId, selectedCompany])
+
+  useEffect(() => {
+    const loadQuotations = async () => {
+      if (allQuotations && !selectedCompany) {
+        setRows([])
+        return
+      }
+      try {
+        const params = new URLSearchParams()
+        if (vehicleId) params.set('vehicle_id', vehicleId)
+        if (allQuotations && selectedCompany) params.set('company_id', selectedCompany)
+        if (dateRange) { params.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); params.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
+        const query = params.size ? `?${params.toString()}` : ''
+        const response = await fetch(`/backend-api/quotations${query}`)
+        const result = await response.json()
+        if (!response.ok || result.success === false) {
+          throw new Error(result.message || 'Unable to load quotations.')
+        }
+        setRows(Array.isArray(result.data) ? result.data.slice().sort((a, b) => Number(b.id) - Number(a.id)) : [])
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to load quotations.')
+      }
+    }
+
+    void loadQuotations()
+  }, [vehicleId, dateRange, allQuotations, selectedCompany])
+
+  useEffect(() => {
+    if (!selectedCompany) return setActiveChannels([])
+    const loadChannels = async () => {
+      const checks: [CommunicationChannel, string][] = [['sms', 'twilio-sms-settings'], ['email', 'sendgrid-settings'], ['whatsapp', 'twilio-whatsapp-settings']]
+      const results = await Promise.all(checks.map(async ([channel, path]) => {
+        try {
+          const response = await fetch(`/backend-api/${path}?company_id=${encodeURIComponent(selectedCompany)}&status=1`)
+          const body = await response.json()
+          const settings = Array.isArray(body) ? body : body.data
+          return Array.isArray(settings) && settings.length ? channel : null
+        } catch { return null }
+      }))
+      setActiveChannels(results.filter((channel): channel is CommunicationChannel => Boolean(channel)))
+    }
+    void loadChannels()
+  }, [selectedCompany])
+
+  const createQuotationPath = vehicleId
+    ? `/quotations/create?vehicle_id=${encodeURIComponent(vehicleId)}`
+    : '/quotations/create'
+
+  const filteredRows = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    return rows.filter((quotation) => {
+      const status = getQuotationStatus(quotation)
+      const customerName = quotation.vehicle?.customer?.name ?? getCustomerName(quotation.customer_id ?? quotation.customerId)
+      const vehicleName = quotation.vehicle?.name ||
+        [quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
+        getVehicleName(quotation.vehicle_id ?? quotation.vehicleId)
+      const matchesSearch = !normalizedQuery || [
+        quotation.quotation_number,
+        quotation.quotationNumber,
+        customerName,
+        vehicleName,
+      ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery))
+
+      return matchesSearch && (statusFilter === 'all' || status === statusFilter)
+    })
+  }, [rows, searchQuery, statusFilter, customers, vehicles])
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize))
+  const paginatedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize)
+  useEffect(() => { setPage(1) }, [searchQuery, statusFilter, pageSize])
+
+  function getCustomerName(customerId: string) {
+    const customer = customers.find((item) => item.id === customerId)
+    return customer ? `${customer.firstName} ${customer.lastName}` : '—'
+  }
+
+  function getVehicleName(vehicleId: string) {
+    const vehicle = vehicles.find((item) => item.id === vehicleId)
+    return vehicle ? `${vehicle.make} ${vehicle.model}` : '—'
+  }
+
+  const downloadQuotation = async (quotationId: string | number) => {
+    try {
+      const response = await fetch(`/backend-api/quotations/${quotationId}`)
+      const result = await response.json()
+      if (!response.ok || result.success === false || !result.data) {
+        throw new Error(result.message || 'Unable to load quotation for download.')
+      }
+
+      const quotation = result.data
+      if (isDocumentOnlyQuotation(quotation)) {
+        const attachedDocument = getQuotationDocuments(quotation)[0]
+        if (attachedDocument.id === undefined || attachedDocument.id === null) {
+          throw new Error('Unable to find the attached quotation document.')
+        }
+        const fileResponse = await fetch(`/backend-api/quotations/documents/${encodeURIComponent(String(attachedDocument.id))}/download`)
+        if (!fileResponse.ok) {
+          const fileResult = await fileResponse.json().catch(() => ({}))
+          throw new Error(fileResult.message || 'Unable to download the attached quotation document.')
+        }
+        const fileBlob = await fileResponse.blob()
+        const downloadUrl = URL.createObjectURL(fileBlob)
+        const link = document.createElement('a')
+        link.href = downloadUrl
+        link.download = String(attachedDocument.document ?? `Quotation-${quotation.quotation_number ?? quotation.id}`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+        toast.success('Quotation document downloaded.')
+        return
+      }
+
+      const companyResponse = await fetch(`/backend-api/companies/${quotation.company_id}`)
+      const companyResult = await companyResponse.json()
+      if (!companyResponse.ok || companyResult.success === false || !companyResult.data) {
+        throw new Error(companyResult.message || 'Unable to load quotation company.')
+      }
+
+      const company = companyResult.data
+      const vehicle = quotation.vehicle ?? {}
+      const customer = vehicle.customer ?? {}
+      const customerName = customer.name ?? ([customer.first_name ?? customer.firstName, customer.last_name ?? customer.lastName].filter(Boolean).join(' ') || '—')
+      const companyAddress = [company.address, company.city, company.state, company.zip_code ?? company.zipCode].filter(Boolean).join(', ') || '—'
+      const payload: QuotationPdfPayload = {
+        companyName: company.name ?? 'Company',
+        companyEmail: company.email ?? '—',
+        companyCountry: company.country ?? '—',
+        companyPhone: company.phone ?? '—',
+        companyAddress,
+        companyRegNo: company.registration_no ?? company.registrationNo ?? '—',
+        companyLogoUrl: company.logo_url ?? company.logoUrl ?? company.logo,
+        quotationNumber: quotation.quotation_number ?? String(quotation.id),
+        creationDate: quotation.creation_date ?? '',
+        customerName,
+        customerEmail: customer.email ?? '—',
+        customerPhone: customer.phone ?? '—',
+        customerAddress: customer.address ?? '—',
+        vehicleName: vehicle.name ?? ([vehicle.make, vehicle.model].filter(Boolean).join(' ') || '—'),
+        vehicleMake: vehicle.make ?? '—',
+        vehicleModel: vehicle.model ?? '—',
+        vehicleVariant: vehicle.variant ?? '—',
+        vehicleYear: vehicle.year ? String(vehicle.year) : '—',
+        vin: vehicle.vin ?? vehicle.VIN ?? '—',
+        licensePlate: vehicle.license_plate ?? vehicle.licensePlate ?? '—',
+        note: quotation.note ?? '',
+        includeLineItems: (quotation.details ?? []).length > 0,
+        lineItems: (quotation.details ?? []).map((detail: any) => ({
+          type: detail.type,
+          description: detail.description ?? '',
+          qty: Number(detail.qty ?? 0),
+          unitPrice: Number(detail.unit_price ?? 0),
+        })),
+        subtotal: Number(quotation.subtotal ?? 0),
+        taxPercentage: Number(quotation.tax_percentage ?? 0),
+        taxAmount: Number(quotation.tax_amount ?? 0),
+        discountPercentage: Number(quotation.discount_percentage ?? 0),
+        discountAmount: Number(quotation.discount ?? 0),
+        total: Number(quotation.total ?? 0),
+      }
+
+      await generateQuotationPdf(payload)
+      toast.success('Quotation PDF downloaded.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to download quotation.')
+    }
+  }
+
+  const sendQuotationEmail = async (quotationId: string | number) => {
+    try {
+      setSendingEmailId(quotationId)
+      const response = await fetch('/backend-api/email/quotation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quotation_id: quotationId }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || result.error || 'Unable to send quotation email.')
+      }
+      toast.success(result.message || 'Quotation email sent successfully.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to send quotation email.')
+    } finally {
+      setSendingEmailId(null)
+    }
+  }
+
+  const toggleQuotationStatus = async (quotation: Record<string, any>) => {
+    const status = String(quotation.status ?? '1') === '0' ? 1 : 0
+    try {
+      const response = await fetch(`/backend-api/quotations/${quotation.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to update quotation status.')
+      setRows((current) => current.map((row) => row.id === quotation.id ? { ...row, ...result.data, status } : row))
+      toast.success(`Quotation ${status === 1 ? 'activated' : 'deactivated'} successfully.`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to update quotation status.')
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-primary">Garage Operations</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">{allQuotations ? 'All Quotations' : 'Quotations'}</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Create, review, and edit quotations using the new full-page workflow.
+          </p>
+        </div>
+        {canCreateQuotation && <Button onClick={() => allQuotations ? setCreateDialogOpen(true) : router.push(createQuotationPath)} className="w-full gap-2 sm:w-auto">
+          <Plus className="size-4" />
+          Add Quotation
+        </Button>}
+      </div>
+
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search quotations..."
+            className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+        <DateRangeFilter value={dateRange} onChange={(range) => { setDateRange(range); setPage(1) }} />
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none"
+        >
+          <option value="all">All Status</option>
+          <option value="draft">Draft</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div className="mb-5">
+        <RecordCountBadges counts={[
+          { label: 'Total', value: rows.length },
+          { label: 'Draft', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'draft').length, color: 'neutral' },
+          { label: 'Pending', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'pending').length, color: 'amber' },
+          { label: 'Approved', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'approved').length, color: 'green' },
+          { label: 'Rejected', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'rejected').length, color: 'red' },
+          { label: 'Cancelled', value: rows.filter((quotation) => getQuotationStatus(quotation) === 'cancelled').length, color: 'blue' },
+        ]} />
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState
+          title="No quotations yet"
+          description="Create your first quotation to start tracking estimates and approvals."
+          action={canCreateQuotation ? {
+            label: 'Add Quotation',
+            onClick: () => router.push(createQuotationPath),
+          } : undefined}
+        />
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-[960px] w-full text-left text-sm">
+              <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-4 font-semibold">S.No</th>
+                  <th className="px-5 py-4 font-semibold">Quotation #</th>
+                  <th className="px-5 py-4 font-semibold">Customer</th>
+                  <th className="px-5 py-4 font-semibold">VIN</th>
+                  <th className="px-5 py-4 font-semibold">Status</th>
+                  <th className="px-5 py-4 font-semibold">Total</th>
+                  <th className="px-5 py-4 font-semibold">Created</th>
+                  <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {paginatedRows.map((quotation, rowIndex) => (
+                  (() => {
+                    const status = getQuotationStatus(quotation)
+                    return (
+                  <tr key={quotation.id} className="group bg-background transition-colors hover:bg-muted/20">
+                    <td className="px-5 py-4 text-muted-foreground">{(page - 1) * pageSize + rowIndex + 1}</td>
+                    <td className="px-5 py-4 font-semibold text-foreground">
+                      {quotation.quotation_number ?? quotation.quotationNumber ?? quotation.id}
+                    </td>
+                    <td className="px-5 py-4 text-foreground">
+                      {quotation.vehicle?.customer?.name ?? getCustomerName(quotation.customer_id ?? quotation.customerId)}
+                    </td>
+                    <td className="px-5 py-4 text-foreground">
+                      {quotation.vehicle?.vin ?? quotation.vehicle?.VIN ?? quotation.vin ?? quotation.VIN ??
+                        ([quotation.vehicle?.make, quotation.vehicle?.model].filter(Boolean).join(' ') ||
+                          getVehicleName(quotation.vehicle_id ?? quotation.vehicleId))}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={cn(
+                          'inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize',
+                          status === 'draft' && 'bg-slate-500/10 text-slate-700',
+                          status === 'pending' && 'bg-amber-500/10 text-amber-700',
+                          status === 'approved' && 'bg-emerald-500/10 text-emerald-700',
+                          status === 'rejected' && 'bg-destructive/10 text-destructive',
+                          status === 'cancelled' && 'bg-blue-500/10 text-blue-700',
+                        )}
+                      >
+                        {quotationStatusLabel(status)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 font-semibold text-foreground">
+                      ${Number(quotation.total ?? 0).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {formatDisplayDate(quotation.creation_date ?? quotation.createdAt)}
+                    </td>
+                    <td className="sticky right-0 z-10 border-l border-border bg-background px-5 py-4 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-muted">
+                      <div className="flex items-center justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                            aria-label="Row actions"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                              onClick={() => void downloadQuotation(quotation.id)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Download className="size-4" />
+                              Download Quotation
+                            </DropdownMenuItem>
+                            {canUpdateQuotation && <DropdownMenuItem
+                              onClick={() => router.push(`/quotations/edit/${quotation.id}${vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''}`)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              <Pencil className="size-4" />
+                              Edit
+                            </DropdownMenuItem>}
+                            {canDeactivateQuotation && <DropdownMenuItem
+                              onClick={() => void toggleQuotationStatus(quotation)}
+                              className="gap-2 cursor-pointer text-xs"
+                            >
+                              {String(quotation.status ?? '1') === '0' ? <Check className="size-4" /> : <CircleX className="size-4" />}
+                              {String(quotation.status ?? '1') === '0' ? 'Activate' : 'Deactivate'}
+                            </DropdownMenuItem>}
+                            {canViewTaskCards && <DropdownMenuItem
+                              disabled={getQuotationStatus(quotation) !== 'approved'}
+                              onClick={() => router.push(`/task-cards?quotation_id=${encodeURIComponent(String(quotation.id))}`)}
+                              className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
+                            >
+                              <FileText className="size-4 text-blue-600" />
+                              Task Card
+                            </DropdownMenuItem>}
+                            {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
+                            {canManageQuotations && (activeChannels.includes('email') || hasQuotationDetails(quotation) || isDocumentOnlyQuotation(quotation)) && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={isDocumentOnlyQuotation(quotation) || sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
+                            {canDeleteQuotation && <DropdownMenuItem
+                              onClick={() => {
+                                setDeletingQuotation(quotation)
+                              }}
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive text-xs"
+                            >
+                              <Trash2 className="size-4" />
+                              Delete
+                            </DropdownMenuItem>}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </td>
+                  </tr>
+                    )
+                  })()
+                ))}
+                {rows.length > 0 && filteredRows.length === 0 && (
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No quotations match your filters.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-4">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">Rows per page
+          <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-9 rounded-lg border border-border bg-background px-2"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option></select>
+        </label>
+        <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
+      <ConfirmDeleteModal
+        open={Boolean(deletingQuotation)}
+        onOpenChange={(open) => !open && setDeletingQuotation(null)}
+        title="Delete quotation?"
+        message="Are you sure you want to delete this quotation? This action cannot be undone."
+        successMessage="Quotation deleted successfully."
+        onConfirm={async () => {
+          if (!deletingQuotation) return
+          const response = await fetch(`/backend-api/quotations/${deletingQuotation.id}`, { method: 'DELETE' })
+          const result = await response.json().catch(() => ({}))
+          if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to delete quotation.')
+          setRows((currentRows) => currentRows.filter((item) => item.id !== deletingQuotation.id))
+        }}
+      />
+      <SendCustomerMessageDialog channel={messageTarget?.channel ?? null} companyId={messageTarget?.companyId} customerId={messageTarget?.customerId} documentLabel="this quotation" onOpenChange={(open) => !open && setMessageTarget(null)} />
+      {allQuotations && <Dialog open={createDialogOpen} onOpenChange={(open) => {
+        setCreateDialogOpen(open)
+        if (!open) {
+          setSelectedCustomerId('')
+          setSelectedVehicleId('')
+          setVehicleOptions([])
+        }
+      }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Quotation</DialogTitle>
+            <DialogDescription>Select a customer and one of their vehicles to continue.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {!selectedCompany && <p className="text-sm text-amber-700">Select a company before choosing a customer.</p>}
+            <label className="block space-y-2 text-sm font-medium">
+              <span>Customer</span>
+              <select
+                value={selectedCustomerId}
+                onChange={(event) => {
+                  setSelectedCustomerId(event.target.value)
+                  setSelectedVehicleId('')
+                }}
+                disabled={customerOptionsLoading || !selectedCompany}
+                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm font-normal"
+              >
+                <option value="">{customerOptionsLoading ? 'Loading customers...' : 'Select a customer'}</option>
+                {customerOptions.map((customer) => <option key={customer.id} value={String(customer.id)}>{customer.name}</option>)}
+              </select>
+            </label>
+            <label className="block space-y-2 text-sm font-medium">
+              <span>Vehicle</span>
+              <select
+                value={selectedVehicleId}
+                onChange={(event) => setSelectedVehicleId(event.target.value)}
+                disabled={!selectedCustomerId || vehicleOptionsLoading || vehicleOptions.length === 0}
+                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm font-normal"
+              >
+                <option value="">{vehicleOptionsLoading ? 'Loading vehicles...' : selectedCustomerId ? 'Select a vehicle' : 'Select a customer first'}</option>
+                {vehicleOptions.map((vehicle) => {
+                  const vehicleLabel = [vehicle.make, vehicle.model, vehicle.year, vehicle.vin ?? vehicle.VIN].filter(Boolean).join(' ')
+                  return <option key={vehicle.id} value={String(vehicle.id)}>{vehicleLabel || `Vehicle #${vehicle.id}`}</option>
+                })}
+              </select>
+              {selectedCustomerId && !vehicleOptionsLoading && vehicleOptions.length === 0 && <span className="block text-xs text-muted-foreground">This customer has no vehicles.</span>}
+            </label>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+            <Button
+              type="button"
+              disabled={!selectedVehicleId || vehicleOptionsLoading}
+              onClick={() => router.push(`/quotations/create?vehicle_id=${encodeURIComponent(selectedVehicleId)}`)}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>}
+    </div>
+  )
+}
+
+export default function QuotationsPage() {
+  return <QuotationsListingPage />
+}

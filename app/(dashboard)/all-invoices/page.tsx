@@ -9,7 +9,7 @@ export default function AllInvoicesPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8 lg:pt-8">
+      <div className="mx-auto max-w-[1440px] px-4 pt-6 sm:px-5 lg:px-6 lg:pt-8">
         <div className="inline-flex rounded-lg bg-muted p-1">
           <button
             type="button"

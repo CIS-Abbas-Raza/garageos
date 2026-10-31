@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { jsPDF } from 'jspdf'
@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { BrandLoader } from '@/components/brand-loader'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -531,6 +532,8 @@ function QuotationPrintView({
 
 export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const preselectedVehicleId = searchParams.get('vehicle_id') ?? undefined
   const { selectedCompany } = useBranch()
   const { user } = useAuth()
   const {
@@ -540,20 +543,15 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     estimations,
     settings,
     addEstimation,
-    addCustomer,
-    addVehicle,
     updateEstimation,
   } = useGarageStore()
-  const [preselectedVehicleId, setPreselectedVehicleId] = useState<string | undefined>()
   const [apiQuotation, setApiQuotation] = useState<any>()
   const [apiVehicle, setApiVehicle] = useState<any>()
   const [apiCustomer, setApiCustomer] = useState<any>()
   const [apiCompany, setApiCompany] = useState<any>()
   const [isQuotationLoading, setIsQuotationLoading] = useState(mode === 'edit')
-
-  useEffect(() => {
-    setPreselectedVehicleId(new URLSearchParams(window.location.search).get('vehicle_id') ?? undefined)
-  }, [])
+  const [isLinkedRecordsLoading, setIsLinkedRecordsLoading] = useState(mode === 'create' && Boolean(preselectedVehicleId))
+  const [linkedRecordsError, setLinkedRecordsError] = useState<string | null>(null)
 
   useEffect(() => {
     if (mode !== 'edit' || !quotationId) return
@@ -566,9 +564,24 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
           throw new Error(result.message || 'Unable to load quotation.')
         }
         const record = result.data
-        const vehicle = record.vehicle
-        const linkedCustomer = vehicle?.customer
-        const customerId = vehicle?.customer_id ?? vehicle?.customerId ?? linkedCustomer?.id
+        const linkedVehicleId = preselectedVehicleId ?? record.vehicle_id
+        if (!linkedVehicleId) throw new Error('Quotation is not linked to a vehicle.')
+
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(String(linkedVehicleId))}`)
+        const vehicleResult = await vehicleResponse.json()
+        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+        }
+        const vehicle = vehicleResult.data
+        const customerId = vehicle.customer_id ?? vehicle.customerId ?? vehicle.customer?.id
+        if (!customerId) throw new Error('The selected vehicle is not linked to a customer.')
+
+        const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
+        const customerResult = await customerResponse.json()
+        if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+          throw new Error(customerResult.message || 'Unable to load customer details.')
+        }
+        const linkedCustomer = customerResult.data
         setApiVehicle(vehicle)
         setApiCustomer(linkedCustomer)
 
@@ -576,7 +589,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
           ...record,
           companyId: record.company_id,
           customerId: customerId ? String(customerId) : undefined,
-          vehicleId: String(record.vehicle_id),
+          vehicleId: String(linkedVehicleId),
           quotationNumber: record.quotation_number,
           note: record.note,
           quotationStatus: record.quotation_status,
@@ -601,7 +614,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     }
 
     void loadQuotation()
-  }, [mode, quotationId])
+  }, [mode, quotationId, preselectedVehicleId])
 
   const quotation = useMemo<any>(
     () => (mode === 'edit' && quotationId ? apiQuotation ?? estimations.find((item) => item.id === quotationId) : undefined),
@@ -677,27 +690,29 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   // Keep the browser File objects separately from their display names. Names alone
   // cannot be uploaded in a multipart request.
   const [documentFiles, setDocumentFiles] = useState<File[]>([])
+  const [deletedDocumentIds, setDeletedDocumentIds] = useState<Array<string | number>>([])
+  const hasAttachedDocuments = uploadedFiles.length > 0 || documentFiles.length > 0
 
   useEffect(() => {
     setUploadedFiles(initialDocuments)
   }, [initialDocuments])
 
   const defaultValues = useMemo<QuotationFormData>(() => {
-    const defaultCustomerId = quotation?.customerId ?? customers[0]?.id ?? 'demo-customer'
+    const defaultCustomerId = quotation?.customerId ?? (preselectedVehicleId ? '' : customers[0]?.id ?? '')
     const defaultVehicle =
       quotation?.vehicleId ??
       preselectedVehicleId ??
       vehicles.find((vehicle) => vehicle.customerId === defaultCustomerId)?.id ??
       vehicles[0]?.id ??
-      'demo-vehicle'
+      ''
 
     return {
       quotationNumber: quotation?.quotationNumber ?? `QT-${Date.now()}`,
       customerId: defaultCustomerId,
       vehicleId: defaultVehicle,
       mileage: quotation?.mileage ?? 0,
-      note: quotation?.note ?? quotation?.description ?? 'General vehicle service quotation',
-      status: String(quotation?.quotationStatus ?? quotation?.status ?? 'Draft').toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) as QuotationFormData['status'],
+      note: quotation?.note ?? '',
+      status: String(quotation?.quotationStatus ?? quotation?.status ?? 'Approved').toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) as QuotationFormData['status'],
       creationDate: formatDateInput(quotation?.creationDate ?? quotation?.createdAt),
       documentName: quotation?.documentName ?? '',
       taxPercentage: quotation?.taxPercentage ?? quotation?.tax_percentage ?? 0,
@@ -712,6 +727,13 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     }
   }, [quotation, customers, vehicles, preselectedVehicleId, includeLineItems])
 
+  const activeQuotationSchema = useMemo(
+    () => includeLineItems
+      ? quotationSchema.extend({ lineItems: quotationSchema.shape.lineItems.min(1, 'Add at least one line item') })
+      : quotationSchema,
+    [includeLineItems],
+  )
+
   const {
     register,
     control,
@@ -722,7 +744,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
     reset,
     formState: { errors, isSubmitting },
   } = useForm<QuotationFormData>({
-    resolver: zodResolver(quotationSchema) as any,
+    resolver: zodResolver(activeQuotationSchema) as any,
     defaultValues,
     mode: 'onChange',
   })
@@ -741,53 +763,6 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   const watchedVehicleId = useWatch({ control, name: 'vehicleId' })
   const watchedTaxPercentage = Number(useWatch({ control, name: 'taxPercentage' }) ?? 0)
   const watchedDiscountPercentage = Number(useWatch({ control, name: 'discountPercentage' }) ?? 0)
-
-  useEffect(() => {
-    if (mode === 'create' && preselectedVehicleId) {
-      setValue('vehicleId', preselectedVehicleId, { shouldDirty: false, shouldValidate: true })
-    }
-  }, [mode, preselectedVehicleId, setValue])
-
-  useEffect(() => {
-    if (!currentCompany?.id || customers.length > 0) return
-
-    const customerId = addCustomer({
-      companyId: currentCompany.id,
-      firstName: 'Demo',
-      lastName: 'Customer',
-      email: 'demo.customer@example.com',
-      phone: '+1 555-0100',
-      address: '123 Demo Street',
-      city: currentCompany.city || 'New York',
-      zipCode: currentCompany.zipCode || '10001',
-    })
-    setValue('customerId', customerId, { shouldDirty: false, shouldValidate: true })
-  }, [addCustomer, currentCompany, customers.length, setValue])
-
-  useEffect(() => {
-    if (!currentCompany?.id || customers.length === 0 || vehicles.length > 0) return
-
-    const vehicleId = addVehicle({
-      companyId: currentCompany.id,
-      customerId: customers[0].id,
-      make: 'Toyota',
-      model: 'Corolla',
-      year: new Date().getFullYear(),
-      vin: 'DEMO-VIN-0001',
-      licensePlate: 'DEMO-001',
-      mileage: 0,
-    })
-    setValue('vehicleId', vehicleId, { shouldDirty: false, shouldValidate: true })
-  }, [addVehicle, currentCompany, customers, setValue, vehicles.length])
-
-  useEffect(() => {
-    if (customers.length === 0) {
-      setValue('customerId', 'demo-customer', { shouldDirty: false, shouldValidate: true })
-    }
-    if (vehicles.length === 0) {
-      setValue('vehicleId', 'demo-vehicle', { shouldDirty: false, shouldValidate: true })
-    }
-  }, [customers.length, setValue, vehicles.length])
 
   const actualSubtotal = useMemo(
     () =>
@@ -809,13 +784,57 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   const total = includeLineItems ? actualTotal : 0
 
   useEffect(() => {
-    if (!watchedCustomerId && customers[0]?.id) {
+    if (!preselectedVehicleId && !watchedCustomerId && customers[0]?.id) {
       setValue('customerId', customers[0].id, { shouldDirty: false, shouldValidate: true })
     }
-  }, [customers, watchedCustomerId, setValue])
+  }, [customers, preselectedVehicleId, watchedCustomerId, setValue])
 
   useEffect(() => {
-    if (mode === 'edit') return
+    if (mode !== 'create' || !preselectedVehicleId) return
+
+    let cancelled = false
+    const loadPreselectedVehicleAndCustomer = async () => {
+      setIsLinkedRecordsLoading(true)
+      setLinkedRecordsError(null)
+      try {
+        const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(preselectedVehicleId)}`)
+        const vehicleResult = await vehicleResponse.json()
+        if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
+          throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
+        }
+
+        const vehicle = vehicleResult.data
+        const customerId = vehicle.customer_id ?? vehicle.customerId ?? vehicle.customer?.id
+        if (!customerId) throw new Error('The selected vehicle is not linked to a customer.')
+
+        const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
+        const customerResult = await customerResponse.json()
+        if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+          throw new Error(customerResult.message || 'Unable to load customer details.')
+        }
+        if (cancelled) return
+
+        setApiVehicle(vehicle)
+        setApiCustomer(customerResult.data)
+        setValue('vehicleId', String(vehicle.id), { shouldDirty: false, shouldValidate: true })
+        setValue('customerId', String(customerResult.data.id), { shouldDirty: false, shouldValidate: true })
+      } catch (error) {
+        if (!cancelled) {
+          const message = error instanceof Error ? error.message : 'Unable to load vehicle and customer details.'
+          setLinkedRecordsError(message)
+          toast.error(message)
+        }
+      } finally {
+        if (!cancelled) setIsLinkedRecordsLoading(false)
+      }
+    }
+
+    void loadPreselectedVehicleAndCustomer()
+    return () => { cancelled = true }
+  }, [mode, preselectedVehicleId, setValue])
+
+  useEffect(() => {
+    if (mode === 'edit' || (preselectedVehicleId && watchedVehicleId === preselectedVehicleId)) return
     if (!watchedVehicleId) {
       setApiVehicle(undefined)
       return
@@ -844,14 +863,12 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
     void loadVehicle()
     return () => { cancelled = true }
-  }, [mode, watchedVehicleId, watchedCustomerId, setValue])
+  }, [mode, preselectedVehicleId, watchedVehicleId, watchedCustomerId, setValue])
 
   useEffect(() => {
-    if (mode === 'edit') return
-    if (!watchedCustomerId) {
-      setApiCustomer(undefined)
-      return
-    }
+    if (mode === 'edit' || !watchedCustomerId) return
+    if (preselectedVehicleId && String(apiVehicle?.id) !== String(watchedVehicleId)) return
+    if (apiCustomer?.id && String(apiCustomer.id) === String(watchedCustomerId)) return
 
     let cancelled = false
     const loadCustomer = async () => {
@@ -869,7 +886,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
     void loadCustomer()
     return () => { cancelled = true }
-  }, [mode, watchedCustomerId])
+  }, [mode, preselectedVehicleId, apiVehicle, apiCustomer, watchedVehicleId, watchedCustomerId])
 
   const selectedCustomer = apiCustomer?.id && String(apiCustomer.id) === watchedCustomerId
     ? apiCustomer
@@ -1029,6 +1046,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
       creation_date: values.creationDate,
       created_by: user?.id,
       status: 1,
+      deleted_document_ids: deletedDocumentIds,
       ...(includeLineItems
         ? {
             details: normalizedItems.map((item) => ({
@@ -1071,7 +1089,23 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   }
 
   if (mode === 'edit' && isQuotationLoading) {
-    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">Loading quotation...</div>
+    return <BrandLoader />
+  }
+
+  if (mode === 'create' && preselectedVehicleId && isLinkedRecordsLoading) {
+    return <BrandLoader />
+  }
+
+  if (mode === 'create' && preselectedVehicleId && linkedRecordsError) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <EmptyState
+          title="Unable to load vehicle details"
+          description={linkedRecordsError}
+          action={{ label: 'Back to Vehicles', onClick: () => router.push('/vehicles') }}
+        />
+      </div>
+    )
   }
 
   if (mode === 'edit' && quotationId && !quotation) {
@@ -1150,11 +1184,13 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
               <div className="w-full max-w-xs space-y-2 sm:pt-1">
                 <Label htmlFor="creationDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Date
+                  Date <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="creationDate"
                   type="date"
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.creationDate)}
                   {...register('creationDate')}
                   className={cn(errors.creationDate && 'border-destructive')}
                 />
@@ -1226,10 +1262,12 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="quotationNumber">Quotation Number</Label>
+                <Label htmlFor="quotationNumber">Quotation Number <span className="text-destructive">*</span></Label>
                 <Input
                   id="quotationNumber"
                   placeholder="QT-0001"
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.quotationNumber)}
                   {...register('quotationNumber')}
                   readOnly={mode === 'edit'}
                   aria-readonly={mode === 'edit'}
@@ -1239,12 +1277,14 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="mileage">Mileage</Label>
+                <Label htmlFor="mileage">Mileage <span className="text-destructive">*</span></Label>
                 <Input
                   id="mileage"
                   type="number"
                   min={0}
                   placeholder="0"
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.mileage)}
                   {...register('mileage', { valueAsNumber: true })}
                   className={cn(errors.mileage && 'border-destructive')}
                 />
@@ -1252,12 +1292,12 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="status">Quotation Status</Label>
+                <Label htmlFor="status">Quotation Status <span className="text-destructive">*</span></Label>
                 <Select
                   value={watch('status') ?? 'Draft'}
                   onValueChange={(value) => setValue('status', value as QuotationFormData['status'], { shouldDirty: true, shouldValidate: true })}
                 >
-                  <SelectTrigger className={cn('w-full', errors.status && 'border-destructive')}>
+                  <SelectTrigger aria-required="true" aria-invalid={Boolean(errors.status)} className={cn('w-full', errors.status && 'border-destructive')}>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1271,34 +1311,36 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                 {errors.status && <p className="text-xs font-medium text-destructive">{errors.status.message}</p>}
               </div>
 
-              {/* Multi-file Document Upload */}
               <div className="space-y-3 md:col-span-2">
-                <Label>Document Upload</Label>
-                <label
-                  htmlFor="multi-file-input"
-                  className="flex min-h-[110px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/20 p-6 text-center hover:border-primary hover:bg-muted/40 transition-colors"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary mb-1.5">
-                    <Upload className="size-5" />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground">Click or drag & drop files to upload</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Supports PDF, DOC, DOCX, PNG, JPG (Multiple files supported)</p>
-                  <input
-                    id="multi-file-input"
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files ?? [])
-                      if (files.length > 0) {
-                        const names = files.map((f) => f.name)
-                        setUploadedFiles((prev) => Array.from(new Set([...prev, ...names])))
-                        setDocumentFiles((prev) => [...prev, ...files])
-                      }
-                    }}
-                  />
-                </label>
+                  <Label>Document Upload</Label>
+                  <label
+                    htmlFor="single-file-input"
+                    aria-disabled={includeLineItems}
+                    className={cn(
+                      'flex min-h-[110px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/20 p-6 text-center transition-colors',
+                      includeLineItems ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-primary hover:bg-muted/40',
+                    )}
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary mb-1.5">
+                      <Upload className="size-5" />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">{includeLineItems ? 'Turn off Include Line Items to upload a document' : 'Click or drag & drop a file to upload'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Supports PDF, DOC, DOCX, PNG, JPG (Single file only)</p>
+                    <input
+                      id="single-file-input"
+                      type="file"
+                      disabled={includeLineItems}
+                      accept=".pdf,.doc,.docx,image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setUploadedFiles((prev) => Array.from(new Set([...prev, file.name])))
+                          setDocumentFiles([file])
+                        }
+                      }}
+                    />
+                  </label>
 
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2">
@@ -1336,6 +1378,10 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                             type="button"
                             onClick={() => {
                               const removedName = fileName
+                              const savedDocument = quotation?.documents?.find((document: any) => document.document === removedName)
+                              if (savedDocument?.id !== undefined) {
+                                setDeletedDocumentIds((prev) => prev.includes(savedDocument.id) ? prev : [...prev, savedDocument.id])
+                              }
                               setUploadedFiles((prev) => prev.filter((_, i) => i !== idx))
                               setDocumentFiles((prev) => {
                                 const fileIndex = prev.findIndex((file) => file.name === removedName)
@@ -1382,9 +1428,12 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   type="button"
                   role="switch"
                   aria-checked={includeLineItems}
+                  aria-disabled={hasAttachedDocuments}
+                  disabled={hasAttachedDocuments}
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
+                    if (hasAttachedDocuments) return
                     const nextValue = !includeLineItems
                     setIncludeLineItems(nextValue)
                     if (nextValue && fields.length === 0) {
@@ -1395,7 +1444,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                       replace([])
                     }
                   }}
-                  className="flex items-center gap-3 cursor-pointer select-none rounded-xl border border-border bg-muted/20 px-3.5 py-2 hover:bg-muted/40 transition-colors"
+                  className={cn('flex items-center gap-3 select-none rounded-xl border border-border bg-muted/20 px-3.5 py-2 transition-colors', hasAttachedDocuments ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-muted/40')}
                 >
                   <span className="text-sm font-semibold text-foreground">Include Line Items</span>
                   <div
@@ -1424,9 +1473,9 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="w-36 px-4 py-3 font-semibold">Type</th>
-                      <th className="px-4 py-3 font-semibold">Description</th>
-                      <th className="w-24 px-4 py-3 font-semibold">Qty</th>
-                      <th className="w-36 px-4 py-3 font-semibold">Unit Price</th>
+                      <th className="px-4 py-3 font-semibold">Description {includeLineItems && <span className="text-destructive">*</span>}</th>
+                      <th className="w-24 px-4 py-3 font-semibold">Qty {includeLineItems && <span className="text-destructive">*</span>}</th>
+                      <th className="w-36 px-4 py-3 font-semibold">Unit Price {includeLineItems && <span className="text-destructive">*</span>}</th>
                       <th className="w-36 px-4 py-3 font-semibold">Amount</th>
                       <th className="w-24 px-4 py-3 font-semibold text-right">Actions</th>
                     </tr>
@@ -1434,7 +1483,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
                   <tbody className="divide-y divide-border bg-background">
                     {fields.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        <td colSpan={6} className={cn('px-4 py-10 text-center text-sm', errors.lineItems ? 'font-medium text-destructive' : 'text-muted-foreground')}>
                           Add at least one line item to continue.
                         </td>
                       </tr>

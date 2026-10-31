@@ -71,6 +71,7 @@ const menuSections = [
     items: [
       { href: '/customers', label: 'Customers', icon: Users },
       { href: '/all-vehicle', label: 'All Vehicles', icon: Truck },
+      { href: '/all-quotations', label: 'All Quotations', icon: ClipboardList },
       // { href: '/quotations', label: 'Quotation', icon: ClipboardList },
       // { href: '/task-cards', label: 'Task Cards', icon: FileText },
       { href: '/assigned-tasks', label: 'Assigned Tasks', icon: ClipboardList },
@@ -178,7 +179,8 @@ export function DashboardSidebar() {
   const filteredSections = menuSections.filter((section) => !section.superAdminOnly || isSuperAdmin).map((section) => {
     const filteredItems = section.items.filter((item) =>
       canAccessDashboardPath(role, item.href)
-      && canSubModule(item.label, 'view')
+      && canSubModule(item.href === '/all-quotations' ? 'Quotation' : item.label, 'view')
+      && !(item.href === '/communication-logs' && Number(user?.PackageId) === 1)
       && item.label.toLowerCase().includes(searchQuery.toLowerCase())
     )
     return { ...section, items: filteredItems }
@@ -195,8 +197,8 @@ export function DashboardSidebar() {
         />
       )}
       <aside
-        className={`no-print sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-72 max-md:shadow-2xl ${
-          collapsed ? 'w-20' : 'w-72'
+        className={`no-print sticky top-0 flex h-dvh shrink-0 flex-col border-r border-border bg-sidebar transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:h-auto max-md:w-64 max-md:pb-[env(safe-area-inset-bottom)] max-md:shadow-2xl ${
+          collapsed ? 'w-20' : 'w-64'
         } ${mobileOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'}`}
       >
         {/* LOGO ROW */}
@@ -243,7 +245,7 @@ export function DashboardSidebar() {
         </div>
 
         {/* NAV ITEMS */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
           <div className="flex flex-col gap-1">
             {/* Home link */}
             <Link
@@ -366,7 +368,7 @@ export function DashboardSidebar() {
         })()}
 
         {/* BOTTOM USER PANEL */}
-        <div className="border-t border-sidebar-border p-3 mt-auto">
+        <div className="mt-auto shrink-0 border-t border-sidebar-border p-3">
           <DropdownMenu>
             <DropdownMenuTrigger className={`flex w-full items-center gap-3 rounded-lg bg-sidebar-accent/40 p-2 text-left outline-none hover:bg-sidebar-accent ${collapsed ? 'justify-center' : ''}`} aria-label="Account menu">
               <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-xs font-semibold text-primary">{profilePicture ? <img src={profilePicture} alt={`${displayName} profile`} className="size-full object-cover" /> : initials}</span>

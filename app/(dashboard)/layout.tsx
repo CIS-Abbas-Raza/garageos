@@ -25,7 +25,7 @@ export default function DashboardLayout({
     <AuthGuard>
       <BranchProvider>
         <RoleRouteGuard>
-          <div className="flex h-screen overflow-hidden bg-background">
+          <div className="flex h-dvh overflow-hidden bg-background">
             <DashboardSidebar />
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <DashboardHeader title="GarageWorkOs" />

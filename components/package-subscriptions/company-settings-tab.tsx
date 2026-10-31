@@ -198,7 +198,7 @@ export function CompanySettingsTab() {
           <div className="space-y-2"><Label htmlFor="company-setting-phone">Phone *</Label><Input id="company-setting-phone" type="tel" value={company.phone} onChange={(event) => setField('phone', event.target.value)} required /></div>
           <div className="sm:col-span-2"><CountryStateSelect country={company.country} state={company.state} onCountryChange={(value) => setField('country', value)} onStateChange={(value) => setField('state', value)} required /></div>
           <div className="space-y-2 sm:col-span-2"><Label htmlFor="company-setting-address">Address *</Label><Input id="company-setting-address" value={company.address} onChange={(event) => setField('address', event.target.value)} required /></div>
-          <div className="space-y-2 sm:col-span-2"><Label htmlFor="company-setting-registration">Registration No. *</Label><Input id="company-setting-registration" value={company.registrationNo} onChange={(event) => setField('registrationNo', event.target.value)} required /></div>
+      <div className="space-y-2 sm:col-span-2"><Label htmlFor="company-setting-registration">Registration No.</Label><Input id="company-setting-registration" value={company.registrationNo} onChange={(event) => setField('registrationNo', event.target.value)} /></div>
         </div>
         <div className="mt-6 flex justify-end border-t border-border pt-4">
           <Button type="submit" disabled={isSaving}><Save className="size-4" /> {isSaving ? 'Saving...' : 'Save Changes'}</Button>

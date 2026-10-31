@@ -123,6 +123,14 @@ export const invoiceSchema = z.object({
   lineItems: z.array(invoiceLineItemSchema).min(1, 'Add at least one line item'),
 })
 
+export const towingInvoiceSchema = invoiceSchema.extend({
+  pickUpAddress: z.string().trim().min(1, 'Pickup address is required'),
+  dropOffAddress: z.string().trim().min(1, 'Drop off address is required'),
+  lineItems: z.array(invoiceLineItemSchema.extend({
+    unitPrice: z.coerce.number().gt(0, 'Rate/Mile must be greater than 0'),
+  })).min(1, 'Add at least one line item'),
+})
+
 export const paymentSchema = z.object({
   invoiceId: z.string().min(1, 'Invoice is required'),
   amount: z.number().min(0.01, 'Amount must be greater than 0'),

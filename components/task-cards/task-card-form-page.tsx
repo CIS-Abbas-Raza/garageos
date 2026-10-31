@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { jsPDF } from 'jspdf'
@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/empty-state'
+import { BrandLoader } from '@/components/brand-loader'
 import { useBranch } from '@/lib/branch-context'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -126,6 +127,8 @@ const normalizeLineItem = (item?: any): TaskCardFormData['lineItems'][number] =>
 
 export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const routeQuotationId = searchParams.get('quotation_id') ?? undefined
   const { selectedCompany } = useBranch()
   const { user } = useAuth()
   const {
@@ -135,22 +138,19 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
     settings,
   } = useGarageStore()
   const [apiTaskCard, setApiTaskCard] = useState<any>()
-  const [quotationId, setQuotationId] = useState<string | undefined>()
+  const [quotationId, setQuotationId] = useState<string | undefined>(routeQuotationId)
   const [isTaskCardLoading, setIsTaskCardLoading] = useState(mode === 'edit')
   const [companyUsers, setCompanyUsers] = useState<{ id: string; name: string }[]>([])
   const [filledQuotationId, setFilledQuotationId] = useState<string | undefined>()
   const [apiVehicle, setApiVehicle] = useState<any>()
   const [apiCustomer, setApiCustomer] = useState<any>()
   const [apiCompany, setApiCompany] = useState<any>()
+  const [quotationLoadError, setQuotationLoadError] = useState<string | null>(null)
 
   const TaskCard = useMemo(
     () => apiTaskCard,
     [apiTaskCard],
   )
-
-  useEffect(() => {
-    setQuotationId(new URLSearchParams(window.location.search).get('quotation_id') ?? undefined)
-  }, [])
 
   useEffect(() => {
     if (mode !== 'edit' || !taskCardId) return
@@ -262,7 +262,9 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
   useEffect(() => {
     if (!quotationId || filledQuotationId === quotationId) return
 
+    let cancelled = false
     const loadQuotationTasks = async () => {
+      setQuotationLoadError(null)
       try {
         const response = await fetch(`/backend-api/quotations/${quotationId}`)
         const result = await response.json()
@@ -277,6 +279,7 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
           if (!companyResponse.ok || companyResult.success === false || !companyResult.data) {
             throw new Error(companyResult.message || 'Unable to load company details.')
           }
+          if (cancelled) return
           setApiCompany(companyResult.data)
         }
         const quotationTasks = (Array.isArray(quotation.details) ? quotation.details : []).map((detail: any) => ({
@@ -292,36 +295,42 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
         }
         if (quotation.vehicle_id) {
           const vehicleId = String(quotation.vehicle_id)
-          const vehicleResponse = await fetch(`/backend-api/vehicles/${vehicleId}`)
+          const vehicleResponse = await fetch(`/backend-api/vehicles/${encodeURIComponent(vehicleId)}`)
           const vehicleResult = await vehicleResponse.json()
           if (!vehicleResponse.ok || vehicleResult.success === false || !vehicleResult.data) {
             throw new Error(vehicleResult.message || 'Unable to load vehicle details.')
           }
           const vehicle = vehicleResult.data
-          setApiVehicle(vehicle)
-
-          const customerId = vehicle.customer_id ?? vehicle.customerId
-          if (customerId) {
-            setValue('customerId', String(customerId), { shouldDirty: false, shouldValidate: true })
-            const customerResponse = await fetch(`/backend-api/customers/${customerId}`)
-            const customerResult = await customerResponse.json()
-            if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
-              throw new Error(customerResult.message || 'Unable to load customer details.')
-            }
-            setApiCustomer(customerResult.data)
+          const customerId = vehicle.customer_id ?? vehicle.customerId ?? vehicle.customer?.id
+          if (!customerId) throw new Error('The selected vehicle is not linked to a customer.')
+          const customerResponse = await fetch(`/backend-api/customers/${encodeURIComponent(String(customerId))}`)
+          const customerResult = await customerResponse.json()
+          if (!customerResponse.ok || customerResult.success === false || !customerResult.data) {
+            throw new Error(customerResult.message || 'Unable to load customer details.')
           }
+          if (cancelled) return
+          setApiVehicle(vehicle)
+          setApiCustomer(customerResult.data)
+          setValue('customerId', String(customerResult.data.id), { shouldDirty: false, shouldValidate: true })
           setValue('vehicleId', vehicleId, { shouldDirty: false, shouldValidate: true })
+        } else {
+          throw new Error('Quotation is not linked to a vehicle.')
         }
         if (quotation.mileage !== undefined && quotation.mileage !== null) {
           setValue('mileage', Number(quotation.mileage), { shouldDirty: false, shouldValidate: true })
         }
-        setFilledQuotationId(quotationId)
+        if (!cancelled) setFilledQuotationId(quotationId)
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Unable to load quotation details.')
+        if (!cancelled) {
+          const message = error instanceof Error ? error.message : 'Unable to load quotation details.'
+          setQuotationLoadError(message)
+          toast.error(message)
+        }
       }
     }
 
     void loadQuotationTasks()
+    return () => { cancelled = true }
   }, [mode, quotationId, filledQuotationId, setValue])
 
   const { fields, append, remove } = useFieldArray({
@@ -474,6 +483,22 @@ export function TaskCardFormPage({ mode, taskCardId }: TaskCardFormPageProps) {
             label: 'Back to Task Cards',
             onClick: () => router.push('/task-cards'),
           }}
+        />
+      </div>
+    )
+  }
+
+  if (isTaskCardLoading || (quotationId && filledQuotationId !== quotationId && !quotationLoadError)) {
+    return <BrandLoader />
+  }
+
+  if (quotationLoadError) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <EmptyState
+          title="Unable to load quotation details"
+          description={quotationLoadError}
+          action={{ label: 'Back to Quotations', onClick: () => router.push('/quotations') }}
         />
       </div>
     )

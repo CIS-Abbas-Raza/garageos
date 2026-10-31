@@ -51,7 +51,7 @@ export function ViewTasksPage() {
         }
         if (!cancelled) {
           setTaskCard(result.data)
-          setTasks(Array.isArray(result.data.tasks) ? result.data.tasks : [])
+          setTasks(Array.isArray(result.data.tasks) ? result.data.tasks.slice().sort((a, b) => Number(b.id) - Number(a.id)) : [])
         }
       } catch (error) {
         if (!cancelled) {
@@ -80,13 +80,13 @@ export function ViewTasksPage() {
   }, [tasks, taskCard, searchQuery, statusFilter])
 
   if (isLoading) {
-    return <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground sm:px-6 lg:px-8">Loading tasks...</div>
+    return <div className="mx-auto max-w-[1440px] px-4 py-8 text-sm text-muted-foreground sm:px-5 lg:px-6">Loading tasks...</div>
   }
 
   const vehicle = taskCard?.quotation?.vehicle ?? {}
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-5 lg:px-6 lg:py-8">
       <div className="mb-6">
         <p className="text-sm font-medium text-primary">Garage Operations</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">Tasks</h1>
@@ -106,18 +106,19 @@ export function ViewTasksPage() {
 
       {!taskCard ? <EmptyState title="Task Card not found" description="We could not find the Task Card for this task list." />
         : tasks.length === 0 ? <EmptyState title="No tasks" description="This Task Card does not have any tasks yet." />
-          : <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          : <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto">
               <table className="min-w-[820px] w-full text-left text-sm">
                 <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr><th className="px-5 py-4 font-semibold">Make</th><th className="px-5 py-4 font-semibold">VIN</th><th className="px-5 py-4 font-semibold">Task Card #</th><th className="px-5 py-4 font-semibold">Assigned To</th><th className="px-5 py-4 font-semibold">Status</th></tr>
+                  <tr><th className="px-5 py-4 font-semibold">S.No</th><th className="px-5 py-4 font-semibold">Make</th><th className="px-5 py-4 font-semibold">VIN</th><th className="px-5 py-4 font-semibold">Task Card #</th><th className="px-5 py-4 font-semibold">Assigned To</th><th className="px-5 py-4 font-semibold">Status</th></tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredTasks.map((task) => {
+                  {filteredTasks.map((task, rowIndex) => {
                     const status = task.task_status ?? 'pending'
                     const assignments = task.assignments ?? []
                     const assigneeNames = assignments.map((assignment: TaskRow) => assignment.user?.name ?? assignment.user?.email ?? `User #${assignment.user_id}`).join(', ')
                     return <tr key={task.id} className="bg-background transition-colors hover:bg-muted/20">
+                      <td className="px-5 py-4 text-muted-foreground">{rowIndex + 1}</td>
                       <td className="px-5 py-4 font-medium text-foreground"><div className="flex items-center gap-2"><CarFront className="size-4 text-primary" /><span>{vehicle.make ?? '—'}</span></div></td>
                       <td className="px-5 py-4 text-muted-foreground">{vehicle.vin ?? vehicle.VIN ?? '—'}</td>
                       <td className="px-5 py-4 text-muted-foreground">{taskCard.task_cards_number ?? taskCard.id ?? '—'}</td>
@@ -125,7 +126,7 @@ export function ViewTasksPage() {
                       <td className="px-5 py-4"><span className={cn('inline-flex rounded-full px-3 py-1 text-xs font-semibold', statusClass[status] ?? statusClass.pending)}>{statusLabel[status] ?? status}</span></td>
                     </tr>
                   })}
-                  {tasks.length > 0 && filteredTasks.length === 0 && <tr><td colSpan={5} className="px-5 py-10 text-center text-muted-foreground">No tasks match your filters.</td></tr>}
+                  {tasks.length > 0 && filteredTasks.length === 0 && <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">No tasks match your filters.</td></tr>}
                 </tbody>
               </table>
             </div>
