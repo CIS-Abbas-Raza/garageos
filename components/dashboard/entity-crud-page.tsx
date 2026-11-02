@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowUpDown,
   CarFront,
+  Check,
   CheckCheck,
   ChevronDown,
   CircleX,
@@ -638,7 +639,7 @@ const singularize = (value: string) =>
       : value;
 
 const labelize = (value: string) =>
-  value
+  (value.toLowerCase() === "created" ? "Created At" : value)
     .replace(/([A-Z])/g, " $1")
     .replaceAll("_", " ")
     .replace(/^./, (v) => v.toUpperCase());
@@ -1105,6 +1106,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
   const { canSubModule } = useRolePermissions();
   const [selectedCustomer, setSelectedCustomer] = useState<string | undefined>();
   const [selectedVehicle, setSelectedVehicle] = useState<string | undefined>();
+  const [towingInvoiceEmailEnabled, setTowingInvoiceEmailEnabled] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -1113,6 +1115,29 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
     setSelectedCustomer(customerId ?? undefined);
     setSelectedVehicle(vehicleId ?? undefined);
   }, []);
+
+  useEffect(() => {
+    if (config.resource !== "towingInvoices" || !selectedCompany) {
+      setTowingInvoiceEmailEnabled(false);
+      return;
+    }
+
+    let cancelled = false;
+    const checkEmailSettings = async () => {
+      try {
+        const response = await fetch(`/backend-api/sendgrid-settings?company_id=${encodeURIComponent(selectedCompany)}&status=1`);
+        const body = await response.json();
+        const settings = Array.isArray(body) ? body : body.data;
+        if (!cancelled) setTowingInvoiceEmailEnabled(response.ok && Array.isArray(settings) && settings.length > 0);
+      } catch {
+        if (!cancelled) setTowingInvoiceEmailEnabled(false);
+      }
+    };
+
+    void checkEmailSettings();
+    return () => { cancelled = true; };
+  }, [config.resource, selectedCompany]);
+
   const apiEnabled = Boolean(config.apiEndpoint);
   const [apiRows, setApiRows] = useState<Record<string, any>[]>([]);
   const [page, setPage] = useState(1);
@@ -1177,11 +1202,12 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
 
   const loadApiRows = useCallback(async () => {
     if (!apiEnabled) return;
+    const isCustomerUser = user?.roleName?.trim().toLowerCase() === "customer";
     if (config.userScoped && !user?.id) {
       setApiRows([]);
       return;
     }
-    if (config.companyScoped && !selectedCompany) {
+    if (config.companyScoped && !selectedCompany && !(config.resource === "vehicles" && isCustomerUser && user?.id)) {
       setApiRows([]);
       return;
     }
@@ -1202,8 +1228,11 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
       queryParams.set("dateField", config.dateRangeField ?? "createdAt");
       if (dateFrom) queryParams.set("startDate", dateFrom);
       if (dateTo) queryParams.set("endDate", dateTo);
-      if (config.companyScoped) queryParams.set("company_id", selectedCompany!);
+      if (config.companyScoped && selectedCompany) queryParams.set("company_id", selectedCompany);
       if (config.userScoped) queryParams.set("user_id", user!.id);
+      if (config.resource === "vehicles" && isCustomerUser && user?.id) {
+        queryParams.set("customer_id", user.id);
+      }
       if (config.resource === "notifications" && user?.id) {
         queryParams.set("scope", user.roleName?.trim().toLowerCase() === "customer" ? "customer" : "system");
       }
@@ -2209,10 +2238,10 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                                 <Download className="size-4" />
                                 Download Invoice
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => void sendTowingInvoiceEmail(row.id)} className="gap-2 cursor-pointer text-xs">
+                              {towingInvoiceEmailEnabled && Number(user?.PackageId) !== 1 && <DropdownMenuItem onClick={() => void sendTowingInvoiceEmail(row.id)} className="gap-2 cursor-pointer text-xs">
                                 <Mail className="size-4" />
                                 Send Email
-                              </DropdownMenuItem>
+                              </DropdownMenuItem>}
                             </>}
                             {!config.hideEditAction && canUpdate && (
                               <DropdownMenuItem
@@ -2265,15 +2294,6 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                                 Towing Invoice
                               </DropdownMenuItem>
                             )}
-                            {(config.resource === "vehicles" || schemaKey === "vehicles") && canViewVehicles && (row.customer_id ?? row.customer?.id) && (
-                              <DropdownMenuItem
-                                onClick={() => router.push(`/vehicles?customer_id=${encodeURIComponent(String(row.customer_id ?? row.customer?.id))}`)}
-                                className="gap-2 cursor-pointer text-xs font-medium text-slate-700 hover:text-slate-900"
-                              >
-                                <Truck className="size-4 text-blue-600" />
-                                Customer Vehicles
-                              </DropdownMenuItem>
-                            )}
                             {(config.resource === "estimations" || schemaKey === "estimations" || config.title === "Quotations") && (
                               <DropdownMenuItem
                                 onClick={() => router.push("/task-cards")}
@@ -2321,8 +2341,8 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                               }}
                               className="gap-2 cursor-pointer text-amber-600 focus:text-amber-600 text-xs"
                             >
-                              <CircleX className="size-4" />
-                              Deactivate
+                              {String(row.status) === "0" ? <Check className="size-4" /> : <CircleX className="size-4" />}
+                              {String(row.status) === "0" ? "Activate" : "Deactivate"}
                             </DropdownMenuItem>}
                             {!config.hideDeleteAction && canDelete && <DropdownMenuItem
                               onClick={() => setDeleting(row)}

@@ -17,6 +17,7 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
 import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { CustomerReviewDialog } from '@/components/task-cards/customer-review-dialog'
 import { RecordCountBadges } from '@/components/common/record-count-badges'
@@ -25,6 +26,7 @@ export default function TaskCardsListingPage() {
   const router = useRouter()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const { canSubModule } = useRolePermissions()
   const canCreateTaskCard = canSubModule('Task Cards', 'create')
   const canUpdateTaskCard = canSubModule('Task Cards', 'update')
@@ -230,7 +232,7 @@ export default function TaskCardsListingPage() {
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Progress</th>
-                  <th className="px-5 py-4 font-semibold">Created</th>
+                  <th className="px-5 py-4 font-semibold">Created At</th>
                   <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
@@ -286,7 +288,7 @@ export default function TaskCardsListingPage() {
                               <Pencil className="size-4" />
                               Edit
                             </DropdownMenuItem>}
-                            {canUpdateTaskCard && emailEnabled && <DropdownMenuItem
+                            {canUpdateTaskCard && emailEnabled && Number(user?.PackageId) !== 1 && <DropdownMenuItem
                               onClick={() => void sendTaskCardEmail(card)}
                               disabled={getTaskCardProgress(card) < 100 || sendingEmailId === card.id}
                               className="gap-2 cursor-pointer text-xs"

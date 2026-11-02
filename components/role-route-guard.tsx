@@ -14,7 +14,13 @@ export function RoleRouteGuard({ children }: { children: React.ReactNode }) {
   const { canSubModule, isReady } = useRolePermissions()
   const role = getDashboardRole(user)
   const permissionName = Object.entries(pathToSubModule).find(([path]) => pathname === path || pathname.startsWith(`${path}/`))?.[1]
-  const allowed = canAccessDashboardPath(role, pathname) && (!permissionName || canSubModule(permissionName, 'view'))
+  const quotationAction = pathname === '/quotations/create'
+    ? 'create'
+    : pathname.startsWith('/quotations/edit/')
+      ? 'update'
+      : 'view'
+  const permissionAction = permissionName === 'Quotation' ? quotationAction : 'view'
+  const allowed = canAccessDashboardPath(role, pathname) && (!permissionName || canSubModule(permissionName, permissionAction))
 
   useEffect(() => {
     if (isReady && !allowed) router.replace('/dashboard')

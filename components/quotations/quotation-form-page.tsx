@@ -1653,7 +1653,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
               <Button type="button" variant="outline" onClick={() => router.push('/quotations')}>
                 Cancel
               </Button>
-              <Button type="button" variant="outline" onClick={handleDownloadPdf}>
+              <Button type="button" variant="outline" onClick={handleDownloadPdf} disabled={!includeLineItems}>
                 <Download className="size-4" />
                 Download PDF
               </Button>

@@ -19,6 +19,7 @@ import {
 import { useGarageStore } from '@/lib/store/garage-store'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useBranch } from '@/lib/branch-context'
+import { useAuth } from '@/lib/auth-context'
 import { useRolePermissions } from '@/lib/hooks/use-role-permissions'
 import { ConfirmDeleteModal } from '@/components/common/confirm-delete-modal'
 import { Pagination } from '@/components/common/pagination'
@@ -42,11 +43,14 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
   const searchParams = useSearchParams()
   const { customers, vehicles } = useGarageStore()
   const { selectedCompany } = useBranch()
+  const { user } = useAuth()
   const { canSubModule } = useRolePermissions()
-  const canCreateQuotation = canSubModule('Quotation', 'create')
-  const canUpdateQuotation = canSubModule('Quotation', 'update')
-  const canDeactivateQuotation = canSubModule('Quotation', 'deactivate')
-  const canDeleteQuotation = canSubModule('Quotation', 'delete')
+  const quotationPermissionModule = allQuotations ? 'All Quotations' : 'Quotation'
+  const canViewQuotation = canSubModule(quotationPermissionModule, 'view')
+  const canCreateQuotation = canSubModule(quotationPermissionModule, 'create')
+  const canUpdateQuotation = canSubModule(quotationPermissionModule, 'update')
+  const canDeactivateQuotation = canSubModule(quotationPermissionModule, 'deactivate')
+  const canDeleteQuotation = canSubModule(quotationPermissionModule, 'delete')
   const canViewTaskCards = canSubModule('Task Cards', 'view')
   const canManageQuotations = canCreateQuotation || canUpdateQuotation || canDeactivateQuotation || canDeleteQuotation
   const [rows, setRows] = useState<Record<string, any>[]>([])
@@ -126,7 +130,12 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
 
   useEffect(() => {
     const loadQuotations = async () => {
-      if (allQuotations && !selectedCompany) {
+      const isCustomerUser = user?.roleName?.trim().toLowerCase() === 'customer'
+      if (!canViewQuotation) {
+        setRows([])
+        return
+      }
+      if (allQuotations && !selectedCompany && !(isCustomerUser && user?.id)) {
         setRows([])
         return
       }
@@ -134,6 +143,7 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
         const params = new URLSearchParams()
         if (vehicleId) params.set('vehicle_id', vehicleId)
         if (allQuotations && selectedCompany) params.set('company_id', selectedCompany)
+        if (allQuotations && isCustomerUser && user?.id) params.set('customer_id', user.id)
         if (dateRange) { params.set('startDate', format(dateRange.startDate, 'yyyy-MM-dd')); params.set('endDate', format(dateRange.endDate, 'yyyy-MM-dd')) }
         const query = params.size ? `?${params.toString()}` : ''
         const response = await fetch(`/backend-api/quotations${query}`)
@@ -148,7 +158,7 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
     }
 
     void loadQuotations()
-  }, [vehicleId, dateRange, allQuotations, selectedCompany])
+  }, [vehicleId, dateRange, allQuotations, selectedCompany, canViewQuotation, user?.id, user?.roleName])
 
   useEffect(() => {
     if (!selectedCompany) return setActiveChannels([])
@@ -401,7 +411,7 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
                   <th className="px-5 py-4 font-semibold">VIN</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
-                  <th className="px-5 py-4 font-semibold">Created</th>
+                  <th className="px-5 py-4 font-semibold">Created At</th>
                   <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
@@ -483,7 +493,7 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
                               Task Card
                             </DropdownMenuItem>}
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
-                            {canManageQuotations && (activeChannels.includes('email') || hasQuotationDetails(quotation) || isDocumentOnlyQuotation(quotation)) && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={isDocumentOnlyQuotation(quotation) || sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {canManageQuotations && activeChannels.includes('email') && Number(user?.PackageId) !== 1 && (hasQuotationDetails(quotation) || isDocumentOnlyQuotation(quotation)) && <DropdownMenuItem onClick={() => void sendQuotationEmail(quotation.id)} disabled={isDocumentOnlyQuotation(quotation) || sendingEmailId === quotation.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === quotation.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: quotation.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             {canDeleteQuotation && <DropdownMenuItem
                               onClick={() => {

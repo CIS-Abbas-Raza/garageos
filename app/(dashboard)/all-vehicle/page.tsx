@@ -12,7 +12,7 @@ export default function AllVehiclesPage() {
         title: 'All Vehicles',
         description: 'Vehicles belonging to customers of the company selected in the sidebar.',
         fields: [],
-        columns: ['make', 'customer_name', 'model', 'year', 'VIN', 'license_plate', 'insured', 'status'],
+        columns: ['customer_name', 'make', 'model', 'year', 'VIN', 'insured', 'status'],
         empty: 'No vehicles found for the selected company.',
       }}
     />

@@ -28,7 +28,7 @@ export const pathToSubModule: Record<string, string> = {
   '/company-sales': 'Company Sales',
   '/sms-settings': 'SMS Setting', '/whatsapp-settings': 'WhatsApp Setting', '/email-settings': 'Email Setting (SendGrid)',
   '/company-users': 'Company Employees', '/roles': 'Role Management', '/communication-logs': 'Communication Logs',
-  '/customers': 'Customers', '/all-vehicle': 'All Vehicles', '/all-quotations': 'Quotation', '/assigned-tasks': 'Assigned Tasks',
+  '/customers': 'Customers', '/all-vehicle': 'All Vehicles', '/all-quotations': 'All Quotations', '/quotations': 'Quotation', '/assigned-tasks': 'Assigned Tasks',
   '/appointments': 'Appointments', '/reviews': 'Customer Review', '/all-invoices': 'All Invoices',
   '/invoice-payments': 'Invoice Payments', '/sales': 'Sales', '/company-accounts': 'Company Account',
   '/account-ledger': 'Account Ledger', '/notifications': 'Notifications', '/view-tasks': 'Task Cards',

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Check, ChevronDown, ChevronRight, CircleX, MoreHorizontal, Pencil, Plus, Save, Search, ShieldCheck, Trash2, UserRoundCog } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/lib/auth-context'
 import { useBranch } from '@/lib/branch-context'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -80,6 +81,7 @@ const normalizeLockedModulePermissions = (
 }
 
 export function RoleManagementPage() {
+  const { user } = useAuth()
   const { selectedCompany } = useBranch()
   const [tab, setTab] = useState<'roles' | 'permissions'>('roles')
   const [roles, setRoles] = useState<Role[]>([])
@@ -101,11 +103,13 @@ export function RoleManagementPage() {
   )
   const selectedRole = roles.find((role) => String(role.id) === selectedRoleId)
   const isCustomerRole = selectedRole?.name.trim().toLowerCase() === 'customer'
+  const hideCommunicationLogs = Number(user?.PackageId) === 1
   const normalizedPermissionSearch = permissionSearch.trim().toLowerCase()
   const filteredModules = modules.map((module) => ({
     ...module,
     subModules: (module.subModules ?? []).filter((subModule) =>
-      !normalizedPermissionSearch || module.name.toLowerCase().includes(normalizedPermissionSearch) || subModule.name.toLowerCase().includes(normalizedPermissionSearch),
+      !(hideCommunicationLogs && subModule.name.trim().toLowerCase() === 'communication logs') &&
+      (!normalizedPermissionSearch || module.name.toLowerCase().includes(normalizedPermissionSearch) || subModule.name.toLowerCase().includes(normalizedPermissionSearch)),
     ),
   })).filter((module) => !normalizedPermissionSearch || module.name.toLowerCase().includes(normalizedPermissionSearch) || module.subModules.length > 0)
 

@@ -179,7 +179,7 @@ export function DashboardSidebar() {
   const filteredSections = menuSections.filter((section) => !section.superAdminOnly || isSuperAdmin).map((section) => {
     const filteredItems = section.items.filter((item) =>
       canAccessDashboardPath(role, item.href)
-      && canSubModule(item.href === '/all-quotations' ? 'Quotation' : item.label, 'view')
+      && canSubModule(item.href === '/all-quotations' ? 'All Quotations' : item.label, 'view')
       && !(item.href === '/communication-logs' && Number(user?.PackageId) === 1)
       && item.label.toLowerCase().includes(searchQuery.toLowerCase())
     )

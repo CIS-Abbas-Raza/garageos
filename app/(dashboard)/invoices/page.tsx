@@ -368,7 +368,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                   <th className="px-5 py-4 font-semibold">Payment Status</th>
                   <th className="px-5 py-4 font-semibold">Total</th>
                   <th className="px-5 py-4 font-semibold">Balance</th>
-                  <th className="px-5 py-4 font-semibold">Created</th>
+                  <th className="px-5 py-4 font-semibold">Created At</th>
                   <th className="sticky right-0 z-20 border-l border-border bg-muted px-5 py-4 text-right font-semibold shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Actions</th>
                 </tr>
               </thead>
@@ -478,7 +478,7 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                               Download Invoice
                             </DropdownMenuItem>
                             {activeChannels.includes('sms') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'sms', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><Send className="size-4" />Send SMS</DropdownMenuItem>}
-                            {canManageInvoices && activeChannels.includes('email') && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
+                            {canManageInvoices && activeChannels.includes('email') && Number(user?.PackageId) !== 1 && <DropdownMenuItem onClick={() => void sendInvoiceEmail(invoice.id)} disabled={sendingEmailId === invoice.id} className="gap-2 cursor-pointer text-xs"><Mail className="size-4" />{sendingEmailId === invoice.id ? 'Sending Email...' : 'Send Email'}</DropdownMenuItem>}
                             {activeChannels.includes('whatsapp') && <DropdownMenuItem onClick={() => setMessageTarget({ channel: 'whatsapp', companyId: selectedCompany, customerId: invoice.vehicle?.customer?.id ?? invoice.taskCard?.quotation?.vehicle?.customer?.id })} className="gap-2 cursor-pointer text-xs"><MessageCircle className="size-4" />Send WhatsApp</DropdownMenuItem>}
                             {canDeleteInvoice && <DropdownMenuItem
                               onClick={() => {
