@@ -524,12 +524,21 @@ const exactFields: Record<string, Field[]> = {
     },
   ],
   invoicePayments: [
+    { key: "invoice_number", label: "Invoice Number", readOnly: true },
+    { key: "total_amount", label: "Total Amount", type: "number", readOnly: true },
+    { key: "balance_amount", label: "Balance Amount", type: "number", readOnly: true },
+    { key: "paid_amount", label: "Paid Amount", type: "number", required: true },
     {
       key: "payment_status",
       label: "Payment status",
       type: "select",
       required: true,
-      options: options(["pending", "not_verified", "verified", "rejected"]),
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Verified", value: "verified" },
+        { label: "Verified With Adjustment", value: "verified_with_adjustment" },
+        { label: "Rejected", value: "rejected" },
+      ],
     },
   ],
   reviews: [
@@ -1224,7 +1233,10 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
       queryParams.set("page", String(page));
       if (config.resource !== "notifications") queryParams.set("limit", String(pageSize));
       if (query.trim()) queryParams.set("search", query.trim());
-      if (status !== "all") queryParams.set("status", status);
+      // Invoice payment rows are filtered locally by payment_status below.
+      // The generic `status` query is also used for active/inactive flags by
+      // other resources, so don't send it for invoice payments.
+      if (status !== "all" && config.resource !== "invoicePayments") queryParams.set("status", status);
       queryParams.set("dateField", config.dateRangeField ?? "createdAt");
       if (dateFrom) queryParams.set("startDate", dateFrom);
       if (dateTo) queryParams.set("endDate", dateTo);
@@ -1708,11 +1720,15 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
     () =>
       rows
         .filter(
-          (row) =>
-            JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
-            (status === "all" || String(row.status ?? "1") === status) &&
+          (row) => {
+            const rowStatus = config.resource === "invoicePayments"
+              ? String(row.payment_status ?? row.paymentStatus ?? "").trim().toLowerCase()
+              : String(row.status ?? "1");
+            return JSON.stringify(row).toLowerCase().includes(query.toLowerCase()) &&
+            (status === "all" || rowStatus === status.toLowerCase()) &&
             (!config.dateRangeField || !dateFrom || new Date(row[config.dateRangeField]).getTime() >= new Date(`${dateFrom}T00:00:00`).getTime()) &&
-            (!config.dateRangeField || !dateTo || new Date(row[config.dateRangeField]).getTime() <= new Date(`${dateTo}T23:59:59.999`).getTime()),
+            (!config.dateRangeField || !dateTo || new Date(row[config.dateRangeField]).getTime() <= new Date(`${dateTo}T23:59:59.999`).getTime());
+          },
         )
         .sort((a, b) => {
           const left = a[sortKey];
@@ -1724,7 +1740,7 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
             : String(left ?? "").localeCompare(String(right ?? ""), undefined, { numeric: true, sensitivity: "base" });
           return comparison * (sortAsc ? 1 : -1);
         }),
-    [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField],
+    [rows, query, status, dateFrom, dateTo, sortKey, sortAsc, config.dateRangeField, config.resource],
   );
 
   const totalPages = apiEnabled ? apiTotalPages : Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -1941,9 +1957,9 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
         ? "bg-green-100 text-green-800 border-green-200"
         : "bg-red-100 text-red-800 border-red-200";
     }
-    if (["approved", "completed", "verified", "confirmed"].includes(v))
+    if (["approved", "completed", "verified", "verified_with_adjustment", "confirmed"].includes(v))
       return "bg-green-100 text-green-800 border-green-200";
-    if (["pending", "draft", "not_verified"].includes(v))
+    if (["pending", "draft"].includes(v))
       return "bg-amber-100 text-amber-800 border-amber-200";
     if (["rejected", "cancelled", "no_show"].includes(v))
       return "bg-red-100 text-red-800 border-red-200";
@@ -2044,7 +2060,14 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
               className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none cursor-pointer"
             >
               <option value="all">All Status</option>
-              {config.resource === "communicationLogs" ? (
+              {config.resource === "invoicePayments" ? (
+                <>
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="verified_with_adjustment">Verified With Adjustment</option>
+                  <option value="rejected">Rejected</option>
+                </>
+              ) : config.resource === "communicationLogs" ? (
                 <>
                   <option value="1">Sent</option>
                   <option value="0">Not Sent</option>
@@ -2145,6 +2168,10 @@ export function EntityCrudPage({ config, flush = false }: { config: Config; flus
                               <CarFront className="size-4 shrink-0 text-primary" aria-hidden="true" />
                               <span>{formatValue(row[column])}</span>
                             </div>
+                          ) : config.resource === "invoicePayments" && column === "payment_status" ? (
+                            <span className="text-foreground">
+                              {({ pending: "Pending", verified: "Verified", verified_with_adjustment: "Verified With Adjustment", rejected: "Rejected" } as Record<string, string>)[String(row[column] ?? "").toLowerCase()] ?? labelize(String(row[column] ?? "—"))}
+                            </span>
                           ) : isBadgeColumn(column) ? (
                             <span
                               className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase border ${getBadgeColor(column, row[column])}`}

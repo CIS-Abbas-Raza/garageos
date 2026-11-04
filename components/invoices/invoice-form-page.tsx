@@ -787,7 +787,6 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
         if (isTowing) {
           const vehicle = record.vehicle
           const customer = vehicle?.customer
-          if (record.company) setApiCompany(record.company)
           if (vehicle) setApiVehicle(vehicle)
           if (customer) setApiCustomer(customer)
           setApiInvoice({
@@ -899,7 +898,9 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
       creationDate: defaultCreationDate,
       dueDate: formatDateInput(Invoice?.dueDate ?? addDaysToDateInput(defaultCreationDate, 30)),
       pickUpAddress: (Invoice as any)?.pickUpAddress ?? (Invoice as any)?.pick_up_address ?? '',
-      dropOffAddress: (Invoice as any)?.dropOffAddress ?? (Invoice as any)?.drop_off_address ?? (isTowing && companyAddress !== '—' ? companyAddress : ''),
+      dropOffAddress: isTowing && companyAddress !== '—'
+        ? companyAddress
+        : (Invoice as any)?.dropOffAddress || (Invoice as any)?.drop_off_address || '',
       documentName: Invoice?.documentName ?? '',
       taxPercentage: Invoice?.taxPercentage ?? 0,
       discountPercentage: Invoice?.discountPercentage ?? (Invoice as any)?.discount_percentage ?? 0,
@@ -921,7 +922,7 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
     setValue,
     getValues,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(isTowing ? towingInvoiceSchema : invoiceSchema) as any,
     defaultValues,
@@ -933,9 +934,9 @@ export function InvoiceFormPage({ mode, invoiceId, variant = 'standard' }: Invoi
   }, [Invoice, defaultValues, reset])
 
   useEffect(() => {
-    if (!isTowing || mode !== 'create' || companyAddress === '—' || getValues('dropOffAddress')) return
+    if (!isTowing || companyAddress === '—' || dirtyFields.dropOffAddress) return
     setValue('dropOffAddress', companyAddress, { shouldDirty: false, shouldValidate: true })
-  }, [isTowing, mode, companyAddress, getValues, setValue])
+  }, [isTowing, companyAddress, dirtyFields.dropOffAddress, setValue])
 
   useEffect(() => {
     if (!isTowing) return

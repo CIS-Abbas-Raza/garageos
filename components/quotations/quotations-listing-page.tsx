@@ -177,9 +177,17 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
     void loadChannels()
   }, [selectedCompany])
 
-  const createQuotationPath = vehicleId
-    ? `/quotations/create?vehicle_id=${encodeURIComponent(vehicleId)}`
-    : '/quotations/create'
+  const returnToPath = allQuotations
+    ? '/all-quotations'
+    : vehicleId
+      ? `/quotations?vehicle_id=${encodeURIComponent(vehicleId)}`
+      : '/quotations'
+  const createQuotationPath = (() => {
+    const params = new URLSearchParams()
+    if (vehicleId) params.set('vehicle_id', vehicleId)
+    params.set('returnTo', returnToPath)
+    return `/quotations/create?${params.toString()}`
+  })()
 
   const filteredRows = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -471,7 +479,11 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
                               Download Quotation
                             </DropdownMenuItem>
                             {canUpdateQuotation && <DropdownMenuItem
-                              onClick={() => router.push(`/quotations/edit/${quotation.id}${vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''}`)}
+                              onClick={() => {
+                                const params = new URLSearchParams({ returnTo: returnToPath })
+                                if (vehicleId) params.set('vehicle_id', vehicleId)
+                                router.push(`/quotations/edit/${quotation.id}?${params.toString()}`)
+                              }}
                               className="gap-2 cursor-pointer text-xs"
                             >
                               <Pencil className="size-4" />
@@ -594,7 +606,10 @@ export function QuotationsListingPage({ allQuotations = false }: { allQuotations
             <Button
               type="button"
               disabled={!selectedVehicleId || vehicleOptionsLoading}
-              onClick={() => router.push(`/quotations/create?vehicle_id=${encodeURIComponent(selectedVehicleId)}`)}
+              onClick={() => {
+                const params = new URLSearchParams({ vehicle_id: selectedVehicleId, returnTo: returnToPath })
+                router.push(`/quotations/create?${params.toString()}`)
+              }}
             >
               Continue
             </Button>

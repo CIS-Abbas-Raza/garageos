@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
-    const backendUrl = 'http://localhost:5000/api'
-    // const backendUrl = 'https://garageworkos.integratedra.com/api'
+    const backendUrl = 'https://backendgarageworkos.integratedra.com/api'
     const backendOrigin = backendUrl.replace(/\/api\/?$/, '')
     return [
       { source: '/backend-api/:path*', destination: `${backendUrl}/:path*` },

@@ -38,6 +38,8 @@ const isPaymentCompleted = (invoice: Record<string, any>) =>
 const isInvoiceSettled = (invoice: Record<string, any>) => isPaymentCompleted(invoice) || hasZeroInvoiceBalance(invoice)
 
 const isInvoiceFullySettled = (invoice: Record<string, any>) => isPaymentCompleted(invoice) && hasZeroInvoiceBalance(invoice)
+const isInvoiceApproved = (invoice: Record<string, any>) =>
+  String(invoice.invoice_status ?? invoice.status ?? '').trim().toLowerCase() === 'approved'
 
 type InvoiceListingType = 'service' | 'towing'
 
@@ -95,8 +97,12 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
       const query = `?${queryParams.toString()}`
       const endpoint = invoiceType === 'towing' ? 'towing-invoices' : 'invoices'
       const response = await fetch(`/backend-api/${endpoint}${query}`)
-      const result = await response.json()
-      if (!response.ok || result.success === false) throw new Error(result.message || 'Unable to load invoices.')
+      const result = await response.json().catch(() => null)
+      if (!response.ok || result?.success === false) throw new Error(result?.message || 'Unable to load invoices.')
+      // Some proxy/server responses can have an empty body (for example, during
+      // a tab switch or a refresh immediately after payment). Keep the current
+      // listing instead of surfacing a JSON parse error or clearing valid data.
+      if (!result) return
       const records = Array.isArray(result.data) ? result.data : []
       setInvoices(invoiceType === 'towing'
         ? records.map((invoice) => ({
@@ -121,7 +127,8 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
       const results = await Promise.all(checks.map(async ([channel, path]) => {
         try {
           const response = await fetch(`/backend-api/${path}?company_id=${encodeURIComponent(selectedCompany)}&status=1`)
-          const body = await response.json()
+          const body = await response.json().catch(() => null)
+          if (!response.ok || !body) return null
           const settings = Array.isArray(body) ? body : body.data
           return Array.isArray(settings) && settings.length ? channel : null
         } catch { return null }
@@ -439,10 +446,10 @@ export function InvoicesPage({ showAll = false, invoiceType = 'service' }: { sho
                           <DropdownMenuContent align="end" className="w-44">
                             {(canCreateCashPayment || canCreateOnlinePayment) && <DropdownMenuItem
                               onClick={() => setPayingInvoice(invoice)}
-                              disabled={isInvoiceSettled(invoice)}
+                              disabled={!isInvoiceApproved(invoice) || isInvoiceSettled(invoice)}
                               className={cn(
                                 'gap-2 cursor-pointer text-xs',
-                                isInvoiceSettled(invoice) && 'cursor-not-allowed opacity-50',
+                                (!isInvoiceApproved(invoice) || isInvoiceSettled(invoice)) && 'cursor-not-allowed opacity-50',
                               )}
                             >
                               <WalletCards className="size-4" />

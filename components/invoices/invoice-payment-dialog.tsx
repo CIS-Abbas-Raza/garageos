@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Banknote, CreditCard, ImagePlus } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -44,6 +44,8 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPay
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paidAmount, setPaidAmount] = useState('')
   const [picture, setPicture] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const submissionInProgress = useRef(false)
 
   const invoiceNumber = invoice?.invoiceNumber ?? invoice?.invoice_number ?? invoice?.id ?? ''
   const [pictureError, setPictureError] = useState('')
@@ -87,6 +89,7 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPay
   }
 
   const handleSubmit = async () => {
+    if (submissionInProgress.current) return
     if (!invoice) return
     if ((paymentMethod === 'cash' && !cashPaymentAllowed) || (paymentMethod !== 'cash' && !onlinePaymentAllowed)) {
       toast.error('This payment method is not allowed for your role.')
@@ -114,6 +117,8 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPay
     const paymentDoneBy = isCustomer ? 'customer' : 'company'
     const paymentStatus = isCustomer ? 'pending' : 'verified'
 
+    submissionInProgress.current = true
+    setIsSubmitting(true)
     try {
       const formData = new FormData()
       formData.set('company_id', String(companyId))
@@ -137,6 +142,9 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPay
       onOpenChange(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to create invoice payment.')
+    } finally {
+      submissionInProgress.current = false
+      setIsSubmitting(false)
     }
   }
 
@@ -217,7 +225,9 @@ export function InvoicePaymentDialog({ invoice, invoiceType = 'invoice', cashPay
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setStep('method')}>Back</Button>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="button" onClick={handleSubmit}>Create Payment</Button>
+              <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Payment'}
+              </Button>
             </DialogFooter>
           </>
         )}

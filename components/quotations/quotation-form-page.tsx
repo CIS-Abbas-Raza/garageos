@@ -534,6 +534,7 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
   const router = useRouter()
   const searchParams = useSearchParams()
   const preselectedVehicleId = searchParams.get('vehicle_id') ?? undefined
+  const requestedReturnTo = searchParams.get('returnTo')
   const { selectedCompany } = useBranch()
   const { user } = useAuth()
   const {
@@ -1082,7 +1083,10 @@ export function QuotationFormPage({ mode, quotationId }: QuotationFormPageProps)
         throw new Error(result.message || 'Unable to save quotation.')
       }
       toast.success(`Quotation ${mode === 'edit' ? 'updated' : 'created'} successfully.`)
-      router.push(`/quotations?vehicle_id=${encodeURIComponent(String(values.vehicleId))}`)
+      const safeReturnTo = requestedReturnTo?.startsWith('/') && !requestedReturnTo.startsWith('//')
+        ? requestedReturnTo
+        : `/quotations?vehicle_id=${encodeURIComponent(String(values.vehicleId))}`
+      router.push(safeReturnTo)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to save quotation.')
     }
